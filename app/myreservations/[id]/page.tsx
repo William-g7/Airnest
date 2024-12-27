@@ -68,8 +68,6 @@ const MyReservationsPage = () => {
                                 </Link>
                             </div>
                         </div>
-
-
                     </div>
                 </div>
             </div>
