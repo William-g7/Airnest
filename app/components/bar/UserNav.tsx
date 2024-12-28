@@ -1,10 +1,14 @@
 'use client'
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+import MenuLink from "./MenuLink";
 
 const UserNav = () => {
     const [isOpen, setIsOpen] = useState(false);
+
+    const router = useRouter();
 
     return (
         <div className="relative">
@@ -26,32 +30,26 @@ const UserNav = () => {
             {isOpen && (
                 <div className="absolute right-0 mt-2 w-[220px] bg-white border rounded-xl shadow-lg py-2">
                     <div className="py-2">
-                        <Link href="/messages" className="px-4 py-2 hover:bg-gray-100 block">
-                            Messages
-                            <span className="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 ml-2">1</span>
-                        </Link>
-                        <Link href="/notifications" className="px-4 py-2 hover:bg-gray-100 block">
-                            Notifications
-                            <span className="bg-red-500 w-2 h-2 rounded-full inline-block ml-2"></span>
-                        </Link>
-                        <Link href="/trips" className="px-4 py-2 hover:bg-gray-100 block">Trips</Link>
-                        <Link href="/wishlists" className="px-4 py-2 hover:bg-gray-100 block">Wishlists</Link>
+                        <MenuLink label="Messages" onClick={() => { setIsOpen(false); router.push('/messages') }} />
+                        <MenuLink label="Notifications" onClick={() => { setIsOpen(false); router.push('/notifications') }} />
+                        <MenuLink label="Trips" onClick={() => { setIsOpen(false); router.push('/trips') }} />
+                        <MenuLink label="Wishlists" onClick={() => { setIsOpen(false); router.push('/wishlists') }} />
                     </div>
 
                     <hr className="my-2" />
 
                     <div className="py-2">
-                        <Link href="/host" className="px-4 py-2 hover:bg-gray-100 block">Airbnb your home</Link>
-                        <Link href="/host/experience" className="px-4 py-2 hover:bg-gray-100 block">Host an experience</Link>
-                        <Link href="/account" className="px-4 py-2 hover:bg-gray-100 block">Account</Link>
+                        <MenuLink label="Airbnb your home" onClick={() => { setIsOpen(false); router.push('/host') }} />
+                        <MenuLink label="Host an experience" onClick={() => { setIsOpen(false); router.push('/host/experience') }} />
+                        <MenuLink label="Account" onClick={() => { setIsOpen(false); router.push('/account') }} />
                     </div>
 
                     <hr className="my-2" />
 
                     <div className="py-2">
-                        <Link href="/gift-cards" className="px-4 py-2 hover:bg-gray-100 block">Gift cards</Link>
-                        <Link href="/help" className="px-4 py-2 hover:bg-gray-100 block">Help Centre</Link>
-                        <button className="w-full text-left px-4 py-2 hover:bg-gray-100">Log out</button>
+                        <MenuLink label="Gift cards" onClick={() => { setIsOpen(false); router.push('/gift-cards') }} />
+                        <MenuLink label="Help Centre" onClick={() => { setIsOpen(false); router.push('/help') }} />
+                        <MenuLink label="Log out" onClick={() => { setIsOpen(false); router.push('/logout') }} />
                     </div>
                 </div>
             )}
