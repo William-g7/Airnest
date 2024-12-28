@@ -1,6 +1,5 @@
 import Image from "next/image";
 import ReservationSideBar from "@/app/components/properties/ReservationSideBar";
-import PropertyList from "@/app/components/properties/PropertyList";
 
 const PropertyDetailPage = () => {
     return (

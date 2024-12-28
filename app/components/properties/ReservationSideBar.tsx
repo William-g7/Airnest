@@ -20,7 +20,7 @@ const ReservationSideBar = () => {
 
                 <div className="border-t border-gray-300 p-4">
                     <label className="text-xs font-bold block mb-1">GUESTS</label>
-                    <select className="w-full -ml-1 text-sm ">
+                    <select className="w-full -ml-1 text-sm">
                         <option value="1">1</option>
                         <option value="2">2</option>
                         <option value="3">3</option>
