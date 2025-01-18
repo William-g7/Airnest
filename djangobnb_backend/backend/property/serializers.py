@@ -8,4 +8,6 @@ class PropertySerializer(serializers.ModelSerializer):
                   'title', 
                   'price_per_night', 
                   'imageURL', 
+                  'city',
+                  'country',
                   ]
