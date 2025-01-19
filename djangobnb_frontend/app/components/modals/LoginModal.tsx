@@ -9,7 +9,7 @@ import CustomButton from "../forms/CustomButton";
 export default function LoginModal() {
     const loginModal = useLoginModal();
     const [formData, setFormData] = useState({
-        username: '',
+        email: '',
         password: ''
     });
 
@@ -18,12 +18,12 @@ export default function LoginModal() {
             <h2 className="mb-4 text-2xl font-bold">Please Login</h2>
             <form className="flex flex-col gap-4">
                 <input
-                    type="text"
-                    placeholder="Username"
-                    value={formData.username}
+                    type="email"
+                    placeholder="Email"
+                    value={formData.email}
                     onChange={(e) => setFormData(prev => ({
                         ...prev,
-                        username: e.target.value
+                        email: e.target.value
                     }))}
                     className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-airbnb"
                 />
