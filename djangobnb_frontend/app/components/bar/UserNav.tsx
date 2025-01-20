@@ -5,9 +5,14 @@ import { useRouter } from "next/navigation";
 
 import { useLoginModal } from "../hooks/useLoginModal";
 import { useSignupModal } from "../hooks/useSignupModal";
+import LogoutButton from "../buttons/LogoutButton";
 import MenuLink from "./MenuLink";
 
-const UserNav = () => {
+interface UserNavProps {
+    userId: string | null;
+}
+
+const UserNav: React.FC<UserNavProps> = ({ userId }) => {
     const [isOpen, setIsOpen] = useState(false);
     const loginModal = useLoginModal();
     const signupModal = useSignupModal();
@@ -31,29 +36,36 @@ const UserNav = () => {
             </div>
 
             {isOpen && (
+
                 <div className="absolute right-0 mt-2 w-[220px] bg-white border rounded-xl shadow-lg py-2">
-                    <div className="py-2">
-                        <MenuLink label="Messages" onClick={() => { setIsOpen(false); router.push('/messages') }} />
-                        <MenuLink label="Notifications" onClick={() => { setIsOpen(false); router.push('/notifications') }} />
-                        <MenuLink label="Trips" onClick={() => { setIsOpen(false); router.push('/trips') }} />
-                        <MenuLink label="Wishlists" onClick={() => { setIsOpen(false); router.push('/wishlists') }} />
-                    </div>
+                    {userId ? (
+                        <>
+                            <div className="py-2">
+                                <MenuLink label="Messages" onClick={() => { setIsOpen(false); router.push('/messages') }} />
+                                <MenuLink label="Notifications" onClick={() => { setIsOpen(false); router.push('/notifications') }} />
+                                <MenuLink label="Trips" onClick={() => { setIsOpen(false); router.push('/trips') }} />
+                                <MenuLink label="Wishlists" onClick={() => { setIsOpen(false); router.push('/wishlists') }} />
+                            </div>
 
-                    <hr className="my-2" />
+                            <hr className="my-2" />
 
-                    <div className="py-2">
-                        <MenuLink label="Airbnb your home" onClick={() => { setIsOpen(false); loginModal.onOpen() }} />
-                        <MenuLink label="Host an experience" onClick={() => { setIsOpen(false); router.push('/host/experience') }} />
-                        <MenuLink label="Register" onClick={() => { setIsOpen(false); signupModal.onOpen() }} />
-                    </div>
+                            <div className="py-2">
+                                <MenuLink label="Gift cards" onClick={() => { setIsOpen(false); router.push('/gift-cards') }} />
+                                <MenuLink label="Help Centre" onClick={() => { setIsOpen(false); router.push('/help') }} />
+                            </div>
 
-                    <hr className="my-2" />
+                            <hr className="my-2" />
 
-                    <div className="py-2">
-                        <MenuLink label="Gift cards" onClick={() => { setIsOpen(false); router.push('/gift-cards') }} />
-                        <MenuLink label="Help Centre" onClick={() => { setIsOpen(false); router.push('/help') }} />
-                        <MenuLink label="Log out" onClick={() => { setIsOpen(false); router.push('/logout') }} />
-                    </div>
+                            <div className="py-2">
+                                <LogoutButton />
+                            </div>
+                        </>
+                    ) : (
+                        <div className="py-1">
+                            <MenuLink label="Login" onClick={() => { setIsOpen(false); loginModal.onOpen() }} />
+                            <MenuLink label="Register" onClick={() => { setIsOpen(false); signupModal.onOpen() }} />
+                        </div>
+                    )}
                 </div>
             )}
         </div>

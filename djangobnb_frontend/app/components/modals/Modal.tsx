@@ -19,15 +19,24 @@ const Modal: React.FC<ModalProps> = ({
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        console.log('Modal useEffect - isOpen changed:', isOpen);
         if (isOpen) {
             setMounted(true);
             setShowModal(true);
+        } else {
+            setShowModal(false);
+            setTimeout(() => {
+                console.log('Modal setTimeout executing');
+                setMounted(false);
+            }, 300);
         }
     }, [isOpen]);
 
     const handleClose = useCallback(() => {
+        console.log('Modal handleClose called');
         setShowModal(false);
         setTimeout(() => {
+            console.log('Modal setTimeout executing');
             setMounted(false);
             close();
         }, 300);
