@@ -46,7 +46,6 @@ const apiService = {
                 throw new Error('Empty response received');
             }
 
-            // 尝试解析 JSON
             try {
                 const responseData = JSON.parse(text);
                 console.log('Response data:', responseData);
