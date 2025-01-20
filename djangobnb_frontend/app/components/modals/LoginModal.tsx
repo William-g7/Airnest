@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLoginModal } from "../hooks/useLoginModal";
-import { handleLogin } from "@/app/lib/action";
+import { handleLogin } from "@/app/auth/session";
 import Modal from "./Modal";
 import CustomButton from "../forms/CustomButton";
 import apiService from "@/app/services/apiService";
@@ -23,7 +23,7 @@ export default function LoginModal() {
             setIsLoading(true);
             setError("");
 
-            const response = await apiService.post('/api/auth/login/', {
+            const response = await apiService.postwithouttoken('/api/auth/login/', {
                 email: formData.email,
                 password: formData.password
             });

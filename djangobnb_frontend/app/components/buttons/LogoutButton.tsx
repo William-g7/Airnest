@@ -1,6 +1,6 @@
 'use client'
 
-import { handleLogout } from "@/app/lib/action";
+import { handleLogout } from "@/app/auth/session";
 import { useRouter } from "next/navigation";
 
 import MenuLink from "../bar/MenuLink";

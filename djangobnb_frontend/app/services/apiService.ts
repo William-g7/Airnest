@@ -1,12 +1,9 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import { getAccessToken } from "../auth/action";
 
 const apiService = {
     get: async function (url: string): Promise<any> {
         try {
-            console.log('Starting fetch request to:', `${API_URL}${url}`);
-            console.log('API_URL value:', API_URL);
-
-            const response = await fetch(`${API_URL}${url}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -29,10 +26,43 @@ const apiService = {
 
     post: async function (url: string, data: any): Promise<any> {
         try {
-            console.log('Starting POST request to:', `${API_URL}${url}`);
-            console.log('Request data:', data);
+            const accessToken = await getAccessToken();
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                },
+                body: JSON.stringify(data),
+            });
 
-            const response = await fetch(`${API_URL}${url}`, {
+            const text = await response.text();
+            if (!text) {
+                throw new Error('Empty response received');
+            }
+
+            try {
+                const responseData = JSON.parse(text);
+                if (!response.ok) {
+                    if (responseData && responseData.email) {
+                        throw new Error(responseData.email[0]);
+                    }
+                    throw new Error(responseData?.detail || 'API Error');
+                }
+
+                return responseData;
+            } catch (parseError) {
+                throw new Error('Invalid JSON response');
+            }
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    postwithouttoken: async function (url: string, data: any): Promise<any> {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -45,10 +75,8 @@ const apiService = {
             if (!text) {
                 throw new Error('Empty response received');
             }
-
             try {
                 const responseData = JSON.parse(text);
-                console.log('Response data:', responseData);
 
                 if (!response.ok) {
                     if (responseData && responseData.email) {
@@ -56,17 +84,15 @@ const apiService = {
                     }
                     throw new Error(responseData?.detail || 'API Error');
                 }
-
                 return responseData;
             } catch (parseError) {
-                console.error('JSON Parse error:', parseError);
                 throw new Error('Invalid JSON response');
             }
         } catch (error) {
-            console.error('Fetch error:', error);
             throw error;
         }
-    }
+    },
+
 };
 
 export default apiService;
