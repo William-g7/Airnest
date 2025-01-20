@@ -19,24 +19,20 @@ const Modal: React.FC<ModalProps> = ({
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        console.log('Modal useEffect - isOpen changed:', isOpen);
         if (isOpen) {
             setMounted(true);
             setShowModal(true);
         } else {
             setShowModal(false);
             setTimeout(() => {
-                console.log('Modal setTimeout executing');
                 setMounted(false);
             }, 300);
         }
     }, [isOpen]);
 
     const handleClose = useCallback(() => {
-        console.log('Modal handleClose called');
         setShowModal(false);
         setTimeout(() => {
-            console.log('Modal setTimeout executing');
             setMounted(false);
             close();
         }, 300);
@@ -48,7 +44,7 @@ const Modal: React.FC<ModalProps> = ({
 
     return (
         <div className="flex items-center justify-center fixed inset-0 z-50 bg-black/60">
-            <div className="relative w-[90%] md:w-[80%] lg:w-[700px] my-6 mx-auto h-auto">
+            <div className="relative w-[90%] md:w-[80%] lg:w-[700px] my-6 mx-auto h-[80vh]">
                 <div className={`translate duration-300 h-full ${showModal ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
                     <div className="w-full h-auto rounded-xl relative flex flex-col bg-white">
 
