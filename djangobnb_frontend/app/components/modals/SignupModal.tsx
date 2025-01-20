@@ -8,7 +8,7 @@ import { useLoginModal } from "../hooks/useLoginModal";
 import Modal from "./Modal";
 import CustomButton from "../forms/CustomButton";
 import apiService from "@/app/services/apiService";
-import { handleLogin } from "@/app/lib/action";
+import { handleLogin } from "@/app/auth/session";
 
 export default function SignupModal() {
     const router = useRouter();
@@ -33,7 +33,7 @@ export default function SignupModal() {
                 return;
             }
 
-            const response = await apiService.post('/api/auth/register/', {
+            const response = await apiService.postwithouttoken('/api/auth/register/', {
                 email: formData.email,
                 password1: formData.password,
                 password2: formData.password2
