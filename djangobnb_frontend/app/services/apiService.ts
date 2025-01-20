@@ -1,4 +1,4 @@
-import { getAccessToken } from "../auth/action";
+import { getAccessToken } from "../auth/session";
 
 const apiService = {
     get: async function (url: string): Promise<any> {
@@ -14,12 +14,9 @@ const apiService = {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-
             const data = await response.json();
-            console.log('Response data:', data);
             return data;
         } catch (error) {
-            console.error('Fetch error:', error);
             throw error;
         }
     },
