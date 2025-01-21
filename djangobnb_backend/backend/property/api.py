@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .models import Property, PropertyImage
-from .serializers import PropertySerializer
+from .serializers import PropertySerializer, PropertyLandlordSerializer
 from .forms import PropertyForm
 
 @api_view(['GET'])
@@ -15,12 +15,21 @@ def property_list(request):
     serializer = PropertySerializer(properties, many=True)
     return JsonResponse(serializer.data, safe=False)
 
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
+def property_detail(request,pk):
+    print(pk)
+    property = Property.objects.get(pk=pk)
+    serializer = PropertyLandlordSerializer(property, many=False)
+    return JsonResponse(serializer.data, safe=False)
+
+
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def create_property(request):
     try:
-        print(f"Request: {request}")
         form = PropertyForm(request.POST)
         
         if form.is_valid():

@@ -1,8 +1,11 @@
-const ReservationSideBar = () => {
+import { PropertyType } from "./PropertyList";
+
+const ReservationSideBar = ({ property }: { property: PropertyType }) => {
+
     return (
         <aside className="mt-6 p-6 border border-gray-200 rounded-xl shadow-md">
             <div className="flex items-baseline mb-6">
-                <span className="text-2xl font-bold">$1,556 CAD</span>
+                <span className="text-2xl font-bold">${property.price_per_night} CAD</span>
                 <span className="text-lg text-gray-500 ml-2">night</span>
             </div>
 

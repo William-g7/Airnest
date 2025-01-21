@@ -12,11 +12,14 @@ const apiService = {
             });
 
             if (!response.ok) {
+                console.log(response);
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
+            console.log(data);
             return data;
         } catch (error) {
+            console.log(error);
             throw error;
         }
     },
