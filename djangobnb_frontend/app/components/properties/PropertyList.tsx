@@ -8,7 +8,9 @@ export type PropertyType = {
     id: number;
     title: string;
     price_per_night: number;
-    imageURL: string;
+    images: Array<{
+        imageURL: string;
+    }>;
     city: string;
     country: string;
 };

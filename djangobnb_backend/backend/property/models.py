@@ -12,19 +12,33 @@ class Property(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     price_per_night = models.DecimalField(max_digits=10, decimal_places=2)
+
+    #category and type
+    category = models.CharField(max_length=255)
+    place_type = models.CharField(max_length=255)
+
+    #basic info
     bedrooms = models.IntegerField()
     bathrooms = models.IntegerField()
     guests = models.IntegerField()
+    beds = models.IntegerField()
+
+    #location
     country = models.CharField(max_length=255)
-    country_code = models.CharField(max_length=255)
+    state = models.CharField(max_length=255, blank=True)
     city = models.CharField(max_length=255)
     address = models.CharField(max_length=255)
-    category = models.CharField(max_length=255)
+    postal_code = models.CharField(max_length=20)
 
-    #favorited
-    image = models.ImageField(upload_to='property_images')
+    #relationship and metadata
     landlord = models.ForeignKey(User, related_name='properties', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.title
+
+class PropertyImage(models.Model):
+    property = models.ForeignKey(Property, related_name='images', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='property_images')
     def imageURL(self):
         return f'{settings.WEBSITE_URL}{self.image.url}' if self.image else None
