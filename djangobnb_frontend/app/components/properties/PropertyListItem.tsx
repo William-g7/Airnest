@@ -9,9 +9,9 @@ const PropertyListItem: React.FC<PropertyListItemProps> = ({ property }) => {
     return (
         <div>
             <div className="cursor-pointer">
-                <div className="relative overflow-hidden aspect-square rounded-xl ">
+                <div className="relative overflow-hidden aspect-square rounded-xl">
                     <Image
-                        src={property.imageURL}
+                        src={property.images?.[0]?.imageURL || '/placeholder.jpg'}
                         alt={property.title}
                         sizes="(max-width: 768px) 768px, (max-width: 1200px) 768px, 768px"
                         fill

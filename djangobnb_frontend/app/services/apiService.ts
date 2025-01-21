@@ -23,32 +23,31 @@ const apiService = {
 
     post: async function (url: string, data: any): Promise<any> {
         try {
-            const accessToken = await getAccessToken();
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`
-                },
-                body: JSON.stringify(data),
-            });
+            const token = await getAccessToken();
 
-            const text = await response.text();
-            if (!text) {
-                throw new Error('Empty response received');
+            if (!token) {
+                throw new Error('No authentication token available');
             }
 
-            try {
-                const responseData = JSON.parse(text);
-                if (!response.ok) {
-                    if (responseData && responseData.email) {
-                        throw new Error(responseData.email[0]);
-                    }
-                    throw new Error(responseData?.detail || 'API Error');
-                }
+            const headers: Record<string, string> = {
+                'Authorization': `Bearer ${token}`,
+            };
+            if (!(data instanceof FormData)) {
+                headers['Content-Type'] = 'application/json';
+            }
 
-                return responseData;
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
+                method: 'POST',
+                headers: headers,
+                body: data,
+                credentials: 'include'
+            });
+
+            const responseText = await response.text();
+
+            try {
+                const json = JSON.parse(responseText);
+                return json;
             } catch (parseError) {
                 throw new Error('Invalid JSON response');
             }

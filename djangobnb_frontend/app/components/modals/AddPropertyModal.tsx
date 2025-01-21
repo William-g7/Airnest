@@ -10,6 +10,7 @@ import LocationForm from '../addproperty/LocationForm'
 import BasicInfoForm from '../addproperty/BasicInfoForm'
 import ImageUpload from '../addproperty/ImageUpload'
 import PropertyDetailsForm from '../addproperty/PropertyDetailsForm'
+import apiService from '@/app/services/apiService';
 
 const TOTAL_STEPS = 6;
 
@@ -42,7 +43,7 @@ export default function AddPropertyModal() {
     const addPropertyModal = useAddPropertyModal();
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
-
+    const [error, setError] = useState("");
     const onBack = () => {
         if (currentStep > 1) {
             setCurrentStep(prev => prev - 1);
@@ -82,6 +83,55 @@ export default function AddPropertyModal() {
             alert('Please complete all required fields before proceeding.');
         }
     }
+
+    const onSubmit = async () => {
+        try {
+            setIsLoading(true);
+            setError("");
+            console.log('Starting submission...');
+
+            const formData = new FormData();
+
+            formData.append('title', propertyDetails.title);
+            formData.append('description', propertyDetails.description);
+            formData.append('price_per_night', propertyDetails.price.toString());
+            formData.append('category', category);
+            formData.append('place_type', placeType);
+            formData.append('guests', basicInfo.guests.toString());
+            formData.append('bedrooms', basicInfo.bedrooms.toString());
+            formData.append('beds', basicInfo.beds.toString());
+            formData.append('bathrooms', basicInfo.bathrooms.toString());
+            formData.append('country', location.country);
+            formData.append('state', location.state);
+            formData.append('city', location.city);
+            formData.append('address', location.street);
+            formData.append('postal_code', location.postalCode);
+
+            for (const [index, image] of images.entries()) {
+                const file = await fetch(image).then(r => r.blob());
+                formData.append('images', file, `image${index}.jpg`);
+            }
+
+            console.log('Sending request to API...');
+            const response = await apiService.post('/api/properties/create/', formData);
+            console.log('API Response:', response);
+
+            if (response.success) {
+                console.log('Success! Closing modal...');
+                addPropertyModal.onClose();
+                router.push('/');
+                router.refresh();
+            } else {
+                console.log('API Error:', response);
+                setError(response.errors || response.error || "Failed to create property. Please try again.");
+            }
+        } catch (error: any) {
+            console.error('Submission error:', error);
+            setError(error.message || "An error occurred while creating the property.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const content = (
         <div className="flex flex-col h-full">
@@ -169,16 +219,16 @@ export default function AddPropertyModal() {
                     </div>
 
                     <button
-                        onClick={onNext}
-                        disabled={!validateStep()}
+                        onClick={currentStep === TOTAL_STEPS ? onSubmit : onNext}
+                        disabled={isLoading || !validateStep()}
                         className={`
                             px-6 py-2 rounded-lg
-                            ${validateStep()
-                                ? 'bg-gray-900 text-white hover:bg-gray-800'
-                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'}
+                            ${isLoading ? 'bg-gray-300 text-gray-500 cursor-not-allowed' :
+                                validateStep() ? 'bg-gray-900 text-white hover:bg-gray-800' :
+                                    'bg-gray-300 text-gray-500 cursor-not-allowed'}
                         `}
                     >
-                        {currentStep === TOTAL_STEPS ? 'Finish' : 'Next'}
+                        {isLoading ? 'Loading...' : currentStep === TOTAL_STEPS ? 'Create Listing' : 'Next'}
                     </button>
                 </div>
             </div>
