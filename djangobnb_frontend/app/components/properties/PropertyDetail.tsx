@@ -7,7 +7,7 @@ import apiService from '@/app/services/apiService';
 import WishlistButton from '@/app/components/properties/WishlistButton';
 import Image from "next/image";
 import Link from "next/link";
-import { PropertyType } from '@/app/components/properties/PropertyList';
+import { PropertyType } from '@/app/constants/propertyType';
 import ReservationSideBar from "@/app/components/properties/ReservationSideBar";
 import PropertyImageCarousel from "@/app/components/properties/PropertyImageCarousel";
 
@@ -65,42 +65,69 @@ const PropertyDetail = ({ property }: { property: PropertyType }) => {
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
                 <div className="md:col-span-7 lg:col-span-8">
-                    <h1 className="mb-4 text-4xl font-semibold">{property.title}</h1>
+                    <h1 className="text-4xl font-semibold mb-4">{property.title}</h1>
 
-                    <span className="mb-6 block text-2xl text-gray-600">
-                        {property.guests} guests · {property.bedrooms} bedrooms · {property.beds} beds · {property.bathrooms} baths
-                    </span>
+                    <div className="text-lg text-gray-600 mb-2">
+                        <p>📍 {property.city}, {property.country}</p>
+                    </div>
 
-                    <hr />
+                    <div className="flex flex-wrap gap-2 text-lg text-gray-600 mb-2">
+                        <span>👤 {property.guests} guests</span>
+                        <span>·</span>
+                        <span>🛏️ {property.bedrooms} bedrooms</span>
+                        <span>·</span>
+                        <span>🛌 {property.beds} beds</span>
+                        <span>·</span>
+                        <span>🛁 {property.bathrooms} baths</span>
+                    </div>
+
+                    <div className="text-lg text-gray-600 mb-6">
+                        {property.place_type === 'entire' && (
+                            <p>🏠 You'll have the {property.category.toLowerCase()} to yourself</p>
+                        )}
+                        {property.place_type === 'room' && (
+                            <p>🛏️ You'll have a private room in a {property.category.toLowerCase()}</p>
+                        )}
+                        {property.place_type === 'shared' && (
+                            <p>🛏️ You'll be sharing a room in a managed hostel</p>
+                        )}
+                    </div>
+
+                    <hr className="my-6" />
+
                     <Link href={`/landlords/${property.landlord.id}`}>
                         {property.landlord.avatar_url ? (
                             <div className="py-6 flex items-center space-x-4">
                                 <Image
-                                    src={property.landlord.avatar_url || '/placeholder.jpg'}
+                                    src={property.landlord.avatar_url}
                                     alt="Host"
                                     width={50}
                                     height={50}
                                     className="rounded-full"
                                 />
                                 <div className="flex flex-col">
-                                    <span className="text-lg font-semibold">{property.landlord.name}</span>
+                                    <span className="text-lg font-semibold">
+                                        {property.landlord.name || property.landlord.username}
+                                    </span>
                                     <span className="text-sm text-gray-500">Host</span>
                                 </div>
                             </div>
                         ) : (
                             <div className="py-6 flex items-center space-x-4">
                                 <div className="flex flex-col">
-                                    <span className="text-lg font-semibold">{property.landlord.username}</span>
-                                    <span className="text-sm text-gray-500">Host</span>
+                                    <span className="text-lg font-semibold">
+                                        {property.landlord.username}
+                                    </span>
                                 </div>
                             </div>
                         )}
                     </Link>
-                    <hr />
+
+                    <hr className="my-6" />
 
                     <div className="py-6">
-                        <h2 className="mb-4 text-2xl font-semibold">About this place</h2>
-                        <p className="text-gray-600">
+                        <h2 className="text-2xl font-semibold mb-4">About this place</h2>
+                        <p className="text-gray-600 whitespace-pre-line">
                             {property.description}
                         </p>
                     </div>

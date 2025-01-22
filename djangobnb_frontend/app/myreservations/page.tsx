@@ -4,23 +4,10 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import apiService from "@/app/services/apiService";
-
-interface Reservation {
-    id: string;
-    property: {
-        id: number;
-        title: string;
-        images: Array<{ imageURL: string }>;
-    };
-    check_in: string;
-    check_out: string;
-    guests: number;
-    total_price: number;
-    created_at: string;
-}
+import { ReservationType } from "@/app/constants/reservationType";
 
 const MyReservationsPage = () => {
-    const [reservations, setReservations] = useState<Reservation[]>([]);
+    const [reservations, setReservations] = useState<ReservationType[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import PropertyList from "@/app/components/properties/PropertyList";
 import apiService from "@/app/services/apiService";
-import { PropertyType } from "../components/properties/PropertyList";
+import { PropertyType } from "@/app/constants/propertyType";
 
 const MyWishlistsPage = () => {
     const [properties, setProperties] = useState<PropertyType[]>([]);
