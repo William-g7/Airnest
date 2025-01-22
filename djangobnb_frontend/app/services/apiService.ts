@@ -12,11 +12,14 @@ const apiService = {
             });
 
             if (!response.ok) {
+                console.log(response);
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
+            console.log(data);
             return data;
         } catch (error) {
+            console.log(error);
             throw error;
         }
     },
@@ -34,7 +37,11 @@ const apiService = {
             };
             if (!(data instanceof FormData)) {
                 headers['Content-Type'] = 'application/json';
+                data = JSON.stringify(data);
             }
+
+            console.log('headers:', headers);
+            console.log('data:', data);
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
                 method: 'POST',
