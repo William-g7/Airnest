@@ -42,3 +42,13 @@ class PropertyImage(models.Model):
     image = models.ImageField(upload_to='property_images')
     def imageURL(self):
         return f'{settings.WEBSITE_URL}{self.image.url}' if self.image else None
+    
+class Reservation(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    property = models.ForeignKey(Property, related_name='reservations', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='reservations', on_delete=models.CASCADE)
+    check_in = models.DateField()
+    check_out = models.DateField()
+    guests = models.IntegerField()
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)

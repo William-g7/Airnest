@@ -13,6 +13,7 @@ export type PropertyType = {
     }>;
     city: string;
     country: string;
+    guests: number;
 };
 
 const PropertyList = () => {

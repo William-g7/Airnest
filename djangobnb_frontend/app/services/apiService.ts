@@ -37,7 +37,11 @@ const apiService = {
             };
             if (!(data instanceof FormData)) {
                 headers['Content-Type'] = 'application/json';
+                data = JSON.stringify(data);
             }
+
+            console.log('headers:', headers);
+            console.log('data:', data);
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
                 method: 'POST',

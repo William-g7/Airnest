@@ -27,3 +27,69 @@
 .swiper-pagination-bullet-active {
     background: white !important;
 }
+
+
+.react-datepicker {
+    font-family: inherit !important;
+    border-radius: 1rem !important;
+    border: 1px solid #e5e7eb !important;
+}
+
+.react-datepicker__header {
+    background-color: white !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    border-top-right-radius: 1rem !important;
+    border-top-left-radius: 1rem !important;
+}
+
+.react-datepicker__day--selected {
+    background-color: #d32f2f !important;
+    color: white !important;
+}
+
+.react-datepicker__day--disabled {
+    color: #ccc !important;
+}
+
+.react-datepicker__day--booked {
+    color: #848884 !important;
+    cursor: not-allowed !important;
+}
+
+.react-datepicker__day--booked:hover {
+    background-color: #ffcdd2 !important;
+}
+
+.react-datepicker__input-container input {
+    cursor: pointer;
+}
+
+.date-tooltip {
+    position: relative;
+}
+
+.date-tooltip:hover::after {
+    content: 'Already booked';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 8px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 1000;
+}
+
+.date-tooltip:hover::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.8);
+    margin-bottom: -4px;
+}

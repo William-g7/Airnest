@@ -3,7 +3,9 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from .models import Property, PropertyImage
+from datetime import datetime, timedelta
+
+from .models import Property, PropertyImage, Reservation
 from .serializers import PropertySerializer, PropertyLandlordSerializer
 from .forms import PropertyForm
 
@@ -51,3 +53,65 @@ def create_property(request):
     except Exception as e:
         print(f"Error creating property: {e}")
         return JsonResponse({'error': str(e)}, status=400)
+    
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def create_reservation(request, pk):
+    try:
+        check_in = datetime.strptime(request.data['check_in'], '%Y-%m-%d').date()
+        check_out = datetime.strptime(request.data['check_out'], '%Y-%m-%d').date()
+        guests = int(request.data['guests'])
+        
+        property = Property.objects.get(pk=pk)
+        
+        if check_in >= check_out:
+            return JsonResponse({'error': 'Check-out date must be after check-in date'}, status=400)
+            
+        overlapping_bookings = Reservation.objects.filter(
+            property=property,
+            check_in__lte=check_out,
+            check_out__gte=check_in
+        ).exists()
+        
+        if overlapping_bookings:
+            return JsonResponse({'error': 'These dates are not available'}, status=400)
+            
+        days = (check_out - check_in).days
+        total_price = property.price_per_night * days
+        
+        Reservation.objects.create(
+            property=property,
+            user=request.user,
+            check_in=check_in,
+            check_out=check_out,
+            guests=guests,
+            total_price=total_price
+        )
+        
+        return JsonResponse({'success': True})
+    except Property.DoesNotExist:
+        return JsonResponse({'error': 'Property not found'}, status=404)
+    except Exception as e:
+        print(f"Error creating reservation: {e}")
+        return JsonResponse({'error': str(e)}, status=400)
+    
+
+@api_view(['GET'])
+def get_booked_dates(request, pk):
+    try:
+        property = Property.objects.get(pk=pk)
+        reservations = Reservation.objects.filter(property=property)
+        
+        booked_dates = []
+        for reservation in reservations:
+            current_date = reservation.check_in
+            while current_date <= reservation.check_out:
+                booked_dates.append(current_date.strftime('%Y-%m-%d'))
+                current_date += timedelta(days=1)
+        
+        return JsonResponse({'booked_dates': booked_dates})
+    except Property.DoesNotExist:
+        return JsonResponse({'error': 'Property not found'}, status=404)
+
+
