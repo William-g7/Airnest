@@ -24,6 +24,28 @@ const apiService = {
         }
     },
 
+    getwithtoken: async function (url: string): Promise<any> {
+        try {
+            const token = await getAccessToken();
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+            if (!response.ok) {
+                console.log(response);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            console.log(data);
+            return data;
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    },
+
     post: async function (url: string, data: any): Promise<any> {
         try {
             const token = await getAccessToken();
@@ -39,9 +61,6 @@ const apiService = {
                 headers['Content-Type'] = 'application/json';
                 data = JSON.stringify(data);
             }
-
-            console.log('headers:', headers);
-            console.log('data:', data);
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
                 method: 'POST',
@@ -95,6 +114,27 @@ const apiService = {
             throw error;
         }
     },
+
+    patch: async function (url: string, data: any): Promise<any> {
+        try {
+            const token = await getAccessToken();
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: data,
+            });
+            if (!response.ok) {
+                console.log(response);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
 };
 

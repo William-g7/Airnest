@@ -3,21 +3,25 @@ interface CustomButtonProps {
     className?: string;
     onClick: () => void;
     disabled?: boolean;
+    type?: "button" | "submit" | "reset";
 }
 
 const CustomButton: React.FC<CustomButtonProps> = ({
     label,
     className,
     onClick,
-    disabled
+    disabled,
+    type = "button"
 }) => {
     return (
-        <div
+        <button
+            type={type}
             onClick={onClick}
-            className={`w-full py-4 bg-airbnb hover:bg-airbnb-dark text-white text-center rounded-xl transition cursor-pointer ${className}`}>
+            disabled={disabled}
+            className={`w-full py-4 bg-airbnb hover:bg-airbnb-dark text-white text-center rounded-xl transition cursor-pointer ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
+        >
             {label}
-            {disabled && <div className="absolute inset-0 bg-gray-500 opacity-50"></div>}
-        </div>
+        </button>
     )
 }
 

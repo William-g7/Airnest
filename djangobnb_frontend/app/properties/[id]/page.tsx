@@ -1,7 +1,9 @@
 import Image from "next/image";
+import Link from "next/link";
 import ReservationSideBar from "@/app/components/properties/ReservationSideBar";
 import PropertyImageCarousel from "@/app/components/properties/PropertyImageCarousel";
 import apiService from "@/app/services/apiService";
+
 
 const PropertyDetailPage = async ({ params }: { params: { id: string } }) => {
 
@@ -24,30 +26,30 @@ const PropertyDetailPage = async ({ params }: { params: { id: string } }) => {
                         </span>
 
                         <hr />
-
-                        {property.landlord.avatar_url ? (
-                            <div className="py-6 flex items-center space-x-4">
-                                <Image
-                                    src={property.landlord.avatar_url || '/placeholder.jpg'}
-                                    alt="Host"
-                                    width={50}
-                                    height={50}
-                                    className="rounded-full"
-                                />
-                                <div className="flex flex-col">
-                                    <span className="text-lg font-semibold">{property.landlord.name}</span>
-                                    <span className="text-sm text-gray-500">Host</span>
+                        <Link href={`landlords/${property.landlord.id}`}>
+                            {property.landlord.avatar_url ? (
+                                <div className="py-6 flex items-center space-x-4">
+                                    <Image
+                                        src={property.landlord.avatar_url || '/placeholder.jpg'}
+                                        alt="Host"
+                                        width={50}
+                                        height={50}
+                                        className="rounded-full"
+                                    />
+                                    <div className="flex flex-col">
+                                        <span className="text-lg font-semibold">{property.landlord.name}</span>
+                                        <span className="text-sm text-gray-500">Host</span>
+                                    </div>
                                 </div>
-                            </div>
-                        ) : (
-                            <div className="py-6 flex items-center space-x-4">
-                                <div className="flex flex-col">
-                                    <span className="text-lg font-semibold">{property.landlord.username}</span>
-                                    <span className="text-sm text-gray-500">Host</span>
+                            ) : (
+                                <div className="py-6 flex items-center space-x-4">
+                                    <div className="flex flex-col">
+                                        <span className="text-lg font-semibold">{property.landlord.username}</span>
+                                        <span className="text-sm text-gray-500">Host</span>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-
+                            )}
+                        </Link>
                         <hr />
 
                         <div className="py-6">
