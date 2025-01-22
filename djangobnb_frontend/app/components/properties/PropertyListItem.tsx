@@ -1,3 +1,5 @@
+'use client'
+
 import { PropertyType } from "./PropertyList";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -6,11 +8,8 @@ interface PropertyListItemProps {
     property: PropertyType;
 }
 
-
 const PropertyListItem: React.FC<PropertyListItemProps> = ({ property }) => {
-
     const router = useRouter();
-
 
     return (
         <div>

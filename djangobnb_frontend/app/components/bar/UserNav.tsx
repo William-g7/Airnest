@@ -50,8 +50,18 @@ const UserNav: React.FC<UserNavProps> = ({ userId }) => {
                             <hr className="my-2" />
 
                             <div className="py-2">
-                                <MenuLink label="Gift cards" onClick={() => { setIsOpen(false); router.push('/gift-cards') }} />
-                                <MenuLink label="Help Centre" onClick={() => { setIsOpen(false); router.push('/help') }} />
+                                <MenuLink label="My Account" onClick={() => {
+                                    setIsOpen(false);
+                                    router.push(`/myprofile/${userId}`)
+                                }} />
+                                <MenuLink label="My Properties" onClick={() => {
+                                    setIsOpen(false);
+                                    router.push(`/myproperties`)
+                                }} />
+                                <MenuLink label="My Reservations" onClick={() => {
+                                    setIsOpen(false);
+                                    router.push(`/myreservations`)
+                                }} />
                             </div>
 
                             <hr className="my-2" />

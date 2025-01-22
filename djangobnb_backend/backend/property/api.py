@@ -26,6 +26,13 @@ def property_detail(request,pk):
     serializer = PropertyLandlordSerializer(property, many=False)
     return JsonResponse(serializer.data, safe=False)
 
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def my_properties(request):
+    properties = Property.objects.filter(landlord=request.user)
+    serializer = PropertySerializer(properties, many=True)
+    return JsonResponse(serializer.data, safe=False)
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
@@ -114,4 +121,34 @@ def get_booked_dates(request, pk):
     except Property.DoesNotExist:
         return JsonResponse({'error': 'Property not found'}, status=404)
 
-
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def get_user_reservations(request):
+    try:
+        reservations = Reservation.objects.filter(user=request.user).select_related('property').order_by('-created_at')
+        
+        data = []
+        for reservation in reservations:
+            property_images = [{'imageURL': image.image.url} 
+                             for image in reservation.property.images.all()]
+            
+            reservation_data = {
+                'id': reservation.id,
+                'property': {
+                    'id': reservation.property.id,
+                    'title': reservation.property.title,
+                    'images': property_images
+                },
+                'check_in': reservation.check_in,
+                'check_out': reservation.check_out,
+                'guests': reservation.guests,
+                'total_price': float(reservation.total_price),
+                'created_at': reservation.created_at
+            }
+            data.append(reservation_data)
+            
+        return JsonResponse(data, safe=False)
+    except Exception as e:
+        print(f"Error fetching reservations: {e}")
+        return JsonResponse({'error': str(e)}, status=400)
