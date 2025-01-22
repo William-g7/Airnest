@@ -105,7 +105,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                             <CustomButton
                                 label={isEditing ? "Cancel" : "Edit Profile"}
                                 onClick={() => setIsEditing(!isEditing)}
-                                className="w-auto px-6"
+                                className="w-auto px-4 py-2 "
                             />
                         </div>
 

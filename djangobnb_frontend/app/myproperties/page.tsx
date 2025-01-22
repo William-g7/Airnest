@@ -1,13 +1,27 @@
-import Image from "next/image";
-import Link from "next/link";
+'use client'
+
+import { useRouter } from 'next/navigation';
 import PropertyList from "@/app/components/properties/PropertyList";
+import { useAddPropertyModal } from '@/app/components/hooks/useAddPropertyModal'
 
 const MyPropertiesPage = () => {
+    const addPropertyModal = useAddPropertyModal();
+
+
     return (
         <main className="max-w-[1500px] mx-auto px-6 pb-6">
-            <h1 className="text-3xl font-semibold my-8">My properties</h1>
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-                <PropertyList />
+            <div className="flex justify-between items-center my-8">
+                <h1 className="text-3xl font-semibold">My Properties</h1>
+                <button
+                    onClick={addPropertyModal.onOpen}
+                    className="bg-airbnb hover:bg-airbnb_dark text-white px-6 py-3 rounded-lg font-semibold transition"
+                >
+                    Add New Property
+                </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+                <PropertyList isMyProperties={true} />
             </div>
         </main>
     );

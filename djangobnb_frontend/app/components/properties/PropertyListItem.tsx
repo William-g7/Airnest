@@ -8,11 +8,8 @@ interface PropertyListItemProps {
     property: PropertyType;
 }
 
-
 const PropertyListItem: React.FC<PropertyListItemProps> = ({ property }) => {
-
     const router = useRouter();
-
 
     return (
         <div>
