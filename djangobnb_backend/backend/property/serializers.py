@@ -36,3 +36,13 @@ class PropertyLandlordSerializer(serializers.ModelSerializer):
             'guests', 'beds', 'country', 'state', 'city',
             'address', 'postal_code', 'landlord', 'created_at',
             'images']
+
+class PropertyListSerializer(serializers.ModelSerializer):
+    images = PropertyImageSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Property
+        fields = [
+            'id', 'title', 'price_per_night', 'city', 
+            'country', 'guests', 'images'
+        ]
