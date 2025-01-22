@@ -23,8 +23,10 @@ const PropertyListItem: React.FC<PropertyListItemProps> = ({ property }) => {
                 const response = await apiService.getwithtoken('/api/properties/wishlist/');
                 const wishlist = response;
                 setIsFavorited(wishlist.some((item: PropertyType) => item.id === property.id));
-            } catch (error) {
-                console.error('Error checking wishlist status:', error);
+            } catch (error: any) {
+                if (error.message !== 'HTTP error! status: 401') {
+                    console.error('Error checking wishlist status:', error);
+                }
             }
         };
 
@@ -42,10 +44,11 @@ const PropertyListItem: React.FC<PropertyListItemProps> = ({ property }) => {
                 setIsFavorited(response.status === 'added');
             }
         } catch (error: any) {
-            if (error.message === 'Unauthorized') {
+            if (error.message === 'No authentication token available') {
                 loginModal.onOpen();
+            } else {
+                console.error('Error toggling wishlist:', error);
             }
-            console.error('Error toggling wishlist:', error);
         }
     };
 
