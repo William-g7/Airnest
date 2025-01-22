@@ -3,16 +3,59 @@
 import { PropertyType } from "./PropertyList";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import WishlistButton from "./WishlistButton";
+import { useState, useEffect } from "react";
+import { useLoginModal } from "../hooks/useLoginModal";
+import apiService from "@/app/services/apiService";
 
 interface PropertyListItemProps {
     property: PropertyType;
 }
 
 const PropertyListItem: React.FC<PropertyListItemProps> = ({ property }) => {
+    const [isFavorited, setIsFavorited] = useState(false);
     const router = useRouter();
+    const loginModal = useLoginModal();
+
+    useEffect(() => {
+        const checkIfFavorited = async () => {
+            try {
+                const response = await apiService.getwithtoken('/api/properties/wishlist/');
+                const wishlist = response;
+                setIsFavorited(wishlist.some((item: PropertyType) => item.id === property.id));
+            } catch (error) {
+                console.error('Error checking wishlist status:', error);
+            }
+        };
+
+        checkIfFavorited();
+    }, [property.id]);
+
+    const handleToggleWishlist = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+
+        try {
+            const response = await apiService.post(`/api/properties/${property.id}/toggle-favorite/`, {
+                propertyId: property.id
+            });
+            if (response.status === 'added' || response.status === 'removed') {
+                setIsFavorited(response.status === 'added');
+            }
+        } catch (error: any) {
+            if (error.message === 'Unauthorized') {
+                loginModal.onOpen();
+            }
+            console.error('Error toggling wishlist:', error);
+        }
+    };
 
     return (
-        <div>
+        <div className="relative group">
+            <WishlistButton
+                propertyId={property.id}
+                isFavorited={isFavorited}
+                onToggle={handleToggleWishlist}
+            />
             <div className="cursor-pointer"
                 onClick={() => router.push(`/properties/${property.id}`)}>
                 <div className="relative overflow-hidden aspect-square rounded-xl">

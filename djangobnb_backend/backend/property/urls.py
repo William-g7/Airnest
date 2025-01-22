@@ -10,4 +10,7 @@ urlpatterns = [
     path('<uuid:pk>/reserve/', api.create_reservation, name='api_properties_reserve'),
     path('<uuid:pk>/booked-dates/', api.get_booked_dates, name='api_properties_booked_dates'),
     path('reservations/', api.get_user_reservations, name='api_properties_reservations'),
+    path('wishlist/', api.get_wishlist, name='api_properties_wishlist'),
+    path('<uuid:pk>/toggle-favorite/', api.toggle_favorite, name='api_properties_toggle_favorite'),
+
 ]

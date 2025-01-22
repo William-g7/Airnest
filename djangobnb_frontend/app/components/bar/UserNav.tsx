@@ -44,7 +44,7 @@ const UserNav: React.FC<UserNavProps> = ({ userId }) => {
                                 <MenuLink label="Messages" onClick={() => { setIsOpen(false); router.push('/messages') }} />
                                 <MenuLink label="Notifications" onClick={() => { setIsOpen(false); router.push('/notifications') }} />
                                 <MenuLink label="Trips" onClick={() => { setIsOpen(false); router.push('/trips') }} />
-                                <MenuLink label="Wishlists" onClick={() => { setIsOpen(false); router.push('/wishlists') }} />
+
                             </div>
 
                             <hr className="my-2" />
@@ -62,6 +62,8 @@ const UserNav: React.FC<UserNavProps> = ({ userId }) => {
                                     setIsOpen(false);
                                     router.push(`/myreservations`)
                                 }} />
+
+                                <MenuLink label="My Wishlists" onClick={() => { setIsOpen(false); router.push('/mywishlists') }} />
                             </div>
 
                             <hr className="my-2" />

@@ -33,7 +33,6 @@ const apiService = {
                     'Authorization': `Bearer ${token}`,
                 },
             });
-            console.log('response:', response);
             if (!response.ok) {
                 console.log(response);
                 throw new Error(`HTTP error! status: ${response.status}`);
