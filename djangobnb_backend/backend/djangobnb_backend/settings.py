@@ -23,6 +23,12 @@ SITE_ID = 1
 
 WEBSITE_URL = 'http://localhost:8000'
 
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
+
 REST_AUTH = {
     'USE_JWT': True,
     'JWT_AUTH_COOKIE': 'jwt-auth',
@@ -77,6 +83,9 @@ CORS_ALLOW_HEADERS = [
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+    'channels',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -96,7 +105,7 @@ INSTALLED_APPS = [
     'dj_rest_auth',
     'dj_rest_auth.registration',
 
-    'channels',
+    'chat',
     'property',
     'useraccount',
 ]
@@ -131,6 +140,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'djangobnb_backend.wsgi.application'
+ASGI_APPLICATION = 'djangobnb_backend.asgi.application'
 
 
 # Database
