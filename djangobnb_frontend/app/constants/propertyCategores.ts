@@ -28,7 +28,7 @@ export const propertyCategories: CategoryOption[] = [
     {
         label: 'Farm',
         icon: '/icons/farm.svg',
-        value: 'farm'
+        value: 'farm house'
     },
     {
         label: 'Ferry',

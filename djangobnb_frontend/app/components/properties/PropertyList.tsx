@@ -3,29 +3,7 @@
 import { useEffect, useState } from "react";
 import apiService from "../../services/apiService";
 import PropertyListItem from "./PropertyListItem";
-
-export type PropertyType = {
-    id: string;
-    title: string;
-    price_per_night: number;
-    images: Array<{
-        imageURL: string;
-    }>;
-    city: string;
-    country: string;
-    guests: number;
-    bedrooms: number;
-    beds: number;
-    bathrooms: number;
-    description: string;
-    landlord: {
-        id: string;
-        name?: string;
-        username: string;
-        avatar_url?: string;
-    };
-};
-
+import { PropertyType } from "@/app/constants/propertyType";
 interface PropertyListProps {
     isMyProperties?: boolean;
     isWishlist?: boolean;

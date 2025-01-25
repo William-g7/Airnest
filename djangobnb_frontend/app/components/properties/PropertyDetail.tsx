@@ -8,9 +8,27 @@ import WishlistButton from '@/app/components/properties/WishlistButton';
 import Image from "next/image";
 import Link from "next/link";
 import { PropertyType } from '@/app/constants/propertyType';
-import ReservationSideBar from "@/app/components/properties/ReservationSideBar";
-import PropertyImageCarousel from "@/app/components/properties/PropertyImageCarousel";
+import dynamic from 'next/dynamic';
+import ContactButton from "@/app/components/ContactButton";
 
+// 动态导入大型组件
+const PropertyImageCarousel = dynamic(
+    () => import('./PropertyImageCarousel'),
+    {
+        loading: () => (
+            <div className="animate-pulse bg-gray-200 h-[60vh] rounded-lg" />
+        ),
+    }
+);
+
+const ReservationSideBar = dynamic(
+    () => import('./ReservationSideBar'),
+    {
+        loading: () => (
+            <div className="animate-pulse bg-gray-200 h-96 rounded-lg" />
+        ),
+    }
+);
 
 const PropertyDetail = ({ property }: { property: PropertyType }) => {
     const [isFavorited, setIsFavorited] = useState(false);
@@ -95,33 +113,38 @@ const PropertyDetail = ({ property }: { property: PropertyType }) => {
 
                     <hr className="my-6" />
 
-                    <Link href={`/landlords/${property.landlord.id}`}>
-                        {property.landlord.avatar_url ? (
-                            <div className="py-6 flex items-center space-x-4">
-                                <Image
-                                    src={property.landlord.avatar_url}
-                                    alt="Host"
-                                    width={50}
-                                    height={50}
-                                    className="rounded-full"
-                                />
-                                <div className="flex flex-col">
-                                    <span className="text-lg font-semibold">
-                                        {property.landlord.name || property.landlord.username}
-                                    </span>
-                                    <span className="text-sm text-gray-500">Host</span>
+                    <div className="flex items-center justify-between">
+                        <Link href={`/landlords/${property.landlord.id}`} className="flex-grow">
+                            {property.landlord.avatar_url ? (
+                                <div className="py-6 flex items-center space-x-4">
+                                    <Image
+                                        src={property.landlord.avatar_url}
+                                        alt="Host"
+                                        width={50}
+                                        height={50}
+                                        className="rounded-full"
+                                    />
+                                    <div className="flex flex-col">
+                                        <span className="text-lg font-semibold">
+                                            {property.landlord.name || property.landlord.username}
+                                        </span>
+                                        <span className="text-sm text-gray-500">Host</span>
+                                    </div>
                                 </div>
-                            </div>
-                        ) : (
-                            <div className="py-6 flex items-center space-x-4">
-                                <div className="flex flex-col">
-                                    <span className="text-lg font-semibold">
-                                        {property.landlord.username}
-                                    </span>
+                            ) : (
+                                <div className="py-6 flex items-center space-x-4">
+                                    <div className="flex flex-col">
+                                        <span className="text-lg font-semibold">
+                                            {property.landlord.username}
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-                    </Link>
+                            )}
+                        </Link>
+                        <div className="w-[200px]">
+                            <ContactButton landlordId={property.landlord.id} />
+                        </div>
+                    </div>
 
                     <hr className="my-6" />
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { PropertyType } from "./PropertyList";
+import { PropertyType } from "@/app/constants/propertyType";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import WishlistButton from "./WishlistButton";
