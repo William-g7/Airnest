@@ -11,7 +11,6 @@ import { PropertyType } from '@/app/constants/propertyType';
 import dynamic from 'next/dynamic';
 import ContactButton from "@/app/components/ContactButton";
 
-// 动态导入大型组件
 const PropertyImageCarousel = dynamic(
     () => import('./PropertyImageCarousel'),
     {

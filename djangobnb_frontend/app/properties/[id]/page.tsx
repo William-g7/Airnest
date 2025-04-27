@@ -85,34 +85,6 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
                         urlTemplate: `https://djangobnb.com/properties/${property.id}`,
                         actionPlatform: ['http://schema.org/DesktopWebPlatform']
                     }
-                },
-                '@type': 'Organization',
-                url: 'https://djangobnb.com',
-                logo: 'https://djangobnb.com/logo.png',
-                sameAs: [
-                    'https://twitter.com/djangobnb',
-                    'https://facebook.com/djangobnb'
-                ],
-                breadcrumb: {
-                    '@type': 'BreadcrumbList',
-                    itemListElement: [
-                        {
-                            '@type': 'ListItem',
-                            position: 1,
-                            item: {
-                                '@id': 'https://djangobnb.com',
-                                name: 'Home'
-                            }
-                        },
-                        {
-                            '@type': 'ListItem',
-                            position: 2,
-                            item: {
-                                '@id': `https://djangobnb.com/properties`,
-                                name: 'Properties'
-                            }
-                        }
-                    ]
                 }
             })
         },

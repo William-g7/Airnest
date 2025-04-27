@@ -1,14 +1,26 @@
 import { getAccessToken } from "../auth/session";
 
+interface RequestOptions {
+    forceRefresh?: boolean;
+}
+
 const apiService = {
-    get: async function (url: string): Promise<any> {
+    get: async function (url: string, options: RequestOptions = {}): Promise<any> {
         try {
+            const headers: Record<string, string> = {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            };
+            
+            if (options.forceRefresh) {
+                headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+                headers['Pragma'] = 'no-cache';
+            }
+
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
                 method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                },
+                headers,
+                cache: options.forceRefresh ? 'reload' : 'default',
             });
 
             if (!response.ok) {
@@ -19,7 +31,7 @@ const apiService = {
             console.log(data);
             return data;
         } catch (error) {
-            console.log(error);
+            console.error('API request failed:', error);
             throw error;
         }
     },
