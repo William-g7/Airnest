@@ -1,49 +1,134 @@
-'use client'
+'use client';
 
+import { useEffect, useState, useRef } from "react";
 import CustomButton from "../forms/CustomButton";
+import { ConversationType } from "@/app/inbox/page";
+import useWebSocket, { ReadyState } from "react-use-websocket";
+import { MessageType } from "@/app/inbox/[id]/page";
+import { UserType } from "@/app/inbox/page";
 
-const ConversationDetail = () => {
+interface ConversationDetailProps {
+    token: string;
+    userId: string;
+    conversation: ConversationType;
+    messages: MessageType[];
+}
+
+const ConversationDetail: React.FC<ConversationDetailProps> = ({
+    userId,
+    token,
+    messages,
+    conversation
+}) => {
+    const messagesDiv = useRef<HTMLDivElement>(null);
+    const [newMessage, setNewMessage] = useState('');
+    const myUser = conversation.users?.find((user) => user.id == userId)
+    const otherUser = conversation.users?.find((user) => user.id != userId)
+    const [realtimeMessages, setRealtimeMessages] = useState<MessageType[]>([]);
+
+    const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(`${process.env.NEXT_PUBLIC_WS_HOST}/ws/${conversation.id}/?token=${token}`, {
+        share: false,
+        shouldReconnect: () => true,
+    },
+    )
+
+    useEffect(() => {
+        console.log("Connection state changed", readyState);
+    }, [readyState]);
+
+    useEffect(() => {
+        if (lastJsonMessage && typeof lastJsonMessage === 'object' && 'name' in lastJsonMessage && 'body' in lastJsonMessage) {
+            const message: MessageType = {
+                id: '',
+                name: lastJsonMessage.name as string,
+                body: lastJsonMessage.body as string,
+                sent_to: otherUser as UserType,
+                created_by: myUser as UserType,
+                conversationId: conversation.id
+            }
+
+            setRealtimeMessages((realtimeMessages) => [...realtimeMessages, message]);
+        }
+
+        scrollToBottom();
+    }, [lastJsonMessage]);
+
+    useEffect(() => {
+        console.log('Messages:', messages);
+        console.log('Realtime Messages:', realtimeMessages);
+    }, [messages, realtimeMessages]);
+
+    const sendMessage = async () => {
+        console.log('sendMessage'),
+
+            sendJsonMessage({
+                event: 'chat_message',
+                data: {
+                    body: newMessage,
+                    name: myUser?.name,
+                    sent_to_id: otherUser?.id,
+                    conversation_id: conversation.id
+                }
+            });
+        console.log('sendMessage - sentJsonMessage:', newMessage);
+
+        setNewMessage('');
+
+        setTimeout(() => {
+            scrollToBottom()
+        }, 50);
+    }
+
+    const scrollToBottom = () => {
+        if (messagesDiv.current) {
+            messagesDiv.current.scrollTop = messagesDiv.current.scrollHeight;
+        }
+    }
+
     return (
-        <div className="h-[calc(100vh-150px)] flex flex-col">
-            {/* Chat Header */}
-            <div className="border-b pt-4">
-                <h2 className="text-xl font-semibold">John Doe</h2>
-                <p className="text-sm text-gray-500">Usually responds within 1 hour</p>
-            </div>
-
-            {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                <div className="flex justify-end">
-                    <div className="bg-airbnb text-white rounded-xl p-3 max-w-[70%]">
-                        <p>Hello, how are you?</p>
+        <>
+            <div
+                ref={messagesDiv}
+                className="max-h-[400px] overflow-auto flex flex-col space-y-4"
+            >
+                {messages.map((message, index) => (
+                    <div
+                        key={index}
+                        className={`w-[80%] py-4 px-6 rounded-xl ${message.created_by.name == myUser?.name ? 'ml-[20%] bg-blue-200' : 'bg-gray-200'}`}
+                    >
+                        <p className="font-bold text-gray-500">{message.created_by.name}</p>
+                        <p>{message.body}</p>
                     </div>
-                </div>
+                ))}
 
-                <div className="flex justify-start">
-                    <div className="bg-gray-100 rounded-xl p-3 max-w-[70%]">
-                        <p>Hi! I'm good, thanks for asking!</p>
+                {realtimeMessages.map((message, index) => (
+                    <div
+                        key={index}
+                        className={`w-[80%]py-4 px-6 rounded-xl ${message.name == myUser?.name ? 'ml-[20%] bg-blue-200' : 'bg-gray-200'}`}
+                    >
+                        <p className="font-bold text-gray-500">{message.name}</p>
+                        <p>{message.body}</p>
                     </div>
-                </div>
+                ))}
             </div>
 
-            {/* Message Input */}
-            <div className="border-t p-4">
-                <div className="flex space-x-4">
-                    <input
-                        type="text"
-                        placeholder="Type a message..."
-                        className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-airbnb"
-                    />
+            <div className="mt-4 py-4 px-6 flex border border-gray-300 space-x-4 rounded-xl">
+                <input
+                    type="text"
+                    placeholder="Type your message..."
+                    className="w-full p-2 bg-gray-200 rounded-xl"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                />
 
-                    <CustomButton
-                        label='Send'
-                        className="w-[100px]"
-                        onClick={() => console.log('Send')}
-                    />
-                </div>
+                <CustomButton
+                    label='Send'
+                    onClick={sendMessage}
+                    className="w-[100px]"
+                />
             </div>
-        </div>
-    );
-};
+        </>
+    )
+}
 
 export default ConversationDetail;

@@ -1,72 +1,101 @@
-import Image from "next/image";
-import Link from "next/link";
-import ReservationSideBar from "@/app/components/properties/ReservationSideBar";
-import PropertyImageCarousel from "@/app/components/properties/PropertyImageCarousel";
+import PropertyDetail from '@/app/components/properties/PropertyDetail';
 import apiService from "@/app/services/apiService";
-
+import type { ImageType } from '@/app/constants/image';
+import type { Metadata } from 'next'
 
 const PropertyDetailPage = async ({ params }: { params: { id: string } }) => {
-
     const property = await apiService.get(`/api/properties/${params.id}`);
 
     return (
         <main className="max-w-[1500px] mx-auto px-6 pb-6">
-            <div>
-                <PropertyImageCarousel
-                    images={property.images}
-                    title={property.title}
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                    <div className="md:col-span-7 lg:col-span-8">
-                        <h1 className="mb-4 text-4xl font-semibold">{property.title}</h1>
-
-                        <span className="mb-6 block text-2xl text-gray-600">
-                            {property.guests} guests · {property.bedrooms} bedrooms · {property.beds} beds · {property.bathrooms} baths
-                        </span>
-
-                        <hr />
-                        <Link href={`/landlords/${property.landlord.id}`}>
-                            {property.landlord.avatar_url ? (
-                                <div className="py-6 flex items-center space-x-4">
-                                    <Image
-                                        src={property.landlord.avatar_url || '/placeholder.jpg'}
-                                        alt="Host"
-                                        width={50}
-                                        height={50}
-                                        className="rounded-full"
-                                    />
-                                    <div className="flex flex-col">
-                                        <span className="text-lg font-semibold">{property.landlord.name}</span>
-                                        <span className="text-sm text-gray-500">Host</span>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="py-6 flex items-center space-x-4">
-                                    <div className="flex flex-col">
-                                        <span className="text-lg font-semibold">{property.landlord.username}</span>
-                                        <span className="text-sm text-gray-500">Host</span>
-                                    </div>
-                                </div>
-                            )}
-                        </Link>
-                        <hr />
-
-                        <div className="py-6">
-                            <h2 className="mb-4 text-2xl font-semibold">About this place</h2>
-                            <p className="text-gray-600">
-                                {property.description}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="md:col-span-5 lg:col-span-4">
-                        <ReservationSideBar property={property} />
-                    </div>
-                </div>
-            </div>
+            <PropertyDetail property={property} />
         </main>
-    )
+    );
 };
+
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+    const property = await apiService.get(`/api/properties/${params.id}`);
+
+    return {
+        title: `${property.title} - DjangoBnb`,
+        description: property.description.substring(0, 160),
+        openGraph: {
+            title: property.title,
+            description: property.description,
+            images: property.images.map((img: ImageType) => ({
+                url: img.imageURL,
+                width: 1200,
+                height: 630,
+                alt: property.title
+            })),
+            type: 'website',
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: property.title,
+            description: property.description,
+            images: [property.images[0]?.imageURL],
+        },
+
+        other: {
+            'application/ld+json': JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'LodgingBusiness',
+                name: property.title,
+                description: property.description,
+                image: property.images.map((img: ImageType) => { img.imageURL }),
+                priceRange: `$${property.price_per_night} per night`,
+                owner: {
+                    '@type': 'Person',
+                    name: property.landlord.name,
+                    image: property.landlord.avatar_url
+                },
+                address: {
+                    '@type': 'PostalAddress',
+                    addressLocality: property.city,
+                    addressCountry: property.country
+                },
+                amenityFeature: [
+                    {
+                        '@type': 'LocationFeatureSpecification',
+                        name: 'Bedrooms',
+                        value: property.bedrooms
+                    },
+                    {
+                        '@type': 'LocationFeatureSpecification',
+                        name: 'Bathrooms',
+                        value: property.bathrooms
+                    },
+                    {
+                        '@type': 'LocationFeatureSpecification',
+                        name: 'Maximum Occupancy',
+                        value: property.guests
+                    }
+                ],
+                aggregateRating: {
+                    '@type': 'AggregateRating',
+                    ratingValue: property.rating,
+                    reviewCount: property.reviews_count
+                },
+                availability: 'https://schema.org/InStock',
+                potentialAction: {
+                    '@type': 'ReserveAction',
+                    target: {
+                        '@type': 'EntryPoint',
+                        urlTemplate: `https://djangobnb.com/properties/${property.id}`,
+                        actionPlatform: ['http://schema.org/DesktopWebPlatform']
+                    }
+                }
+            })
+        },
+        alternates: {
+            canonical: `/properties/${params.id}`,
+            languages: {
+                'en-US': `/en-US/properties/${params.id}`,
+                'zh-CN': `/zh-CN/properties/${params.id}`,
+            }
+        }
+    }
+}
 
 export default PropertyDetailPage;

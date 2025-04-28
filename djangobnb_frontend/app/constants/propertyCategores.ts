@@ -13,12 +13,12 @@ export const propertyCategories: CategoryOption[] = [
     {
         label: 'Beach',
         icon: '/icons/beach.svg',
-        value: 'beach'
+        value: 'beach house'
     },
     {
         label: 'Bed & Breakfast',
         icon: '/icons/bed.svg',
-        value: 'bed-and-breakfast'
+        value: 'bed and breakfast'
     },
     {
         label: 'Castle',
@@ -28,7 +28,7 @@ export const propertyCategories: CategoryOption[] = [
     {
         label: 'Farm',
         icon: '/icons/farm.svg',
-        value: 'farm'
+        value: 'farm house'
     },
     {
         label: 'Ferry',

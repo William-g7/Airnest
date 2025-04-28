@@ -1,6 +1,5 @@
 'use client'
 
-import { useRouter } from 'next/navigation';
 import PropertyList from "@/app/components/properties/PropertyList";
 import { useAddPropertyModal } from '@/app/components/hooks/useAddPropertyModal'
 

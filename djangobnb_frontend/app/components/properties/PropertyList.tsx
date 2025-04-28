@@ -3,32 +3,27 @@
 import { useEffect, useState } from "react";
 import apiService from "../../services/apiService";
 import PropertyListItem from "./PropertyListItem";
-
-export type PropertyType = {
-    id: number;
-    title: string;
-    price_per_night: number;
-    images: Array<{
-        imageURL: string;
-    }>;
-    city: string;
-    country: string;
-    guests: number;
-};
-
+import { PropertyType } from "@/app/constants/propertyType";
 interface PropertyListProps {
     isMyProperties?: boolean;
+    isWishlist?: boolean;
 }
 
-const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties }) => {
+const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties, isWishlist }) => {
     const [properties, setProperties] = useState<PropertyType[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
 
     const getProperties = async () => {
         try {
-            const endpoint = isMyProperties ? '/api/properties/my/' : '/api/properties/';
-            const data = isMyProperties
+            let endpoint = '/api/properties/';
+            if (isMyProperties) {
+                endpoint = '/api/properties/my/';
+            } else if (isWishlist) {
+                endpoint = '/api/properties/wishlist/';
+            }
+
+            const data = (isMyProperties || isWishlist)
                 ? await apiService.getwithtoken(endpoint)
                 : await apiService.get(endpoint);
             setProperties(data);
@@ -42,7 +37,7 @@ const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties }) => {
 
     useEffect(() => {
         getProperties();
-    }, [isMyProperties]);
+    }, [isMyProperties, isWishlist]);
 
     if (isLoading) {
         return <div>Loading...</div>;

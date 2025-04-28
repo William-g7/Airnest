@@ -5,7 +5,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from datetime import datetime, timedelta
 
-from .models import Property, PropertyImage, Reservation
+from .models import Property, PropertyImage, Reservation, Wishlist
 from .serializers import PropertySerializer, PropertyLandlordSerializer
 from .forms import PropertyForm
 
@@ -152,3 +152,29 @@ def get_user_reservations(request):
     except Exception as e:
         print(f"Error fetching reservations: {e}")
         return JsonResponse({'error': str(e)}, status=400)
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def toggle_favorite(request, pk):
+    try:
+        property = Property.objects.get(pk=pk)
+        wishlist_item = Wishlist.objects.filter(user=request.user, property=property)
+        
+        if wishlist_item.exists():
+            wishlist_item.delete()
+            return JsonResponse({'status': 'removed'})
+        else:
+            Wishlist.objects.create(user=request.user, property=property)
+            return JsonResponse({'status': 'added'})
+    except Property.DoesNotExist:
+        return JsonResponse({'error': 'Property not found'}, status=404)
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def get_wishlist(request):
+    wishlist_items = Wishlist.objects.filter(user=request.user).select_related('property')
+    properties = [item.property for item in wishlist_items]
+    serializer = PropertySerializer(properties, many=True)
+    return JsonResponse(serializer.data, safe=False)
