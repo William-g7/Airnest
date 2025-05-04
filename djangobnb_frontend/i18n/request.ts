@@ -24,7 +24,6 @@ export default getRequestConfig(async ({ requestLocale }) => {
         locale = defaultLocale;
     }
 
-    // 获取当前地区的配置，如果没有则使用默认配置
     const config = localeConfig[locale as keyof typeof localeConfig] || localeConfig[defaultLocale];
 
     // 动态导入语言资源，避免在服务器端进行不必要的导入
