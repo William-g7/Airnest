@@ -1,7 +1,7 @@
 import { createNavigation } from 'next-intl/navigation';
 import { routing, locales } from './routing';
 
-// 创建链接和重定向函数
+// 重新包装原生导航组件和hook
 export const { Link, redirect, usePathname, useRouter, getPathname } =
     createNavigation(routing);
 
@@ -11,19 +11,16 @@ export function getLocalizedPath(
     currentLocale: string,
     newLocale: string
 ): string {
-    // 处理当前路径在不同语言下的转换
+    // 路径格式为 /语言/其他路径
     if (currentPathname.startsWith(`/${currentLocale}/`)) {
-        // 路径格式为 /语言/其他路径
         return currentPathname.replace(`/${currentLocale}/`, `/${newLocale}/`);
-    } else if (currentPathname === `/${currentLocale}`) {
         // 路径仅为 /语言
+    } else if (currentPathname === `/${currentLocale}`) {
         return `/${newLocale}`;
-    } else if (currentPathname.startsWith('/')) {
         // 路径不包含语言代码
+    } else if (currentPathname.startsWith('/')) {
         return `/${newLocale}${currentPathname}`;
     }
-
-    // 默认情况
     return `/${newLocale}`;
 }
 
@@ -31,13 +28,11 @@ export function getLocalizedPath(
 export function getLocaleFromPathname(pathname: string): string | null {
     if (!pathname) return null;
 
-    // 检查路径是否以某个语言代码开头
     const segments = pathname.split('/').filter(Boolean);
     const firstSegment = segments[0];
 
     if (locales.includes(firstSegment as any)) {
         return firstSegment;
     }
-
     return null;
 } 
