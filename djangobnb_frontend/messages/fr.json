@@ -1,0 +1,57 @@
+{
+    "app": {
+        "name": "DjangoBnB",
+        "tagline": "Trouvez votre séjour parfait",
+        "description": "Réservez des hébergements uniques dans le monde entier"
+    },
+    "navigation": {
+        "home": "Accueil",
+        "properties": "Propriétés",
+        "wishlist": "Favoris",
+        "inbox": "Messages",
+        "profile": "Profil",
+        "login": "Se connecter",
+        "register": "S'inscrire",
+        "logout": "Se déconnecter"
+    },
+    "common": {
+        "search": "Rechercher",
+        "filter": "Filtrer",
+        "sort": "Trier",
+        "book": "Réserver",
+        "price": "Prix",
+        "cancel": "Annuler",
+        "confirm": "Confirmer",
+        "loading": "Chargement...",
+        "error": "Une erreur est survenue",
+        "success": "Succès !",
+        "viewMore": "Voir plus"
+    },
+    "property": {
+        "title": "Titre",
+        "description": "Description",
+        "price": "Prix par nuit",
+        "location": "Emplacement",
+        "rooms": "Chambres",
+        "bathrooms": "Salles de bain",
+        "amenities": "Équipements",
+        "availability": "Disponibilité",
+        "reviews": "Avis",
+        "host": "Hôte",
+        "book": "Réserver ce logement"
+    },
+    "categories": {
+        "omg": "OMG!",
+        "icons": "Icônes",
+        "beach": "Plage",
+        "castles": "Châteaux"
+    },
+    "properties": {
+        "loadError": "Échec du chargement des propriétés",
+        "loading": "Chargement...",
+        "noPropertiesFound": "Aucune propriété trouvée",
+        "noListedProperties": "Vous n'avez pas encore listé de propriétés.",
+        "location": "Emplacement",
+        "price": "Prix"
+    }
+}

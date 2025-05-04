@@ -1,0 +1,57 @@
+{
+    "app": {
+        "name": "DjangoBnB",
+        "tagline": "Find your perfect stay",
+        "description": "Book unique accommodations worldwide"
+    },
+    "navigation": {
+        "home": "Home",
+        "properties": "Properties",
+        "wishlist": "Wishlist",
+        "inbox": "Inbox",
+        "profile": "Profile",
+        "login": "Login",
+        "register": "Register",
+        "logout": "Logout"
+    },
+    "common": {
+        "search": "Search",
+        "filter": "Filter",
+        "sort": "Sort",
+        "book": "Book",
+        "price": "Price",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "loading": "Loading...",
+        "error": "An error occurred",
+        "success": "Success!",
+        "viewMore": "View more"
+    },
+    "property": {
+        "title": "Title",
+        "description": "Description",
+        "price": "Price per night",
+        "location": "Location",
+        "rooms": "Rooms",
+        "bathrooms": "Bathrooms",
+        "amenities": "Amenities",
+        "availability": "Availability",
+        "reviews": "Reviews",
+        "host": "Host",
+        "book": "Book this place"
+    },
+    "categories": {
+        "omg": "OMG!",
+        "icons": "Icons",
+        "beach": "Beach",
+        "castles": "Castles"
+    },
+    "properties": {
+        "loadError": "Failed to load properties",
+        "loading": "Loading...",
+        "noPropertiesFound": "No properties found",
+        "noListedProperties": "You haven't listed any properties yet.",
+        "location": "Location",
+        "price": "Price"
+    }
+}
