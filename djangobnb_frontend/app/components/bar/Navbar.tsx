@@ -4,6 +4,7 @@ import SearchFilters from "./SearchFilters";
 import UserNav from "./UserNav";
 import AddPropertyButton from "./AddPropertyButton";
 import { getUserId } from "@/app/auth/session";
+import LanguageSwitcher from "../LanguageSwitcher";
 
 const Navbar = async () => {
     const userId = await getUserId();
@@ -22,6 +23,7 @@ const Navbar = async () => {
                     <div className="flex space-x-4 items-center">
                         <AddPropertyButton />
                         <UserNav userId={userId} />
+                        <LanguageSwitcher />
                     </div>
 
                 </div>
