@@ -1,0 +1,57 @@
+{
+    "app": {
+        "name": "DjangoBnB",
+        "tagline": "寻找您的完美住宿",
+        "description": "预订全球独特住宿"
+    },
+    "navigation": {
+        "home": "首页",
+        "properties": "房源",
+        "wishlist": "心愿单",
+        "inbox": "消息",
+        "profile": "个人资料",
+        "login": "登录",
+        "register": "注册",
+        "logout": "退出"
+    },
+    "common": {
+        "search": "搜索",
+        "filter": "筛选",
+        "sort": "排序",
+        "book": "预订",
+        "price": "价格",
+        "cancel": "取消",
+        "confirm": "确认",
+        "loading": "加载中...",
+        "error": "发生错误",
+        "success": "成功！",
+        "viewMore": "查看更多"
+    },
+    "property": {
+        "title": "标题",
+        "description": "描述",
+        "price": "每晚价格",
+        "location": "位置",
+        "rooms": "房间数",
+        "bathrooms": "浴室数",
+        "amenities": "设施",
+        "availability": "可用性",
+        "reviews": "评价",
+        "host": "房东",
+        "book": "预订此房源"
+    },
+    "categories": {
+        "omg": "哇！",
+        "icons": "图标",
+        "beach": "海滩",
+        "castles": "城堡"
+    },
+    "properties": {
+        "loadError": "加载房源失败",
+        "loading": "加载中...",
+        "noPropertiesFound": "未找到房源",
+        "noListedProperties": "您尚未列出任何房源。",
+        "location": "位置",
+        "price": "价格"
+    }
+}
