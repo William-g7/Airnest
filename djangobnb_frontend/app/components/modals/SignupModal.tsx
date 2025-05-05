@@ -42,7 +42,8 @@ export default function SignupModal() {
             });
 
             if (response.access) {
-                handleLogin(response.user_pk, response.access, response.refresh);
+                await handleLogin(response.user_pk, response.access, response.refresh);
+
                 signupModal.onClose();
                 router.push('/');
             } else {

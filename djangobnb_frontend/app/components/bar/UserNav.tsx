@@ -86,10 +86,12 @@ const UserNav: React.FC<UserNavProps> = ({ userId }) => {
                         <div className="py-2">
                             <MenuLink label={t('myAccount')} onClick={() => {
                                 setIsOpen(false);
-                                router.push({
-                                    pathname: '/myprofile/[id]',
-                                    params: { id: userId.toString() }
-                                });
+                                if (userId) {
+                                    router.push({
+                                        pathname: '/myprofile/[id]',
+                                        params: { id: userId }
+                                    } as any);
+                                }
                             }} />
                             <MenuLink label={t('myProperties')} onClick={() => {
                                 setIsOpen(false);
