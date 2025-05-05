@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { getUserId } from "@/app/auth/session";
 import apiService from "@/app/services/apiService";
 import { useLoginModal } from "./hooks/useLoginModal";
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface ContactButtonProps {
     landlordId: string;
@@ -16,6 +16,7 @@ const ContactButton = ({ landlordId }: ContactButtonProps) => {
     const loginModal = useLoginModal();
     const [userId, setUserId] = useState<string | null>(null);
     const t = useTranslations('common');
+    const locale = useLocale();
 
     useEffect(() => {
         const fetchUserId = async () => {
@@ -39,7 +40,7 @@ const ContactButton = ({ landlordId }: ContactButtonProps) => {
 
             if (conversation.success && conversation.conversation_id) {
                 console.log('Navigating to conversation:', conversation.conversation_id);
-                router.push(`/inbox/${conversation.conversation_id}`)
+                router.push(`/${locale}/inbox/${conversation.conversation_id}`)
             }
         } catch (error: any) {
             console.error('Error starting conversation:', error);

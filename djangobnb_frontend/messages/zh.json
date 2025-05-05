@@ -21,6 +21,29 @@
         "myReservations": "我的预订",
         "myWishlists": "我的心愿单"
     },
+    "inbox": {
+        "title": "收件箱",
+        "conversations": "聊天列表",
+        "conversation": "聊天详情",
+        "conversationWith": "与{name}的聊天",
+        "noConversations": "您目前没有任何聊天。",
+        "startConversation": "查看房源并点击“联系房东”以开始与房东聊天。",
+        "authRequired": "请登录查看您的聊天",
+        "sendMessage": "发送消息",
+        "typeMessage": "在此输入您的消息...",
+        "sending": "发送中...",
+        "loadError": "加载聊天失败",
+        "messageSentError": "发送消息失败"
+    },
+    "landlord": {
+        "superhost": "超赞房东",
+        "yearsHosting": "已做房东{years}年",
+        "hostListings": "{name}的房源",
+        "noListings": "该房东暂时没有可用房源。",
+        "propertiesCount": "{count}处房源",
+        "responseRate": "100%回复率",
+        "contactText": "联系房东预订房源或询问任何相关问题。"
+    },
     "profile": {
         "title": "个人资料",
         "editProfile": "编辑资料",
@@ -203,26 +226,5 @@
         "totalPrice": "总价",
         "viewProperty": "查看房源",
         "nights": "晚"
-    },
-    "inbox": {
-        "title": "收件箱",
-        "conversations": "对话",
-        "noConversations": "您目前没有任何对话。",
-        "startConversation": "查看房源并点击 联系房东 以开始与房东对话。",
-        "authRequired": "请登录查看您的消息",
-        "sendMessage": "发送消息",
-        "typeMessage": "在此输入您的消息...",
-        "sending": "发送中...",
-        "loadError": "加载对话失败",
-        "messageSentError": "发送消息失败"
-    },
-    "landlord": {
-        "superhost": "超赞房东",
-        "yearsHosting": "已做房东{years}年",
-        "hostListings": "{name}的房源",
-        "noListings": "该房东暂时没有可用房源。",
-        "propertiesCount": "{count}处房源",
-        "responseRate": "100%回复率",
-        "contactText": "联系房东预订房源或询问任何相关问题。"
     }
 }

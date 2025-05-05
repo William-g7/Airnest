@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useState, useRef } from "react";
-import CustomButton from "../forms/CustomButton";
-import { ConversationType } from "@/app/inbox/page";
+import { ConversationType } from "@/app/[locale]/inbox/page";
 import useWebSocket, { ReadyState } from "react-use-websocket";
-import { MessageType } from "@/app/inbox/[id]/page";
-import { UserType } from "@/app/inbox/page";
+import { MessageType } from "@/app/[locale]/inbox/[id]/page";
+import { UserType } from "@/app/[locale]/inbox/page";
+import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 interface ConversationDetailProps {
     token: string;
@@ -56,21 +57,21 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({
     useEffect(() => {
         console.log('Messages:', messages);
         console.log('Realtime Messages:', realtimeMessages);
+        scrollToBottom();
     }, [messages, realtimeMessages]);
 
     const sendMessage = async () => {
-        console.log('sendMessage'),
+        if (!newMessage.trim()) return;
 
-            sendJsonMessage({
-                event: 'chat_message',
-                data: {
-                    body: newMessage,
-                    name: myUser?.name,
-                    sent_to_id: otherUser?.id,
-                    conversation_id: conversation.id
-                }
-            });
-        console.log('sendMessage - sentJsonMessage:', newMessage);
+        sendJsonMessage({
+            event: 'chat_message',
+            data: {
+                body: newMessage,
+                name: myUser?.name,
+                sent_to_id: otherUser?.id,
+                conversation_id: conversation.id
+            }
+        });
 
         setNewMessage('');
 
@@ -85,49 +86,124 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({
         }
     }
 
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    }
+
+    const t = useTranslations('inbox');
+
     return (
-        <>
+        <div className="flex flex-col h-[calc(100vh-150px)]">
+            {/* Chat messages area - fixed height with scroll */}
             <div
                 ref={messagesDiv}
-                className="max-h-[400px] overflow-auto flex flex-col space-y-4"
+                className="flex-1 overflow-y-auto p-4 space-y-4"
             >
-                {messages.map((message, index) => (
-                    <div
-                        key={index}
-                        className={`w-[80%] py-4 px-6 rounded-xl ${message.created_by.name == myUser?.name ? 'ml-[20%] bg-blue-200' : 'bg-gray-200'}`}
-                    >
-                        <p className="font-bold text-gray-500">{message.created_by.name}</p>
-                        <p>{message.body}</p>
-                    </div>
-                ))}
+                {messages.map((message, index) => {
+                    const isMyMessage = message.created_by.name === myUser?.name;
+                    return (
+                        <div
+                            key={`message-${index}`}
+                            className={`flex items-start gap-3 ${isMyMessage ? 'justify-end' : 'justify-start'}`}
+                        >
+                            {!isMyMessage && (
+                                <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                                    <Image
+                                        src={message.created_by.avatar_url || "/profile_pic_1.jpg"}
+                                        alt={message.created_by.name}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
+                            )}
 
-                {realtimeMessages.map((message, index) => (
-                    <div
-                        key={index}
-                        className={`w-[80%]py-4 px-6 rounded-xl ${message.name == myUser?.name ? 'ml-[20%] bg-blue-200' : 'bg-gray-200'}`}
-                    >
-                        <p className="font-bold text-gray-500">{message.name}</p>
-                        <p>{message.body}</p>
-                    </div>
-                ))}
+                            <div className={`max-w-[70%] py-3 px-4 rounded-2xl ${isMyMessage
+                                ? 'bg-airbnb text-white rounded-tr-none'
+                                : 'bg-gray-200 rounded-tl-none'
+                                }`}>
+                                <p className="break-words">{message.body}</p>
+                            </div>
+
+                            {isMyMessage && (
+                                <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                                    <Image
+                                        src={message.created_by.avatar_url || "/profile_pic_1.jpg"}
+                                        alt={message.created_by.name}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+
+                {realtimeMessages.map((message, index) => {
+                    const isMyMessage = message.name === myUser?.name;
+                    return (
+                        <div
+                            key={`realtime-${index}`}
+                            className={`flex items-start gap-3 ${isMyMessage ? 'justify-end' : 'justify-start'}`}
+                        >
+                            {!isMyMessage && (
+                                <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                                    <Image
+                                        src={otherUser?.avatar_url || "/profile_pic_1.jpg"}
+                                        alt={message.name}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
+                            )}
+
+                            <div className={`max-w-[70%] py-3 px-4 rounded-2xl ${isMyMessage
+                                ? 'bg-airbnb text-white rounded-tr-none'
+                                : 'bg-gray-200 rounded-tl-none'
+                                }`}>
+                                <p className="break-words">{message.body}</p>
+                            </div>
+
+                            {isMyMessage && (
+                                <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                                    <Image
+                                        src={myUser?.avatar_url || "/profile_pic_1.jpg"}
+                                        alt={message.name}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
 
-            <div className="mt-4 py-4 px-6 flex border border-gray-300 space-x-4 rounded-xl">
-                <input
-                    type="text"
-                    placeholder="Type your message..."
-                    className="w-full p-2 bg-gray-200 rounded-xl"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                />
-
-                <CustomButton
-                    label='Send'
-                    onClick={sendMessage}
-                    className="w-[100px]"
-                />
+            {/* Fixed input area at the bottom */}
+            <div className="sticky bottom-0 bg-white px-4 py-4 border-t border-gray-200">
+                <div className="flex items-center space-x-2 max-w-[1500px] mx-auto">
+                    <input
+                        type="text"
+                        placeholder={t('typeMessage')}
+                        className="flex-1 py-3 px-4 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-airbnb"
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                    />
+                    <button
+                        onClick={sendMessage}
+                        disabled={!newMessage.trim()}
+                        className="p-3 bg-airbnb text-white rounded-full disabled:opacity-50 hover:bg-airbnb_dark transition-colors"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                    </button>
+                </div>
             </div>
-        </>
+        </div>
     )
 }
 

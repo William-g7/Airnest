@@ -24,6 +24,8 @@
     "inbox": {
         "title": "Inbox",
         "conversations": "Conversations",
+        "conversation": "Conversation",
+        "conversationWith": "Conversation with {name}",
         "noConversations": "You don't have any conversations yet.",
         "startConversation": "Start a conversation with a host by viewing a property and clicking 'Contact Host'.",
         "authRequired": "Please login to view your messages",
@@ -109,6 +111,7 @@
         "checkOut": "CHECKOUT"
     },
     "addProperty": {
+        "djangobnbYourHome": "Share your home",
         "title": "Add a property",
         "categoryDescription": "Which of these best describes your place?",
         "placeTypeDescription": "What type of place will guests have?",

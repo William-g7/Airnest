@@ -24,6 +24,8 @@
     "inbox": {
         "title": "Messagerie",
         "conversations": "Conversations",
+        "conversation": "Conversation",
+        "conversationWith": "Conversation avec {name}",
         "noConversations": "Vous n'avez aucune conversation pour le moment.",
         "startConversation": "Commencez une conversation avec un hôte en consultant une propriété et en cliquant sur 'Contacter l'hôte'.",
         "authRequired": "Veuillez vous connecter pour voir vos messages",
@@ -96,6 +98,7 @@
         "checkOut": "DÉPART"
     },
     "addProperty": {
+        "djangobnbYourHome": "Partager votre maison",
         "title": "Ajouter un logement",
         "categoryDescription": "Laquelle de ces options décrit le mieux votre logement ?",
         "placeTypeDescription": "Quel type de logement les voyageurs auront-ils ?",

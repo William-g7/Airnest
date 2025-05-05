@@ -5,10 +5,6 @@ import apiService from "@/app/services/apiService";
 import { getTranslations } from 'next-intl/server';
 import { PropertyType } from "@/app/constants/propertyType";
 
-interface Property extends PropertyType {
-    // 所有必需的属性现在都从PropertyType继承
-}
-
 interface Landlord {
     id: string;
     name: string;
