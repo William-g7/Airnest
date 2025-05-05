@@ -12,7 +12,9 @@ type Props = {
 };
 
 const PropertyDetailPage = async ({ params }: Props) => {
-    const property = await apiService.get(`/api/properties/${params.id}`);
+    // Ensure params is properly resolved before using it
+    const id = params.id;
+    const property = await apiService.get(`/api/properties/${id}`);
     const t = await getTranslations('property');
 
     return (
@@ -23,9 +25,12 @@ const PropertyDetailPage = async ({ params }: Props) => {
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    // Ensure params is properly resolved before using it
+    const id = params.id;
+
     // 先获取数据
     const [property, t] = await Promise.all([
-        apiService.get(`/api/properties/${params.id}`),
+        apiService.get(`/api/properties/${id}`),
         getTranslations('property')
     ]);
 
@@ -51,11 +56,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             images: [property.images[0]?.imageURL],
         },
         alternates: {
-            canonical: `/properties/${params.id}`,
+            canonical: `/properties/${id}`,
             languages: {
-                'en': `/en/properties/${params.id}`,
-                'zh': `/zh/properties/${params.id}`,
-                'fr': `/fr/properties/${params.id}`
+                'en': `/en/properties/${id}`,
+                'zh': `/zh/properties/${id}`,
+                'fr': `/fr/properties/${id}`
             }
         }
     };
@@ -105,7 +110,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             '@type': 'ReserveAction',
             target: {
                 '@type': 'EntryPoint',
-                urlTemplate: `https://djangobnb.com/properties/${params.id}`,
+                urlTemplate: `https://djangobnb.com/properties/${id}`,
                 actionPlatform: ['http://schema.org/DesktopWebPlatform']
             }
         }

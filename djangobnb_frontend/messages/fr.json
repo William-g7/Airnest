@@ -121,5 +121,18 @@
         "totalPrice": "Prix total",
         "viewProperty": "Voir la propriété",
         "nights": "nuits"
+    },
+    "profile": {
+        "title": "Profil",
+        "editProfile": "Modifier le profil",
+        "cancel": "Annuler",
+        "saving": "Enregistrement...",
+        "saveChanges": "Enregistrer les modifications",
+        "name": "Nom",
+        "email": "E-mail",
+        "memberSince": "Membre depuis",
+        "notSet": "Non défini",
+        "loadError": "Échec du chargement du profil",
+        "updateError": "Échec de la mise à jour du profil"
     }
 }

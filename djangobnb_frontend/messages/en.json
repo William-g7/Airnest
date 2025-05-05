@@ -21,6 +21,19 @@
         "myReservations": "My Reservations",
         "myWishlists": "My Wishlists"
     },
+    "profile": {
+        "title": "Profile",
+        "editProfile": "Edit Profile",
+        "cancel": "Cancel",
+        "saving": "Saving...",
+        "saveChanges": "Save Changes",
+        "name": "Name",
+        "email": "Email",
+        "memberSince": "Member Since",
+        "notSet": "Not set",
+        "loadError": "Failed to load profile",
+        "updateError": "Failed to update profile"
+    },
     "common": {
         "search": "Search",
         "filter": "Filter",
