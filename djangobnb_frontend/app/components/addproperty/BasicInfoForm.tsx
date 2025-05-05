@@ -1,5 +1,7 @@
 'use client'
 
+import { useTranslations } from 'next-intl';
+
 interface BasicInfoFormProps {
     basicInfo: BasicInfoType;
     setBasicInfo: (info: BasicInfoType) => void;
@@ -13,6 +15,8 @@ interface BasicInfoType {
 }
 
 const BasicInfoForm: React.FC<BasicInfoFormProps> = ({ basicInfo, setBasicInfo }) => {
+    const t = useTranslations('addProperty');
+
     const handleIncrement = (field: keyof BasicInfoType) => {
         setBasicInfo({ ...basicInfo, [field]: basicInfo[field] + 1 });
     };
@@ -23,14 +27,16 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({ basicInfo, setBasicInfo }
         }
     };
 
+    const fields: Record<keyof BasicInfoType, string> = {
+        guests: t('guests'),
+        bedrooms: t('bedrooms'),
+        beds: t('beds'),
+        bathrooms: t('bathrooms')
+    };
+
     return (
         <div className="flex flex-col gap-8">
-            {Object.entries({
-                guests: 'Guests',
-                bedrooms: 'Bedrooms',
-                beds: 'Beds',
-                bathrooms: 'Bathrooms'
-            }).map(([field, label]) => (
+            {Object.entries(fields).map(([field, label]) => (
                 <div key={field} className="flex items-center justify-between">
                     <span className="text-xl">{label}</span>
                     <div className="flex items-center gap-4">

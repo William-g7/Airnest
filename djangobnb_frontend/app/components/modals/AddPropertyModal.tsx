@@ -11,10 +11,13 @@ import BasicInfoForm from '../addproperty/BasicInfoForm'
 import ImageUpload from '../addproperty/ImageUpload'
 import PropertyDetailsForm from '../addproperty/PropertyDetailsForm'
 import apiService from '@/app/services/apiService';
+import { useTranslations } from 'next-intl'
 
 const TOTAL_STEPS = 6;
 
 export default function AddPropertyModal() {
+    const t = useTranslations('addProperty');
+    const commonT = useTranslations('common');
     const [currentStep, setCurrentStep] = useState(1);
     const [category, setCategory] = useState('');
     const [placeType, setPlaceType] = useState('');
@@ -80,7 +83,7 @@ export default function AddPropertyModal() {
                 setCurrentStep(prev => prev + 1);
             }
         } else {
-            alert('Please complete all required fields before proceeding.');
+            alert(t('formIncomplete'));
         }
     }
 
@@ -139,7 +142,7 @@ export default function AddPropertyModal() {
                 {currentStep === 1 && (
                     <>
                         <h2 className='mb-6 text-2xl font-semibold'>
-                            Which of these best describes your place?
+                            {t('categoryDescription')}
                         </h2>
                         <Categories selectedCategory={category} setSelectedCategory={setCategory} />
                     </>
@@ -147,7 +150,7 @@ export default function AddPropertyModal() {
                 {currentStep === 2 && (
                     <>
                         <h2 className='mb-6 text-2xl font-semibold'>
-                            What type of place will guests have?
+                            {t('placeTypeDescription')}
                         </h2>
                         <PlaceTypes selectedType={placeType} setSelectedType={setPlaceType} />
                     </>
@@ -155,10 +158,10 @@ export default function AddPropertyModal() {
                 {currentStep === 3 && (
                     <>
                         <h2 className='mb-6 text-2xl font-semibold'>
-                            Where's your place located?
+                            {t('locationDescription')}
                         </h2>
                         <p className="text-gray-500 mb-6">
-                            Your address is only shared with guests after they've made a reservation.
+                            {t('locationNote')}
                         </p>
                         <LocationForm location={location} setLocation={setLocation} />
                     </>
@@ -166,10 +169,10 @@ export default function AddPropertyModal() {
                 {currentStep === 4 && (
                     <>
                         <h2 className='mb-6 text-2xl font-semibold'>
-                            Share some basics about your place
+                            {t('basicsDescription')}
                         </h2>
                         <p className="text-gray-500 mb-6">
-                            You can add more details later.
+                            {t('basicsNote')}
                         </p>
                         <BasicInfoForm basicInfo={basicInfo} setBasicInfo={setBasicInfo} />
                     </>
@@ -177,10 +180,10 @@ export default function AddPropertyModal() {
                 {currentStep === 5 && (
                     <>
                         <h2 className='mb-6 text-2xl font-semibold'>
-                            Add some photos of your place
+                            {t('photosDescription')}
                         </h2>
                         <p className="text-gray-500 mb-6">
-                            Show guests what your place looks like.
+                            {t('photosNote')}
                         </p>
                         <ImageUpload images={images} setImages={setImages} />
                     </>
@@ -188,10 +191,10 @@ export default function AddPropertyModal() {
                 {currentStep === 6 && (
                     <>
                         <h2 className='mb-6 text-2xl font-semibold'>
-                            Now, set your price and add the final details
+                            {t('detailsDescription')}
                         </h2>
                         <p className="text-gray-500 mb-6">
-                            Add a catchy title and description to attract guests.
+                            {t('detailsNote')}
                         </p>
                         <PropertyDetailsForm details={propertyDetails} setDetails={setPropertyDetails} />
                     </>
@@ -205,7 +208,7 @@ export default function AddPropertyModal() {
                         onClick={onBack}
                         className={`px-4 py-2 hover:underline ${currentStep === 1 ? 'text-gray-400' : 'text-gray-900'}`}
                     >
-                        Back
+                        {commonT('previous')}
                     </button>
 
                     {/* Progress Indicator */}
@@ -228,7 +231,7 @@ export default function AddPropertyModal() {
                                     'bg-gray-300 text-gray-500 cursor-not-allowed'}
                         `}
                     >
-                        {isLoading ? 'Loading...' : currentStep === TOTAL_STEPS ? 'Create Listing' : 'Next'}
+                        {isLoading ? commonT('loading') : currentStep === TOTAL_STEPS ? t('createListing') : commonT('next')}
                     </button>
                 </div>
             </div>
@@ -237,7 +240,7 @@ export default function AddPropertyModal() {
 
     return (
         <Modal
-            label="Add Property"
+            label={t('title')}
             isOpen={addPropertyModal.isOpen}
             close={addPropertyModal.onClose}
             content={content}

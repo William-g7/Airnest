@@ -21,7 +21,7 @@ export const routing = defineRouting({
         '/properties/[id]': '/properties/[id]',
         '/landlords/[id]': '/landlords/[id]',
         '/inbox': '/inbox',
-        '/inbox/[conversationId]': '/inbox/[conversationId]',
+        '/inbox/[id]': '/inbox/[id]',
         '/myproperties': '/myproperties',
         '/mywishlists': '/mywishlists',
         '/myreservations': '/myreservations',

@@ -12,6 +12,7 @@ urlpatterns = [
     path('register/', RegisterView.as_view(), name='rest_register'),
     path('login/', LoginView.as_view(), name='rest_login'),
     path('logout/', LogoutView.as_view(), name='rest_logout'),
+    path('me/', UserDetailsView.as_view(), name='user_details'),
     path('profile/<uuid:pk>/', api.profile_detail, name='api_profile_detail'),
     path('landlords/<uuid:pk>/', api.landlord_detail, name='api_landlord_detail'),
 ]

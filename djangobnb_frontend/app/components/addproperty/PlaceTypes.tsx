@@ -1,6 +1,7 @@
 'use client'
 import Image from 'next/image'
 import { placeTypeOptions } from '@/app/constants/placeType'
+import { useTranslations } from 'next-intl'
 
 interface PlaceTypeProps {
     selectedType: string;
@@ -8,6 +9,8 @@ interface PlaceTypeProps {
 }
 
 const PlaceTypes: React.FC<PlaceTypeProps> = ({ selectedType, setSelectedType }) => {
+    const t = useTranslations('placeTypes');
+
     return (
         <div className="flex flex-col gap-4">
             {placeTypeOptions.map((type) => (
@@ -21,13 +24,13 @@ const PlaceTypes: React.FC<PlaceTypeProps> = ({ selectedType, setSelectedType })
                     `}
                 >
                     <div className="flex flex-col gap-2">
-                        <h3 className="text-lg font-semibold">{type.title}</h3>
-                        <p className="text-gray-500">{type.description}</p>
+                        <h3 className="text-lg font-semibold">{t(`${type.value}.title`)}</h3>
+                        <p className="text-gray-500">{t(`${type.value}.description`)}</p>
                     </div>
                     <div className="w-12 h-12 relative">
                         <Image
                             src={type.icon}
-                            alt={type.title}
+                            alt={t(`${type.value}.title`)}
                             fill
                             className="object-contain"
                         />

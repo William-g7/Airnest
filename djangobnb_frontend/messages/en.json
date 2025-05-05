@@ -21,6 +21,30 @@
         "myReservations": "My Reservations",
         "myWishlists": "My Wishlists"
     },
+    "inbox": {
+        "title": "Inbox",
+        "conversations": "Conversations",
+        "conversation": "Conversation",
+        "conversationWith": "Conversation with {name}",
+        "noConversations": "You don't have any conversations yet.",
+        "startConversation": "Start a conversation with a host by viewing a property and clicking 'Contact Host'.",
+        "authRequired": "Please login to view your messages",
+        "sendMessage": "Send message",
+        "typeMessage": "Type your message here...",
+        "sending": "Sending...",
+        "loadError": "Failed to load conversations",
+        "messageSentError": "Failed to send message",
+        "viewConversation": "View conversation"
+    },
+    "landlord": {
+        "superhost": "Superhost",
+        "yearsHosting": "{years} years hosting",
+        "hostListings": "{name}'s listings",
+        "noListings": "This host has no available listings.",
+        "propertiesCount": "{count} properties",
+        "responseRate": "100% response rate",
+        "contactText": "Contact this host to book a property or ask any questions you may have."
+    },
     "profile": {
         "title": "Profile",
         "editProfile": "Edit Profile",
@@ -45,7 +69,12 @@
         "loading": "Loading...",
         "error": "An error occurred",
         "success": "Success!",
-        "viewMore": "View more"
+        "viewMore": "View more",
+        "contact": "Contact Host",
+        "addDate": "Add date",
+        "back": "Back",
+        "previous": "Previous",
+        "next": "Next"
     },
     "property": {
         "title": "Title",
@@ -78,13 +107,60 @@
         "cleaningFee": "Cleaning fee",
         "serviceFee": "Service fee",
         "taxes": "Taxes",
-        "total": "Total"
+        "total": "Total",
+        "checkIn": "CHECK-IN",
+        "checkOut": "CHECKOUT"
+    },
+    "addProperty": {
+        "djangobnbYourHome": "Share your home",
+        "title": "Add a property",
+        "categoryDescription": "Which of these best describes your place?",
+        "placeTypeDescription": "What type of place will guests have?",
+        "locationDescription": "Where's your place located?",
+        "locationNote": "Your address will only be shared with guests after they book.",
+        "basicsDescription": "Share some basics about your place",
+        "basicsNote": "You can add more details later.",
+        "photosDescription": "Add some photos of your place",
+        "photosNote": "Show guests what your place looks like including the surroundings.",
+        "detailsDescription": "Set your price and finish up",
+        "detailsNote": "Write an engaging title and description to help more people see your listing!",
+        "createListing": "Create listing",
+        "formIncomplete": "Please complete all required fields before continuing.",
+        "propertyTitle": "Give your place a title",
+        "titlePlaceholder": "Example: Cozy Beachfront Villa",
+        "propertyDescription": "Add a description",
+        "descriptionPlaceholder": "Share what makes your place special...",
+        "pricePerNight": "Set your price per night",
+        "characters": "characters"
     },
     "categories": {
         "omg": "OMG!",
         "icons": "Icons",
         "beach": "Beach",
-        "castles": "Castles"
+        "castles": "Castles",
+        "apartment": "Apartment",
+        "beach house": "Beach House",
+        "bed and breakfast": "Bed & Breakfast",
+        "castle": "Castle",
+        "farm house": "Farm House",
+        "ferry": "Ferry",
+        "hotel": "Hotel",
+        "house": "House",
+        "treehouse": "Treehouse"
+    },
+    "placeTypes": {
+        "entire": {
+            "title": "An entire place",
+            "description": "Guests have the whole place to themselves."
+        },
+        "room": {
+            "title": "A room",
+            "description": "Guests have their own room in a home, plus access to shared spaces."
+        },
+        "shared": {
+            "title": "A shared room in a hostel",
+            "description": "Guests sleep in a shared room in a managed hostel with staff on-site 24/7."
+        }
     },
     "properties": {
         "loadError": "Failed to load properties",

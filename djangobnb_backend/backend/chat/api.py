@@ -11,7 +11,13 @@ from useraccount.models import User
 
 @api_view(['GET'])
 def conversations_list(request):
-    serializer = ConversationListSerializer(request.user.conversations.all(), many=True)
+    conversations_with_messages = []
+    
+    for conversation in request.user.conversations.all():
+        if conversation.messages.exists():
+            conversations_with_messages.append(conversation)
+    
+    serializer = ConversationListSerializer(conversations_with_messages, many=True)
 
     return JsonResponse(serializer.data, safe=False)
 

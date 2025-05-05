@@ -21,6 +21,30 @@
         "myReservations": "Mes Réservations",
         "myWishlists": "Mes Favoris"
     },
+    "inbox": {
+        "title": "Messagerie",
+        "conversations": "Conversations",
+        "conversation": "Conversation",
+        "conversationWith": "Conversation avec {name}",
+        "noConversations": "Vous n'avez aucune conversation pour le moment.",
+        "startConversation": "Commencez une conversation avec un hôte en consultant une propriété et en cliquant sur 'Contacter l'hôte'.",
+        "authRequired": "Veuillez vous connecter pour voir vos messages",
+        "sendMessage": "Envoyer le message",
+        "typeMessage": "Écrivez votre message ici...",
+        "sending": "Envoi en cours...",
+        "loadError": "Échec du chargement des conversations",
+        "messageSentError": "Échec de l'envoi du message",
+        "viewConversation": "Voir la conversation"
+    },
+    "landlord": {
+        "superhost": "Super hôte",
+        "yearsHosting": "{years} ans d'hébergement",
+        "hostListings": "Annonces de {name}",
+        "noListings": "Cet hôte n'a pas d'annonces disponibles.",
+        "propertiesCount": "{count} propriétés",
+        "responseRate": "Taux de réponse de 100%",
+        "contactText": "Contactez cet hôte pour réserver un logement ou poser vos questions."
+    },
     "common": {
         "search": "Rechercher",
         "filter": "Filtrer",
@@ -32,7 +56,12 @@
         "loading": "Chargement...",
         "error": "Une erreur est survenue",
         "success": "Succès !",
-        "viewMore": "Voir plus"
+        "viewMore": "Voir plus",
+        "contact": "Contacter l'hôte",
+        "addDate": "Ajouter une date",
+        "back": "Retour",
+        "previous": "Précédent",
+        "next": "Suivant"
     },
     "property": {
         "title": "Titre",
@@ -65,13 +94,60 @@
         "cleaningFee": "Frais de ménage",
         "serviceFee": "Frais de service",
         "taxes": "Taxes",
-        "total": "Total"
+        "total": "Total",
+        "checkIn": "ARRIVÉE",
+        "checkOut": "DÉPART"
+    },
+    "addProperty": {
+        "djangobnbYourHome": "Partager votre maison",
+        "title": "Ajouter un logement",
+        "categoryDescription": "Laquelle de ces options décrit le mieux votre logement ?",
+        "placeTypeDescription": "Quel type de logement les voyageurs auront-ils ?",
+        "locationDescription": "Où se trouve votre logement ?",
+        "locationNote": "Votre adresse ne sera partagée avec les voyageurs qu'après leur réservation.",
+        "basicsDescription": "Partagez quelques informations de base sur votre logement",
+        "basicsNote": "Vous pourrez ajouter plus de détails ultérieurement.",
+        "photosDescription": "Ajoutez des photos de votre logement",
+        "photosNote": "Montrez aux voyageurs à quoi ressemble votre logement et ses environs.",
+        "detailsDescription": "Définissez votre prix et finalisez",
+        "detailsNote": "Rédigez un titre et une description attrayants pour aider plus de personnes à voir votre annonce !",
+        "createListing": "Créer l'annonce",
+        "formIncomplete": "Veuillez compléter tous les champs obligatoires avant de continuer.",
+        "propertyTitle": "Donnez un titre à votre logement",
+        "titlePlaceholder": "Exemple : Villa confortable en bord de mer",
+        "propertyDescription": "Ajoutez une description",
+        "descriptionPlaceholder": "Partagez ce qui rend votre logement spécial...",
+        "pricePerNight": "Définissez votre prix par nuit",
+        "characters": "caractères"
     },
     "categories": {
         "omg": "OMG!",
         "icons": "Icônes",
         "beach": "Plage",
-        "castles": "Châteaux"
+        "castles": "Châteaux",
+        "apartment": "Appartement",
+        "beach house": "Maison de plage",
+        "bed and breakfast": "Chambre d'hôtes",
+        "castle": "Château",
+        "farm house": "Ferme",
+        "ferry": "Ferry",
+        "hotel": "Hôtel",
+        "house": "Maison",
+        "treehouse": "Cabane dans les arbres"
+    },
+    "placeTypes": {
+        "entire": {
+            "title": "Un logement entier",
+            "description": "Les voyageurs disposent du logement entier pour eux-mêmes."
+        },
+        "room": {
+            "title": "Une chambre",
+            "description": "Les voyageurs disposent d'une chambre privée dans un logement, ainsi que d'un accès aux espaces communs."
+        },
+        "shared": {
+            "title": "Une chambre partagée en auberge",
+            "description": "Les voyageurs dorment dans une chambre partagée dans une auberge gérée avec du personnel sur place 24h/24 et 7j/7."
+        }
     },
     "properties": {
         "loadError": "Échec du chargement des propriétés",

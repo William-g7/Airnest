@@ -1,6 +1,9 @@
+'use client'
+
 import { useState } from 'react';
 import ReactDatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import { useTranslations } from 'next-intl';
 
 interface DatePickerProps {
     checkIn: Date | null;
@@ -14,6 +17,9 @@ const DatePicker: React.FC<DatePickerProps> = ({
     onChange,
     bookedDates
 }) => {
+    const t = useTranslations('property');
+    const commonT = useTranslations('common');
+
     const handleCheckInChange = (date: Date | null) => {
         if (checkOut && date && date >= checkOut) {
             onChange([date, null]);
@@ -44,13 +50,13 @@ const DatePicker: React.FC<DatePickerProps> = ({
         <div className="border border-gray-300 rounded-lg">
             <div className="grid grid-cols-2 divide-x">
                 <div className="p-4">
-                    <div className="text-xs font-bold">CHECK-IN</div>
+                    <div className="text-xs font-bold">{t('checkIn')}</div>
                     <ReactDatePicker
                         selected={checkIn}
                         onChange={handleCheckInChange}
                         minDate={new Date()}
                         excludeDates={bookedDates.map(date => new Date(date))}
-                        placeholderText="Add date"
+                        placeholderText={commonT('addDate')}
                         className="w-full border-none focus:ring-0 p-0 text-gray-600"
                         renderDayContents={renderDayContents}
                         dayClassName={date => {
@@ -60,13 +66,13 @@ const DatePicker: React.FC<DatePickerProps> = ({
                     />
                 </div>
                 <div className="p-4">
-                    <div className="text-xs font-bold">CHECKOUT</div>
+                    <div className="text-xs font-bold">{t('checkOut')}</div>
                     <ReactDatePicker
                         selected={checkOut}
                         onChange={handleCheckOutChange}
                         minDate={checkIn || new Date()}
                         excludeDates={bookedDates.map(date => new Date(date))}
-                        placeholderText="Add date"
+                        placeholderText={commonT('addDate')}
                         className="w-full border-none focus:ring-0 p-0 text-gray-600"
                         disabled={!checkIn}
                         renderDayContents={renderDayContents}
