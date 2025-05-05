@@ -1,5 +1,7 @@
 'use client'
 
+import { useTranslations } from 'next-intl';
+
 interface PropertyDetailsFormProps {
     details: PropertyDetailsType;
     setDetails: (details: PropertyDetailsType) => void;
@@ -15,10 +17,12 @@ const MAX_TITLE_LENGTH = 50;
 const MAX_DESCRIPTION_LENGTH = 500;
 
 const PropertyDetailsForm: React.FC<PropertyDetailsFormProps> = ({ details, setDetails }) => {
+    const t = useTranslations('addProperty');
+
     return (
         <div className="flex flex-col gap-6">
             <div>
-                <label className="block text-xl mb-2">Give your place a title</label>
+                <label className="block text-xl mb-2">{t('propertyTitle')}</label>
                 <div>
                     <input
                         type="text"
@@ -28,18 +32,18 @@ const PropertyDetailsForm: React.FC<PropertyDetailsFormProps> = ({ details, setD
                                 setDetails({ ...details, title: e.target.value })
                             }
                         }}
-                        placeholder="Example: Cozy Beachfront Villa"
+                        placeholder={t('titlePlaceholder')}
                         className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-black"
                         maxLength={MAX_TITLE_LENGTH}
                     />
                     <p className="text-sm text-gray-500 mt-2">
-                        {details.title.length}/{MAX_TITLE_LENGTH} characters
+                        {details.title.length}/{MAX_TITLE_LENGTH} {t('characters')}
                     </p>
                 </div>
             </div>
 
             <div>
-                <label className="block text-xl mb-2">Add a description</label>
+                <label className="block text-xl mb-2">{t('propertyDescription')}</label>
                 <div>
                     <textarea
                         value={details.description}
@@ -48,19 +52,19 @@ const PropertyDetailsForm: React.FC<PropertyDetailsFormProps> = ({ details, setD
                                 setDetails({ ...details, description: e.target.value })
                             }
                         }}
-                        placeholder="Share what makes your place special..."
+                        placeholder={t('descriptionPlaceholder')}
                         rows={5}
                         className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-black"
                         maxLength={MAX_DESCRIPTION_LENGTH}
                     />
                     <p className="text-sm text-gray-500 mt-2">
-                        {details.description.length}/{MAX_DESCRIPTION_LENGTH} characters
+                        {details.description.length}/{MAX_DESCRIPTION_LENGTH} {t('characters')}
                     </p>
                 </div>
             </div>
 
             <div>
-                <label className="block text-xl mb-2">Set your price per night</label>
+                <label className="block text-xl mb-2">{t('pricePerNight')}</label>
                 <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">$</span>
                     <input
