@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-
+import { useRouter } from "@/i18n/navigation";
 import { useLoginModal } from "../hooks/useLoginModal";
 import { useSignupModal } from "../hooks/useSignupModal";
-import LogoutButton from "../buttons/LogoutButton";
+import LogoutButton from "./LogoutButton";
 import MenuLink from "./MenuLink";
+import { useTranslations } from 'next-intl';
 
 interface UserNavProps {
     userId: string | null;
@@ -17,6 +17,7 @@ const UserNav: React.FC<UserNavProps> = ({ userId }) => {
     const loginModal = useLoginModal();
     const signupModal = useSignupModal();
     const router = useRouter();
+    const t = useTranslations('navigation');
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -74,29 +75,31 @@ const UserNav: React.FC<UserNavProps> = ({ userId }) => {
                 {userId ? (
                     <>
                         <div className="py-2">
-                            <MenuLink label="Messages" onClick={() => { setIsOpen(false); router.push('/messages') }} />
-                            <MenuLink label="Notifications" onClick={() => { setIsOpen(false); router.push('/notifications') }} />
-                            <MenuLink label="Trips" onClick={() => { setIsOpen(false); router.push('/trips') }} />
+                            <MenuLink label={t('messages')} onClick={() => { setIsOpen(false); router.push('/messages') }} />
+                            <MenuLink label={t('notifications')} onClick={() => { setIsOpen(false); router.push('/notifications') }} />
+                            <MenuLink label={t('trips')} onClick={() => { setIsOpen(false); router.push('/trips') }} />
 
                         </div>
 
                         <hr className="my-2" />
 
                         <div className="py-2">
-                            <MenuLink label="My Account" onClick={() => {
+                            <MenuLink label={t('myAccount')} onClick={() => {
                                 setIsOpen(false);
-                                router.push(`/myprofile/${userId}`)
+                                router.push({
+                                    pathname: '/myprofile/[id]',
+                                    params: { id: userId.toString() }
+                                });
                             }} />
-                            <MenuLink label="My Properties" onClick={() => {
+                            <MenuLink label={t('myProperties')} onClick={() => {
                                 setIsOpen(false);
-                                router.push(`/myproperties`)
+                                router.push('/myproperties');
                             }} />
-                            <MenuLink label="My Reservations" onClick={() => {
+                            <MenuLink label={t('myReservations')} onClick={() => {
                                 setIsOpen(false);
-                                router.push(`/myreservations`)
+                                router.push('/myreservations');
                             }} />
-
-                            <MenuLink label="My Wishlists" onClick={() => { setIsOpen(false); router.push('/mywishlists') }} />
+                            <MenuLink label={t('myWishlists')} onClick={() => { setIsOpen(false); router.push('/mywishlists') }} />
                         </div>
 
                         <hr className="my-2" />
@@ -107,8 +110,8 @@ const UserNav: React.FC<UserNavProps> = ({ userId }) => {
                     </>
                 ) : (
                     <div className="py-1">
-                        <MenuLink label="Login" onClick={() => { setIsOpen(false); loginModal.onOpen() }} />
-                        <MenuLink label="Register" onClick={() => { setIsOpen(false); signupModal.onOpen() }} />
+                        <MenuLink label={t('login')} onClick={() => { setIsOpen(false); loginModal.onOpen() }} />
+                        <MenuLink label={t('register')} onClick={() => { setIsOpen(false); signupModal.onOpen() }} />
                     </div>
                 )}
             </div>

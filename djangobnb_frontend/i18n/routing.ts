@@ -26,6 +26,10 @@ export const routing = defineRouting({
         '/mywishlists': '/mywishlists',
         '/myreservations': '/myreservations',
         '/myprofile': '/myprofile',
+        '/myprofile/[id]': '/myprofile/[id]',
+        '/messages': '/messages',
+        '/notifications': '/notifications',
+        '/trips': '/trips',
         '/auth/login': '/auth/login',
         '/auth/register': '/auth/register'
     }

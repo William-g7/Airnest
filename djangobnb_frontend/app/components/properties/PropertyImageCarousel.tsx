@@ -15,7 +15,7 @@ interface ImageCarouselProps {
 
 const ImageCarousel = ({ images, title }: ImageCarouselProps) => {
     return (
-        <div className="relative mb-4 w-full h-[64vh] rounded-xl overflow-hidden">
+        <div className="relative mb-4 w-full h-[75vh] rounded-xl overflow-hidden">
             <Swiper
                 modules={[Navigation, Pagination, Autoplay]}
                 spaceBetween={0}

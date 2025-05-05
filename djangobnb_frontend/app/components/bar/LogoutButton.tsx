@@ -1,13 +1,13 @@
 'use client'
 
 import { handleLogout } from "@/app/auth/session";
-import { useRouter } from "next/navigation";
-
-import MenuLink from "../bar/MenuLink";
+import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from 'next-intl';
+import MenuLink from "./MenuLink";
 
 const LogoutButton: React.FC = () => {
     const router = useRouter();
-
+    const t = useTranslations('navigation');
     const onLogoutClick = () => {
         handleLogout()
             .then(() => {
@@ -20,7 +20,7 @@ const LogoutButton: React.FC = () => {
 
     return (
         <MenuLink
-            label="Log out"
+            label={t('logout')}
             onClick={onLogoutClick}
         />
     );
