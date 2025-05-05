@@ -19,6 +19,7 @@ export const routing = defineRouting({
         '/': '/',
         '/properties': '/properties',
         '/properties/[id]': '/properties/[id]',
+        '/landlords/[id]': '/landlords/[id]',
         '/inbox': '/inbox',
         '/inbox/[conversationId]': '/inbox/[conversationId]',
         '/myproperties': '/myproperties',

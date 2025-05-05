@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from 'next-intl';
 import apiService from "../../services/apiService";
 import PropertyListItem from "./PropertyListItem";
 import { PropertyType } from "@/app/constants/propertyType";
@@ -10,6 +11,7 @@ interface PropertyListProps {
 }
 
 const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties, isWishlist }) => {
+    const t = useTranslations('properties');
     const [properties, setProperties] = useState<PropertyType[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
@@ -28,7 +30,7 @@ const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties, isWishlist 
                 : await apiService.get(endpoint);
             setProperties(data);
         } catch (error) {
-            setError("Failed to load properties");
+            setError(t('loadError'));
             console.error("Error fetching properties:", error);
         } finally {
             setIsLoading(false);
@@ -40,7 +42,7 @@ const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties, isWishlist 
     }, [isMyProperties, isWishlist]);
 
     if (isLoading) {
-        return <div>Loading...</div>;
+        return <div>{t('loading')}</div>;
     }
 
     if (error) {
@@ -50,10 +52,10 @@ const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties, isWishlist 
     if (properties.length === 0) {
         return (
             <div className="text-center py-10">
-                <h3 className="text-lg font-semibold">No properties found</h3>
+                <h3 className="text-lg font-semibold">{t('noPropertiesFound')}</h3>
                 {isMyProperties && (
                     <p className="text-gray-500 mt-2">
-                        You haven't listed any properties yet.
+                        {t('noListedProperties')}
                     </p>
                 )}
             </div>
