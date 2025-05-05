@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { propertyCategories } from '@/app/constants/propertyCategores'
+import { useTranslations } from 'next-intl'
 
 interface CategoryProps {
     selectedCategory: string;
@@ -7,6 +8,8 @@ interface CategoryProps {
 }
 
 const Categories: React.FC<CategoryProps> = ({ selectedCategory, setSelectedCategory }) => {
+    const t = useTranslations('categories');
+
     return (
         <div className="grid grid-cols-3 gap-4">
             {propertyCategories.map((category) => (
@@ -21,12 +24,12 @@ const Categories: React.FC<CategoryProps> = ({ selectedCategory, setSelectedCate
                     <div className="w-10 h-10 relative">
                         <Image
                             src={category.icon}
-                            alt={category.label}
+                            alt={t(category.value)}
                             fill
                             className="object-contain"
                         />
                     </div>
-                    <div className="font-medium">{category.label}</div>
+                    <div className="font-medium">{t(category.value)}</div>
                 </div>
             ))}
         </div>

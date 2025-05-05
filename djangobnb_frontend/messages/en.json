@@ -47,7 +47,10 @@
         "success": "Success!",
         "viewMore": "View more",
         "contact": "Contact Host",
-        "addDate": "Add date"
+        "addDate": "Add date",
+        "back": "Back",
+        "previous": "Previous",
+        "next": "Next"
     },
     "property": {
         "title": "Title",
@@ -84,11 +87,70 @@
         "checkIn": "CHECK-IN",
         "checkOut": "CHECKOUT"
     },
+    "addProperty": {
+        "djangobnbYourHome": "Djangobnb your home",
+        "title": "Add Property",
+        "categoryDescription": "Which of these best describes your place?",
+        "placeTypeDescription": "What type of place will guests have?",
+        "locationDescription": "Where's your place located?",
+        "locationNote": "Your address is only shared with guests after they've made a reservation.",
+        "basicsDescription": "Share some basics about your place",
+        "basicsNote": "You can add more details later.",
+        "photosDescription": "Add some photos of your place",
+        "photosNote": "Show guests what your place looks like.",
+        "detailsDescription": "Now, set your price and add the final details",
+        "detailsNote": "Add a catchy title and description to attract guests.",
+        "createListing": "Create Listing",
+        "formIncomplete": "Please complete all required fields before proceeding.",
+        "streetAddress": "Street address",
+        "city": "City",
+        "stateProvince": "State/Province",
+        "country": "Country",
+        "selectCountry": "Select a country",
+        "postalCode": "Postal code",
+        "guests": "Guests",
+        "bedrooms": "Bedrooms",
+        "beds": "Beds",
+        "bathrooms": "Bathrooms",
+        "uploadImages": "Upload Images",
+        "dragImages": "Drag images here or click to upload",
+        "uploadImagesLimit": "Upload at most {maxImages} images (max {maxSizeMB}MB each)",
+        "propertyTitle": "Property Title",
+        "propertyDescription": "Property Description",
+        "pricePerNight": "Price per night",
+        "tooManyImages": "You can only upload a maximum of {maxImages} images.",
+        "invalidFileType": "Please upload only image files.",
+        "fileTooLarge": "Image size should not exceed {maxSizeMB}MB.",
+        "maxImagesReached": "Maximum number of images reached"
+    },
     "categories": {
         "omg": "OMG!",
         "icons": "Icons",
         "beach": "Beach",
-        "castles": "Castles"
+        "castles": "Castles",
+        "apartment": "Apartment",
+        "beach house": "Beach House",
+        "bed and breakfast": "Bed & Breakfast",
+        "castle": "Castle",
+        "farm house": "Farm House",
+        "ferry": "Ferry",
+        "hotel": "Hotel",
+        "house": "House",
+        "treehouse": "Treehouse"
+    },
+    "placeTypes": {
+        "entire": {
+            "title": "An entire place",
+            "description": "Guests have the whole place to themselves."
+        },
+        "room": {
+            "title": "A room",
+            "description": "Guests have their own room in a home, plus access to shared spaces."
+        },
+        "shared": {
+            "title": "A shared room in a hostel",
+            "description": "Guests sleep in a shared room in a managed hostel with staff on-site 24/7."
+        }
     },
     "properties": {
         "loadError": "Failed to load properties",

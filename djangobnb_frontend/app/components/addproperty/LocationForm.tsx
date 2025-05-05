@@ -2,6 +2,7 @@
 
 import Select from 'react-select'
 import { getName, getNames } from 'country-list'
+import { useTranslations } from 'next-intl'
 
 interface LocationFormProps {
     location: LocationType;
@@ -17,6 +18,8 @@ interface LocationType {
 }
 
 const LocationForm: React.FC<LocationFormProps> = ({ location, setLocation }) => {
+    const t = useTranslations('addProperty');
+
     const countryOptions = getNames().map(country => ({
         value: country,
         label: country
@@ -26,7 +29,7 @@ const LocationForm: React.FC<LocationFormProps> = ({ location, setLocation }) =>
         <div className="flex flex-col gap-4">
             <input
                 type="text"
-                placeholder="Street address"
+                placeholder={t('streetAddress')}
                 value={location.street}
                 onChange={(e) => setLocation({ ...location, street: e.target.value })}
                 className="p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-black"
@@ -34,14 +37,14 @@ const LocationForm: React.FC<LocationFormProps> = ({ location, setLocation }) =>
             <div className="grid grid-cols-2 gap-4">
                 <input
                     type="text"
-                    placeholder="City"
+                    placeholder={t('city')}
                     value={location.city}
                     onChange={(e) => setLocation({ ...location, city: e.target.value })}
                     className="p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-black"
                 />
                 <input
                     type="text"
-                    placeholder="State/Province"
+                    placeholder={t('stateProvince')}
                     value={location.state}
                     onChange={(e) => setLocation({ ...location, state: e.target.value })}
                     className="p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-black"
@@ -52,7 +55,7 @@ const LocationForm: React.FC<LocationFormProps> = ({ location, setLocation }) =>
                     options={countryOptions}
                     value={location.country ? { value: location.country, label: location.country } : null}
                     onChange={(option) => setLocation({ ...location, country: option?.value || '' })}
-                    placeholder="Select a country"
+                    placeholder={t('selectCountry')}
                     className="react-select-container"
                     classNamePrefix="react-select"
                     styles={{
@@ -69,7 +72,7 @@ const LocationForm: React.FC<LocationFormProps> = ({ location, setLocation }) =>
                 />
                 <input
                     type="text"
-                    placeholder="Postal code"
+                    placeholder={t('postalCode')}
                     value={location.postalCode}
                     onChange={(e) => setLocation({ ...location, postalCode: e.target.value })}
                     className="p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-black"

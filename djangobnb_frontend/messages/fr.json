@@ -34,7 +34,10 @@
         "success": "Succès !",
         "viewMore": "Voir plus",
         "contact": "Contacter l'hôte",
-        "addDate": "Ajouter une date"
+        "addDate": "Ajouter une date",
+        "back": "Retour",
+        "previous": "Précédent",
+        "next": "Suivant"
     },
     "property": {
         "title": "Titre",
@@ -71,11 +74,70 @@
         "checkIn": "ARRIVÉE",
         "checkOut": "DÉPART"
     },
+    "addProperty": {
+        "djangobnbYourHome": "Djangobnb votre maison",
+        "title": "Ajouter un Logement",
+        "categoryDescription": "Laquelle de ces options décrit le mieux votre logement ?",
+        "placeTypeDescription": "Quel type de logement les voyageurs auront-ils ?",
+        "locationDescription": "Où se trouve votre logement ?",
+        "locationNote": "Votre adresse n'est partagée avec les voyageurs qu'après leur réservation.",
+        "basicsDescription": "Partagez quelques informations de base sur votre logement",
+        "basicsNote": "Vous pourrez ajouter plus de détails plus tard.",
+        "photosDescription": "Ajoutez quelques photos de votre logement",
+        "photosNote": "Montrez aux voyageurs à quoi ressemble votre logement.",
+        "detailsDescription": "Maintenant, définissez votre prix et ajoutez les détails finaux",
+        "detailsNote": "Ajoutez un titre accrocheur et une description pour attirer les voyageurs.",
+        "createListing": "Créer l'Annonce",
+        "formIncomplete": "Veuillez remplir tous les champs obligatoires avant de continuer.",
+        "streetAddress": "Adresse",
+        "city": "Ville",
+        "stateProvince": "État/Province",
+        "country": "Pays",
+        "selectCountry": "Sélectionnez un pays",
+        "postalCode": "Code postal",
+        "guests": "Voyageurs",
+        "bedrooms": "Chambres",
+        "beds": "Lits",
+        "bathrooms": "Salles de bain",
+        "uploadImages": "Télécharger des images",
+        "dragImages": "Glissez des images ici ou cliquez pour télécharger",
+        "uploadImagesLimit": "Téléchargez au maximum {maxImages} images (max {maxSizeMB}MB chacune)",
+        "propertyTitle": "Titre du logement",
+        "propertyDescription": "Description du logement",
+        "pricePerNight": "Prix par nuit",
+        "tooManyImages": "Vous ne pouvez télécharger qu'un maximum de {maxImages} images.",
+        "invalidFileType": "Veuillez télécharger uniquement des fichiers image.",
+        "fileTooLarge": "La taille de l'image ne doit pas dépasser {maxSizeMB}MB.",
+        "maxImagesReached": "Nombre maximum d'images atteint"
+    },
     "categories": {
         "omg": "OMG!",
         "icons": "Icônes",
         "beach": "Plage",
-        "castles": "Châteaux"
+        "castles": "Châteaux",
+        "apartment": "Appartement",
+        "beach house": "Maison de plage",
+        "bed and breakfast": "Chambre d'hôtes",
+        "castle": "Château",
+        "farm house": "Ferme",
+        "ferry": "Ferry",
+        "hotel": "Hôtel",
+        "house": "Maison",
+        "treehouse": "Cabane dans les arbres"
+    },
+    "placeTypes": {
+        "entire": {
+            "title": "Un logement entier",
+            "description": "Les voyageurs disposent du logement entier pour eux-mêmes."
+        },
+        "room": {
+            "title": "Une chambre",
+            "description": "Les voyageurs disposent d'une chambre privée dans un logement, ainsi que d'un accès aux espaces communs."
+        },
+        "shared": {
+            "title": "Une chambre partagée en auberge",
+            "description": "Les voyageurs dorment dans une chambre partagée dans une auberge gérée avec du personnel sur place 24h/24 et 7j/7."
+        }
     },
     "properties": {
         "loadError": "Échec du chargement des propriétés",
