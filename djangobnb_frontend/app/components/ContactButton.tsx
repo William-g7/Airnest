@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { getUserId } from "@/app/auth/session";
 import apiService from "@/app/services/apiService";
 import { useLoginModal } from "./hooks/useLoginModal";
+import { useTranslations } from 'next-intl';
 
 interface ContactButtonProps {
     landlordId: string;
@@ -14,6 +15,7 @@ const ContactButton = ({ landlordId }: ContactButtonProps) => {
     const router = useRouter();
     const loginModal = useLoginModal();
     const [userId, setUserId] = useState<string | null>(null);
+    const t = useTranslations('common');
 
     useEffect(() => {
         const fetchUserId = async () => {
@@ -52,7 +54,7 @@ const ContactButton = ({ landlordId }: ContactButtonProps) => {
             onClick={handleContact}
             className="py-4 px-6 w-full bg-airbnb text-white rounded-lg font-semibold hover:bg-airbnb_dark transition-all duration-300"
         >
-            Contact
+            {t('contact')}
         </button>
     );
 };

@@ -32,7 +32,9 @@
         "loading": "Chargement...",
         "error": "Une erreur est survenue",
         "success": "Succès !",
-        "viewMore": "Voir plus"
+        "viewMore": "Voir plus",
+        "contact": "Contacter l'hôte",
+        "addDate": "Ajouter une date"
     },
     "property": {
         "title": "Titre",
@@ -65,7 +67,9 @@
         "cleaningFee": "Frais de ménage",
         "serviceFee": "Frais de service",
         "taxes": "Taxes",
-        "total": "Total"
+        "total": "Total",
+        "checkIn": "ARRIVÉE",
+        "checkOut": "DÉPART"
     },
     "categories": {
         "omg": "OMG!",

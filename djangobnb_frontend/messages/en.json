@@ -45,7 +45,9 @@
         "loading": "Loading...",
         "error": "An error occurred",
         "success": "Success!",
-        "viewMore": "View more"
+        "viewMore": "View more",
+        "contact": "Contact Host",
+        "addDate": "Add date"
     },
     "property": {
         "title": "Title",
@@ -78,7 +80,9 @@
         "cleaningFee": "Cleaning fee",
         "serviceFee": "Service fee",
         "taxes": "Taxes",
-        "total": "Total"
+        "total": "Total",
+        "checkIn": "CHECK-IN",
+        "checkOut": "CHECKOUT"
     },
     "categories": {
         "omg": "OMG!",

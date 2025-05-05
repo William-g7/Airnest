@@ -45,7 +45,9 @@
         "loading": "加载中...",
         "error": "发生错误",
         "success": "成功！",
-        "viewMore": "查看更多"
+        "viewMore": "查看更多",
+        "contact": "联系房东",
+        "addDate": "添加日期"
     },
     "property": {
         "title": "标题",
@@ -78,7 +80,9 @@
         "cleaningFee": "清洁费",
         "serviceFee": "服务费",
         "taxes": "税费",
-        "total": "总计"
+        "total": "总计",
+        "checkIn": "入住",
+        "checkOut": "退房"
     },
     "categories": {
         "omg": "哇！",
