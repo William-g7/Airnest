@@ -1,13 +1,15 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { PropertyType } from "./PropertyList";
+import { useRouter } from '@/i18n/navigation';
+import { PropertyType } from "@/app/constants/propertyType";
 import DatePicker from './DatePicker';
 import apiService from '@/app/services/apiService';
 import { useLoginModal } from '../hooks/useLoginModal';
+import { useTranslations } from 'next-intl';
 
 const ReservationSideBar = ({ property }: { property: PropertyType }) => {
+    const t = useTranslations('property');
     const [dates, setDates] = useState<[Date | null, Date | null]>([null, null]);
     const [guests, setGuests] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
@@ -44,18 +46,11 @@ const ReservationSideBar = ({ property }: { property: PropertyType }) => {
     const handleReservation = async () => {
         try {
             if (!dates[0] || !dates[1]) {
-                alert('Please select check-in and check-out dates');
+                alert(t('selectDates'));
                 return;
             }
 
             setIsLoading(true);
-
-            console.log('Sending reservation request:', {
-                check_in: dates[0].toISOString().split('T')[0],
-                check_out: dates[1].toISOString().split('T')[0],
-                guests: guests,
-                total_price: totals.total
-            });
 
             const response = await apiService.post(`/api/properties/${property.id}/reserve/`, {
                 check_in: dates[0].toISOString().split('T')[0],
@@ -68,14 +63,13 @@ const ReservationSideBar = ({ property }: { property: PropertyType }) => {
                 router.push('/myreservations');
                 router.refresh();
             } else {
-                alert(response.error || 'Failed to make reservation');
+                alert(response.error || t('reservationFailed'));
             }
         } catch (error: any) {
             if (error.message === 'Unauthorized') {
                 loginModal.onOpen();
             } else {
-                console.log('error:', error);
-
+                console.error('Error:', error);
             }
         } finally {
             setIsLoading(false);
@@ -99,7 +93,7 @@ const ReservationSideBar = ({ property }: { property: PropertyType }) => {
         <aside className="mt-6 p-6 border border-gray-200 rounded-xl shadow-md">
             <div className="flex items-baseline mb-6">
                 <span className="text-2xl font-bold">${property.price_per_night}</span>
-                <span className="text-lg text-gray-500 ml-2">night</span>
+                <span className="text-lg text-gray-500 ml-2">{t('perNight')}</span>
             </div>
 
             <DatePicker
@@ -110,7 +104,7 @@ const ReservationSideBar = ({ property }: { property: PropertyType }) => {
             />
 
             <div className="border-t border-gray-300 p-4">
-                <label className="text-xs font-bold block mb-1">GUESTS</label>
+                <label className="text-xs font-bold block mb-1">{t('guests').toUpperCase()}</label>
                 <select
                     className="w-full -ml-1 text-sm"
                     value={guests}
@@ -122,46 +116,46 @@ const ReservationSideBar = ({ property }: { property: PropertyType }) => {
                 </select>
             </div>
 
-            <button
-                onClick={handleReservation}
-                disabled={isLoading || !dates[0] || !dates[1]}
-                className={`
-                    w-full bg-airbnb hover:bg-airbnb_dark text-white p-3 rounded-lg mt-4 font-semibold
-                    ${(isLoading || !dates[0] || !dates[1]) ? 'opacity-50 cursor-not-allowed' : ''}
-                `}
-            >
-                {isLoading ? 'Reserving...' : 'Reserve'}
-            </button>
-
             {dates[0] && dates[1] && (
                 <>
                     <div className="mt-4 space-y-4">
                         <div className="flex justify-between">
                             <span className="underline">
-                                ${property.price_per_night} x {calculateNights()} nights
+                                ${property.price_per_night} x {calculateNights()} {t('nights')}
                             </span>
                             <span>${totals.subtotal}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="underline">Cleaning fee</span>
+                            <span className="underline">{t('cleaningFee')}</span>
                             <span>${totals.cleaningFee.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="underline">Service fee</span>
+                            <span className="underline">{t('serviceFee')}</span>
                             <span>${totals.serviceFee.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="underline">Taxes</span>
+                            <span className="underline">{t('taxes')}</span>
                             <span>${totals.taxes.toFixed(2)}</span>
                         </div>
                     </div>
 
                     <div className="mt-4 pt-4 border-t border-gray-300 flex justify-between font-bold">
-                        <span>Total</span>
+                        <span>{t('total')}</span>
                         <span>${totals.total.toFixed(2)}</span>
                     </div>
                 </>
             )}
+
+            <button
+                onClick={handleReservation}
+                disabled={isLoading || !dates[0] || !dates[1]}
+                className={`
+                    w-full bg-airbnb hover:bg-airbnb_dark text-white py-4 rounded-lg mt-6 font-semibold
+                    ${(isLoading || !dates[0] || !dates[1]) ? 'opacity-50 cursor-not-allowed' : ''}
+                `}
+            >
+                {isLoading ? t('reserving') : t('reserve')}
+            </button>
         </aside>
     );
 };
