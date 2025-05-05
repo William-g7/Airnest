@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, use, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, use } from 'react';
+import { useRouter } from '@/i18n/navigation';
 import Image from 'next/image';
 import apiService from '@/app/services/apiService';
 import CustomButton from '@/app/components/forms/CustomButton';
+import { useTranslations } from 'next-intl';
 
 interface ProfileData {
     id: string;
@@ -14,9 +15,11 @@ interface ProfileData {
     date_joined: string;
 }
 
-export default function ProfilePage({ params }: { params: Promise<{ id: string }> }) {
+export default function ProfilePage({ params }: { params: Promise<{ id: string, locale: string }> }) {
     const resolvedParams = use(params);
     const userId = resolvedParams.id;
+    const t = useTranslations('profile');
+    const router = useRouter();
 
     const [isEditing, setIsEditing] = useState(false);
     const [error, setError] = useState("");
@@ -101,9 +104,9 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                 <div className="bg-white rounded-xl shadow-md overflow-hidden">
                     <div className="p-8">
                         <div className="flex justify-between items-center mb-6">
-                            <h1 className="text-2xl font-semibold">Profile</h1>
+                            <h1 className="text-2xl font-semibold">{t('title')}</h1>
                             <CustomButton
-                                label={isEditing ? "Cancel" : "Edit Profile"}
+                                label={isEditing ? t('cancel') : t('editProfile')}
                                 onClick={() => setIsEditing(!isEditing)}
                                 className="w-auto px-4 py-2 "
                             />
@@ -130,7 +133,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Name
+                                        {t('name')}
                                     </label>
                                     <input
                                         type="text"
@@ -142,7 +145,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
 
                                 <div className="flex justify-end">
                                     <CustomButton
-                                        label={isLoading ? "Saving..." : "Save Changes"}
+                                        label={isLoading ? t('saving') : t('saveChanges')}
                                         onClick={() => { }}
                                         disabled={isLoading}
                                         className="w-auto px-6"
@@ -165,17 +168,17 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
 
                                 <div className="grid grid-cols-1 gap-6">
                                     <div>
-                                        <h2 className="text-sm font-medium text-gray-500">Name</h2>
-                                        <p className="mt-1 text-lg font-medium">{profile.name || 'Not set'}</p>
+                                        <h2 className="text-sm font-medium text-gray-500">{t('name')}</h2>
+                                        <p className="mt-1 text-lg font-medium">{profile.name || t('notSet')}</p>
                                     </div>
 
                                     <div>
-                                        <h2 className="text-sm font-medium text-gray-500">Email</h2>
+                                        <h2 className="text-sm font-medium text-gray-500">{t('email')}</h2>
                                         <p className="mt-1 text-lg font-medium">{profile.email}</p>
                                     </div>
 
                                     <div>
-                                        <h2 className="text-sm font-medium text-gray-500">Member Since</h2>
+                                        <h2 className="text-sm font-medium text-gray-500">{t('memberSince')}</h2>
                                         <p className="mt-1 text-lg font-medium">
                                             {new Date(profile.date_joined).toLocaleDateString()}
                                         </p>
@@ -188,4 +191,4 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
             </div>
         </main>
     );
-}
+} 
