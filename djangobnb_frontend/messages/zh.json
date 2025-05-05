@@ -12,7 +12,14 @@
         "profile": "个人资料",
         "login": "登录",
         "register": "注册",
-        "logout": "退出"
+        "logout": "退出",
+        "messages": "消息",
+        "notifications": "通知",
+        "trips": "旅行",
+        "myAccount": "我的账户",
+        "myProperties": "我的房源",
+        "myReservations": "我的预订",
+        "myWishlists": "我的心愿单"
     },
     "common": {
         "search": "搜索",
@@ -43,7 +50,7 @@
         "loading": "正在加载房源详情...",
         "notFound": "未找到房源",
         "perNight": "每晚",
-        "guests": "入住人数",
+        "guests": "位房客",
         "bedrooms": "间卧室",
         "beds": "张床",
         "aboutPlace": "关于这处房源",
@@ -73,5 +80,46 @@
         "noListedProperties": "您尚未列出任何房源。",
         "location": "位置",
         "price": "价格"
+    },
+    "auth": {
+        "login": "登录",
+        "signup": "注册",
+        "logout": "退出",
+        "email": "电子邮箱",
+        "password": "密码",
+        "confirmPassword": "确认密码",
+        "pleaseLogin": "请登录",
+        "createAccount": "创建账号",
+        "loginFailed": "登录失败，请重试。",
+        "loginError": "登录失败",
+        "loading": "加载中...",
+        "passwordsNotMatch": "两次输入的密码不匹配",
+        "somethingWentWrong": "出现错误",
+        "alreadyHaveAccount": "已有账号？"
+    },
+    "myproperties": {
+        "title": "我的房源",
+        "addNewProperty": "添加新房源",
+        "loading": "加载中...",
+        "loadError": "加载房源失败"
+    },
+    "mywishlists": {
+        "title": "我的心愿单",
+        "loading": "加载中...",
+        "loadError": "加载心愿单失败",
+        "noSavedProperties": "没有保存的房源",
+        "propertiesWillAppearHere": "您保存的房源将显示在这里"
+    },
+    "myreservations": {
+        "title": "我的预订",
+        "loading": "加载中...",
+        "loadError": "加载预订失败",
+        "noReservations": "您还没有任何预订。",
+        "checkIn": "入住",
+        "checkOut": "退房",
+        "duration": "时长",
+        "totalPrice": "总价",
+        "viewProperty": "查看房源",
+        "nights": "晚"
     }
 }

@@ -12,7 +12,14 @@
         "profile": "Profil",
         "login": "Se connecter",
         "register": "S'inscrire",
-        "logout": "Se déconnecter"
+        "logout": "Se déconnecter",
+        "messages": "Messages",
+        "notifications": "Notifications",
+        "trips": "Voyages",
+        "myAccount": "Mon Compte",
+        "myProperties": "Mes Propriétés",
+        "myReservations": "Mes Réservations",
+        "myWishlists": "Mes Favoris"
     },
     "common": {
         "search": "Rechercher",
@@ -73,5 +80,46 @@
         "noListedProperties": "Vous n'avez pas encore listé de propriétés.",
         "location": "Emplacement",
         "price": "Prix"
+    },
+    "auth": {
+        "login": "Se connecter",
+        "signup": "S'inscrire",
+        "logout": "Se déconnecter",
+        "email": "Email",
+        "password": "Mot de passe",
+        "confirmPassword": "Confirmer le mot de passe",
+        "pleaseLogin": "Veuillez vous connecter",
+        "createAccount": "Créer un compte",
+        "loginFailed": "Échec de la connexion. Veuillez réessayer.",
+        "loginError": "Échec de la connexion",
+        "loading": "Chargement...",
+        "passwordsNotMatch": "Les mots de passe ne correspondent pas",
+        "somethingWentWrong": "Quelque chose s'est mal passé",
+        "alreadyHaveAccount": "Vous avez déjà un compte ?"
+    },
+    "myproperties": {
+        "title": "Mes propriétés",
+        "addNewProperty": "Ajouter une nouvelle propriété",
+        "loading": "Chargement...",
+        "loadError": "Échec du chargement des propriétés"
+    },
+    "mywishlists": {
+        "title": "Mes favoris",
+        "loading": "Chargement...",
+        "loadError": "Échec du chargement des favoris",
+        "noSavedProperties": "Aucune propriété enregistrée",
+        "propertiesWillAppearHere": "Les propriétés que vous enregistrez apparaîtront ici"
+    },
+    "myreservations": {
+        "title": "Mes réservations",
+        "loading": "Chargement...",
+        "loadError": "Échec du chargement des réservations",
+        "noReservations": "Vous n'avez pas encore de réservations.",
+        "checkIn": "Arrivée",
+        "checkOut": "Départ",
+        "duration": "Durée",
+        "totalPrice": "Prix total",
+        "viewProperty": "Voir la propriété",
+        "nights": "nuits"
     }
 }

@@ -12,7 +12,14 @@
         "profile": "Profile",
         "login": "Login",
         "register": "Register",
-        "logout": "Logout"
+        "logout": "Logout",
+        "messages": "Messages",
+        "notifications": "Notifications",
+        "trips": "Trips",
+        "myAccount": "My Account",
+        "myProperties": "My Properties",
+        "myReservations": "My Reservations",
+        "myWishlists": "My Wishlists"
     },
     "common": {
         "search": "Search",
@@ -73,5 +80,46 @@
         "noListedProperties": "You haven't listed any properties yet.",
         "location": "Location",
         "price": "Price"
+    },
+    "auth": {
+        "login": "Login",
+        "signup": "Sign up",
+        "logout": "Logout",
+        "email": "Email",
+        "password": "Password",
+        "confirmPassword": "Confirm Password",
+        "pleaseLogin": "Please Login",
+        "createAccount": "Create an account",
+        "loginFailed": "Login failed. Please try again.",
+        "loginError": "Login failed",
+        "loading": "Loading...",
+        "passwordsNotMatch": "Passwords do not match",
+        "somethingWentWrong": "Something went wrong",
+        "alreadyHaveAccount": "Already have an account?"
+    },
+    "myproperties": {
+        "title": "My Properties",
+        "addNewProperty": "Add New Property",
+        "loading": "Loading...",
+        "loadError": "Failed to load properties"
+    },
+    "mywishlists": {
+        "title": "My Wishlists",
+        "loading": "Loading...",
+        "loadError": "Failed to load wishlists",
+        "noSavedProperties": "No saved properties",
+        "propertiesWillAppearHere": "Properties you save will appear here"
+    },
+    "myreservations": {
+        "title": "My Reservations",
+        "loading": "Loading...",
+        "loadError": "Failed to load reservations",
+        "noReservations": "You don't have any reservations yet.",
+        "checkIn": "Check in",
+        "checkOut": "Check out",
+        "duration": "Duration",
+        "totalPrice": "Total price",
+        "viewProperty": "View Property",
+        "nights": "nights"
     }
 }

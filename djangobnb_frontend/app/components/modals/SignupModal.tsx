@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useSignupModal } from "../hooks/useSignupModal";
 import { useLoginModal } from "../hooks/useLoginModal";
 
@@ -9,8 +9,10 @@ import Modal from "./Modal";
 import CustomButton from "../forms/CustomButton";
 import apiService from "@/app/services/apiService";
 import { handleLogin } from "@/app/auth/session";
+import { useTranslations } from 'next-intl';
 
 export default function SignupModal() {
+    const t = useTranslations('auth');
     const router = useRouter();
     const signupModal = useSignupModal();
     const loginModal = useLoginModal();
@@ -29,7 +31,7 @@ export default function SignupModal() {
             setError("");
 
             if (formData.password !== formData.password2) {
-                setError("Passwords do not match");
+                setError(t('passwordsNotMatch'));
                 return;
             }
 
@@ -40,18 +42,14 @@ export default function SignupModal() {
             });
 
             if (response.access) {
-
                 handleLogin(response.user_pk, response.access, response.refresh);
                 signupModal.onClose();
                 router.push('/');
-
             } else {
-
-                setError("Something went wrong");
-
+                setError(t('somethingWentWrong'));
             }
         } catch (error: any) {
-            setError(error.message || "Something went wrong");
+            setError(error.message || t('somethingWentWrong'));
         } finally {
             setIsLoading(false);
         }
@@ -59,7 +57,7 @@ export default function SignupModal() {
 
     const content = (
         <div className="flex flex-col gap-4">
-            <h2 className="mb-4 text-2xl font-bold">Create an account</h2>
+            <h2 className="mb-4 text-2xl font-bold">{t('createAccount')}</h2>
 
             {error && (
                 <div className="p-3 text-sm bg-red-100 text-red-600 rounded-lg">
@@ -70,7 +68,7 @@ export default function SignupModal() {
             <form className="flex flex-col gap-4">
                 <input
                     type="email"
-                    placeholder="Email"
+                    placeholder={t('email')}
                     value={formData.email}
                     onChange={(e) => setFormData(prev => ({
                         ...prev,
@@ -82,7 +80,7 @@ export default function SignupModal() {
 
                 <input
                     type="password"
-                    placeholder="Password"
+                    placeholder={t('password')}
                     value={formData.password}
                     onChange={(e) => setFormData(prev => ({
                         ...prev,
@@ -94,7 +92,7 @@ export default function SignupModal() {
 
                 <input
                     type="password"
-                    placeholder="Confirm Password"
+                    placeholder={t('confirmPassword')}
                     value={formData.password2}
                     onChange={(e) => setFormData(prev => ({
                         ...prev,
@@ -105,14 +103,14 @@ export default function SignupModal() {
                 />
 
                 <CustomButton
-                    label={isLoading ? "Loading..." : "Sign up"}
+                    label={isLoading ? t('loading') : t('signup')}
                     onClick={onSubmit}
                     disabled={isLoading}
                 />
             </form>
 
             <div className="text-center text-gray-500 text-sm">
-                Already have an account?{" "}
+                {t('alreadyHaveAccount')}{" "}
                 <button
                     onClick={() => {
                         signupModal.onClose();
@@ -120,7 +118,7 @@ export default function SignupModal() {
                     }}
                     className="text-airbnb hover:underline"
                 >
-                    Log in
+                    {t('login')}
                 </button>
             </div>
         </div>
@@ -128,7 +126,7 @@ export default function SignupModal() {
 
     return (
         <Modal
-            label="Sign up"
+            label={t('signup')}
             isOpen={signupModal.isOpen}
             close={signupModal.onClose}
             content={content}

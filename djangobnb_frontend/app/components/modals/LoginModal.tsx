@@ -1,14 +1,16 @@
 'use client'
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useLoginModal } from "../hooks/useLoginModal";
 import { handleLogin } from "@/app/auth/session";
 import Modal from "./Modal";
 import CustomButton from "../forms/CustomButton";
 import apiService from "@/app/services/apiService";
+import { useTranslations } from 'next-intl';
 
 export default function LoginModal() {
+    const t = useTranslations('auth');
     const loginModal = useLoginModal();
     const router = useRouter();
     const [formData, setFormData] = useState({
@@ -34,10 +36,10 @@ export default function LoginModal() {
                 await router.refresh();
                 router.push('/');
             } else {
-                setError("Login failed. Please try again.");
+                setError(t('loginFailed'));
             }
         } catch (error: any) {
-            setError(error.message || "Login failed");
+            setError(error.message || t('loginError'));
         } finally {
             setIsLoading(false);
         }
@@ -45,7 +47,7 @@ export default function LoginModal() {
 
     const content = (
         <div className="flex flex-col gap-4">
-            <h2 className="mb-4 text-2xl font-bold">Please Login</h2>
+            <h2 className="mb-4 text-2xl font-bold">{t('pleaseLogin')}</h2>
 
             {error && (
                 <div className="p-3 text-sm bg-red-100 text-red-600 rounded-lg">
@@ -55,7 +57,7 @@ export default function LoginModal() {
             <form className="flex flex-col gap-4">
                 <input
                     type="email"
-                    placeholder="Email"
+                    placeholder={t('email')}
                     value={formData.email}
                     onChange={(e) => setFormData(prev => ({
                         ...prev,
@@ -65,7 +67,7 @@ export default function LoginModal() {
                 />
                 <input
                     type="password"
-                    placeholder="Password"
+                    placeholder={t('password')}
                     value={formData.password}
                     onChange={(e) => setFormData(prev => ({
                         ...prev,
@@ -74,7 +76,7 @@ export default function LoginModal() {
                     className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-airbnb"
                 />
                 <CustomButton
-                    label={isLoading ? "Loading..." : "Login"}
+                    label={isLoading ? t('loading') : t('login')}
                     onClick={() => {
                         onSubmit();
                     }}
@@ -85,7 +87,7 @@ export default function LoginModal() {
 
     return (
         <Modal
-            label="Login"
+            label={t('login')}
             isOpen={loginModal.isOpen}
             close={loginModal.onClose}
             content={content}
