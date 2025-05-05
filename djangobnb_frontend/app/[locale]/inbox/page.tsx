@@ -34,17 +34,23 @@ const InboxPage = async ({ params }: { params: { locale: string } }) => {
             <h1 className="my-6 text-2xl">{t('title')}</h1>
 
             {conversations.length > 0 ? (
-                conversations.map((conversation: ConversationType) => {
-                    return (
-                        <Conversation
-                            userId={userId}
-                            key={conversation.id}
-                            conversation={conversation}
-                        />
-                    )
-                })
+                <div className="space-y-4">
+                    <p className="text-gray-500">{t('conversations')}</p>
+                    {conversations.map((conversation: ConversationType) => {
+                        return (
+                            <Conversation
+                                userId={userId}
+                                key={conversation.id}
+                                conversation={conversation}
+                            />
+                        )
+                    })}
+                </div>
             ) : (
-                <p>{t('noConversations')}</p>
+                <div className="p-6 bg-gray-50 rounded-lg border border-gray-200">
+                    <p className="text-lg font-medium mb-2">{t('noConversations')}</p>
+                    <p className="text-gray-500">{t('startConversation')}</p>
+                </div>
             )}
         </main>
     )

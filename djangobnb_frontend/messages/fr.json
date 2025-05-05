@@ -33,7 +33,8 @@
         "typeMessage": "Écrivez votre message ici...",
         "sending": "Envoi en cours...",
         "loadError": "Échec du chargement des conversations",
-        "messageSentError": "Échec de l'envoi du message"
+        "messageSentError": "Échec de l'envoi du message",
+        "viewConversation": "Voir la conversation"
     },
     "landlord": {
         "superhost": "Super hôte",

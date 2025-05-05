@@ -33,7 +33,8 @@
         "typeMessage": "在此输入您的消息...",
         "sending": "发送中...",
         "loadError": "加载聊天失败",
-        "messageSentError": "发送消息失败"
+        "messageSentError": "发送消息失败",
+        "viewConversation": "查看聊天"
     },
     "landlord": {
         "superhost": "超赞房东",

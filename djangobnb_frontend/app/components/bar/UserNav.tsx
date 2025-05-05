@@ -75,10 +75,7 @@ const UserNav: React.FC<UserNavProps> = ({ userId }) => {
                 {userId ? (
                     <>
                         <div className="py-2">
-                            <MenuLink label={t('messages')} onClick={() => { setIsOpen(false); router.push('/messages') }} />
-                            <MenuLink label={t('notifications')} onClick={() => { setIsOpen(false); router.push('/notifications') }} />
-                            <MenuLink label={t('trips')} onClick={() => { setIsOpen(false); router.push('/trips') }} />
-
+                            <MenuLink label={t('messages')} onClick={() => { setIsOpen(false); router.push('/inbox') }} />
                         </div>
 
                         <hr className="my-2" />

@@ -33,7 +33,8 @@
         "typeMessage": "Type your message here...",
         "sending": "Sending...",
         "loadError": "Failed to load conversations",
-        "messageSentError": "Failed to send message"
+        "messageSentError": "Failed to send message",
+        "viewConversation": "View conversation"
     },
     "landlord": {
         "superhost": "Superhost",
