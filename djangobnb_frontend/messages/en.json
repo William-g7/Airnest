@@ -21,6 +21,27 @@
         "myReservations": "My Reservations",
         "myWishlists": "My Wishlists"
     },
+    "inbox": {
+        "title": "Inbox",
+        "conversations": "Conversations",
+        "noConversations": "You don't have any conversations yet.",
+        "startConversation": "Start a conversation with a host by viewing a property and clicking 'Contact Host'.",
+        "authRequired": "Please login to view your messages",
+        "sendMessage": "Send message",
+        "typeMessage": "Type your message here...",
+        "sending": "Sending...",
+        "loadError": "Failed to load conversations",
+        "messageSentError": "Failed to send message"
+    },
+    "landlord": {
+        "superhost": "Superhost",
+        "yearsHosting": "{years} years hosting",
+        "hostListings": "{name}'s listings",
+        "noListings": "This host has no available listings.",
+        "propertiesCount": "{count} properties",
+        "responseRate": "100% response rate",
+        "contactText": "Contact this host to book a property or ask any questions you may have."
+    },
     "profile": {
         "title": "Profile",
         "editProfile": "Edit Profile",

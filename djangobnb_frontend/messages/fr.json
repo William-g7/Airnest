@@ -21,6 +21,27 @@
         "myReservations": "Mes Réservations",
         "myWishlists": "Mes Favoris"
     },
+    "inbox": {
+        "title": "Messagerie",
+        "conversations": "Conversations",
+        "noConversations": "Vous n'avez aucune conversation pour le moment.",
+        "startConversation": "Commencez une conversation avec un hôte en consultant une propriété et en cliquant sur 'Contacter l'hôte'.",
+        "authRequired": "Veuillez vous connecter pour voir vos messages",
+        "sendMessage": "Envoyer le message",
+        "typeMessage": "Écrivez votre message ici...",
+        "sending": "Envoi en cours...",
+        "loadError": "Échec du chargement des conversations",
+        "messageSentError": "Échec de l'envoi du message"
+    },
+    "landlord": {
+        "superhost": "Super hôte",
+        "yearsHosting": "{years} ans d'hébergement",
+        "hostListings": "Annonces de {name}",
+        "noListings": "Cet hôte n'a pas d'annonces disponibles.",
+        "propertiesCount": "{count} propriétés",
+        "responseRate": "Taux de réponse de 100%",
+        "contactText": "Contactez cet hôte pour réserver un logement ou poser vos questions."
+    },
     "common": {
         "search": "Rechercher",
         "filter": "Filtrer",
