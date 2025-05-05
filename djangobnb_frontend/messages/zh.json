@@ -21,6 +21,19 @@
         "myReservations": "我的预订",
         "myWishlists": "我的心愿单"
     },
+    "profile": {
+        "title": "个人资料",
+        "editProfile": "编辑资料",
+        "cancel": "取消",
+        "saving": "保存中...",
+        "saveChanges": "保存更改",
+        "name": "姓名",
+        "email": "电子邮箱",
+        "memberSince": "注册时间",
+        "notSet": "未设置",
+        "loadError": "加载个人资料失败",
+        "updateError": "更新个人资料失败"
+    },
     "common": {
         "search": "搜索",
         "filter": "筛选",
