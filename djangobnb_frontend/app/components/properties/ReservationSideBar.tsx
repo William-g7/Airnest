@@ -50,6 +50,12 @@ const ReservationSideBar = ({ property }: { property: PropertyType }) => {
                 return;
             }
 
+            const token = localStorage.getItem('token');
+            if (!token) {
+                loginModal.onOpen();
+                return;
+            }
+
             setIsLoading(true);
 
             const response = await apiService.post(`/api/properties/${property.id}/reserve/`, {
@@ -66,11 +72,8 @@ const ReservationSideBar = ({ property }: { property: PropertyType }) => {
                 alert(response.error || t('reservationFailed'));
             }
         } catch (error: any) {
-            if (error.message === 'Unauthorized') {
-                loginModal.onOpen();
-            } else {
-                console.error('Error:', error);
-            }
+            console.error('Error:', error);
+            alert(t('reservationFailed'));
         } finally {
             setIsLoading(false);
         }
