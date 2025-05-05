@@ -2,17 +2,19 @@
 
 import { PropertyType } from "@/app/constants/propertyType";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import WishlistButton from "./WishlistButton";
 import { useState, useEffect } from "react";
 import { useLoginModal } from "../hooks/useLoginModal";
 import apiService from "@/app/services/apiService";
+import { useTranslations } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
 
 interface PropertyListItemProps {
     property: PropertyType;
 }
 
 const PropertyListItem: React.FC<PropertyListItemProps> = ({ property }) => {
+    const t = useTranslations('properties');
     const [isFavorited, setIsFavorited] = useState(false);
     const router = useRouter();
     const loginModal = useLoginModal();
@@ -60,7 +62,7 @@ const PropertyListItem: React.FC<PropertyListItemProps> = ({ property }) => {
                 onToggle={handleToggleWishlist}
             />
             <div className="cursor-pointer"
-                onClick={() => router.push(`/properties/${property.id}`)}>
+                onClick={() => router.push({ pathname: '/properties/[id]', params: { id: property.id } })}>
                 <div className="relative overflow-hidden aspect-square rounded-xl">
                     <Image
                         src={property.images?.[0]?.imageURL || '/placeholder.jpg'}
@@ -76,11 +78,11 @@ const PropertyListItem: React.FC<PropertyListItemProps> = ({ property }) => {
                 </div>
 
                 <div className="mt-2">
-                    <p className="text-sm text-gray-500"><strong>Location:</strong> {property.city}, {property.country}</p>
+                    <p className="text-sm text-gray-500"><strong>{t('location')}:</strong> {property.city}, {property.country}</p>
                 </div>
 
                 <div className="mt-2">
-                    <p className="text-sm text-gray-500"><strong>Price:</strong> ${property.price_per_night}</p>
+                    <p className="text-sm text-gray-500"><strong>{t('price')}:</strong> ${property.price_per_night}</p>
                 </div>
             </div>
         </div>

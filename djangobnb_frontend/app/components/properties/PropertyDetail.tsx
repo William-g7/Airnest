@@ -1,15 +1,16 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useLoginModal } from '@/app/components/hooks/useLoginModal';
 import apiService from '@/app/services/apiService';
 import WishlistButton from '@/app/components/properties/WishlistButton';
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from '@/i18n/navigation';
 import { PropertyType } from '@/app/constants/propertyType';
 import dynamic from 'next/dynamic';
 import ContactButton from "@/app/components/ContactButton";
+import { useTranslations } from 'next-intl';
 
 const PropertyImageCarousel = dynamic(
     () => import('./PropertyImageCarousel'),
@@ -17,6 +18,7 @@ const PropertyImageCarousel = dynamic(
         loading: () => (
             <div className="animate-pulse bg-gray-200 h-[60vh] rounded-lg" />
         ),
+        ssr: true
     }
 );
 
@@ -26,10 +28,12 @@ const ReservationSideBar = dynamic(
         loading: () => (
             <div className="animate-pulse bg-gray-200 h-96 rounded-lg" />
         ),
+        ssr: true
     }
 );
 
 const PropertyDetail = ({ property }: { property: PropertyType }) => {
+    const t = useTranslations('property');
     const [isFavorited, setIsFavorited] = useState(false);
     const router = useRouter();
     const loginModal = useLoginModal();
@@ -89,36 +93,36 @@ const PropertyDetail = ({ property }: { property: PropertyType }) => {
                     </div>
 
                     <div className="flex flex-wrap gap-2 text-lg text-gray-600 mb-2">
-                        <span>👤 {property.guests} guests</span>
+                        <span>👤 {property.guests} {t('guests')}</span>
                         <span>·</span>
-                        <span>🛏️ {property.bedrooms} bedrooms</span>
+                        <span>🛏️ {property.bedrooms} {t('bedrooms')}</span>
                         <span>·</span>
-                        <span>🛌 {property.beds} beds</span>
+                        <span>🛌 {property.beds} {t('beds')}</span>
                         <span>·</span>
-                        <span>🛁 {property.bathrooms} baths</span>
+                        <span>🛁 {property.bathrooms} {t('bathrooms')}</span>
                     </div>
 
                     <div className="text-lg text-gray-600 mb-6">
                         {property.place_type === 'entire' && (
-                            <p>🏠 You'll have the {property.category.toLowerCase()} to yourself</p>
+                            <p>🏠 {t('entirePlace', { category: property.category.toLowerCase() })}</p>
                         )}
                         {property.place_type === 'room' && (
-                            <p>🛏️ You'll have a private room in a {property.category.toLowerCase()}</p>
+                            <p>🛏️ {t('privateRoom', { category: property.category.toLowerCase() })}</p>
                         )}
                         {property.place_type === 'shared' && (
-                            <p>🛏️ You'll be sharing a room in a managed hostel</p>
+                            <p>🛏️ {t('sharedRoom')}</p>
                         )}
                     </div>
 
                     <hr className="my-6" />
 
                     <div className="flex items-center justify-between">
-                        <Link href={`/landlords/${property.landlord.id}`} className="flex-grow">
+                        <Link href={{ pathname: '/landlords/[id]', params: { id: property.landlord.id.toString() } }} className="flex-grow">
                             {property.landlord.avatar_url ? (
                                 <div className="py-6 flex items-center space-x-4">
                                     <Image
                                         src={property.landlord.avatar_url}
-                                        alt="Host"
+                                        alt={t('hostAlt')}
                                         width={50}
                                         height={50}
                                         className="rounded-full"
@@ -127,7 +131,7 @@ const PropertyDetail = ({ property }: { property: PropertyType }) => {
                                         <span className="text-lg font-semibold">
                                             {property.landlord.name || property.landlord.username}
                                         </span>
-                                        <span className="text-sm text-gray-500">Host</span>
+                                        <span className="text-sm text-gray-500">{t('host')}</span>
                                     </div>
                                 </div>
                             ) : (
@@ -148,7 +152,7 @@ const PropertyDetail = ({ property }: { property: PropertyType }) => {
                     <hr className="my-6" />
 
                     <div className="py-6">
-                        <h2 className="text-2xl font-semibold mb-4">About this place</h2>
+                        <h2 className="text-2xl font-semibold mb-4">{t('aboutPlace')}</h2>
                         <p className="text-gray-600 whitespace-pre-line">
                             {property.description}
                         </p>
