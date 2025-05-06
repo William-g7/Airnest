@@ -130,7 +130,7 @@ const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties, isWishlist 
                 )}
                 {!isMyProperties && !isWishlist && hasFilters && (
                     <p className="text-gray-500 mt-2">
-                        No properties match your search criteria. Try adjusting your filters.
+                        {t('noPropertiesMatch')}
                     </p>
                 )}
             </div>

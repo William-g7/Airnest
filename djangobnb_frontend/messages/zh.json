@@ -21,6 +21,22 @@
         "myReservations": "我的预订",
         "myWishlists": "我的心愿单"
     },
+    "search": {
+        "where": "地点",
+        "checkIn": "入住",
+        "checkOut": "退房",
+        "who": "人数",
+        "anywhere": "任何地点",
+        "addDate": "添加日期",
+        "search": "搜索",
+        "guest": "位客人",
+        "guests": "入住人数",
+        "whereTo": "准备去哪儿？",
+        "searchDestinations": "搜索目的地...",
+        "when": "何时入住？",
+        "whosComing": "有几位入住？",
+        "closeModal": "关闭搜索框"
+    },
     "inbox": {
         "title": "收件箱",
         "conversations": "聊天列表",
@@ -183,6 +199,7 @@
         "loadError": "加载房源失败",
         "loading": "加载中...",
         "noPropertiesFound": "未找到房源",
+        "noPropertiesMatch": "没有符合您搜索条件的房源。请尝试调整筛选条件。",
         "noListedProperties": "您尚未列出任何房源。",
         "location": "位置",
         "price": "价格"

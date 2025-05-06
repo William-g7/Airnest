@@ -21,6 +21,23 @@
         "myReservations": "My Reservations",
         "myWishlists": "My Wishlists"
     },
+    "search": {
+        "where": "Where",
+        "checkIn": "Check in",
+        "checkOut": "Check out",
+        "who": "Who",
+        "anywhere": "Anywhere",
+        "addDate": "Add date",
+        "search": "Search",
+        "guest": "guest",
+        "guests": "guests",
+        "whereTo": "Where to?",
+        "searchDestinations": "Search destinations...",
+        "when": "When?",
+        "whosComing": "Who's coming?",
+        "closeModal": "Close search modal",
+        "viewConversation": "View conversation"
+    },
     "inbox": {
         "title": "Inbox",
         "conversations": "Conversations",
