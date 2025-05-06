@@ -185,6 +185,8 @@
         "createAccount": "Créer un compte",
         "loginFailed": "Échec de la connexion. Veuillez réessayer.",
         "loginError": "Échec de la connexion",
+        "pleaseCompleteAllFields": "Veuillez remplir tous les champs",
+        "invalidCredentials": "Échec de la connexion. Veuillez vérifier vos identifiants et réessayer.",
         "loading": "Chargement...",
         "passwordsNotMatch": "Les mots de passe ne correspondent pas",
         "somethingWentWrong": "Quelque chose s'est mal passé",

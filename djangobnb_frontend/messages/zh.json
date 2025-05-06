@@ -215,6 +215,8 @@
         "createAccount": "创建账号",
         "loginFailed": "登录失败，请重试。",
         "loginError": "登录失败",
+        "pleaseCompleteAllFields": "请填写所有字段",
+        "invalidCredentials": "登录失败，请检查您的用户名和密码后重试。",
         "loading": "加载中...",
         "passwordsNotMatch": "两次输入的密码不匹配",
         "somethingWentWrong": "出现错误",

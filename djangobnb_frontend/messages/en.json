@@ -198,6 +198,8 @@
         "createAccount": "Create an account",
         "loginFailed": "Login failed. Please try again.",
         "loginError": "Login failed",
+        "pleaseCompleteAllFields": "Please complete all fields",
+        "invalidCredentials": "Login failed. Please check your credentials and try again.",
         "loading": "Loading...",
         "passwordsNotMatch": "Passwords do not match",
         "somethingWentWrong": "Something went wrong",
