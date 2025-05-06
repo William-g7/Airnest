@@ -20,11 +20,9 @@ const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties, isWishlist 
     const [error, setError] = useState("");
     const [lastSearchParams, setLastSearchParams] = useState("");
 
-    // 获取搜索筛选条件
     const { location, checkIn, checkOut, guests } = useSearchStore();
     const searchParams = useSearchParams();
 
-    // 序列化searchParams，用于比较变化
     const serializedParams = searchParams.toString();
 
     // 使用useCallback包装getProperties函数，避免不必要的重新创建
@@ -81,6 +79,8 @@ const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties, isWishlist 
         }
     }, [isMyProperties, isWishlist, searchParams, location, checkIn, checkOut, guests, t]);
 
+
+
     // 只有当URL参数真正变化时才重新获取数据
     useEffect(() => {
         if (serializedParams !== lastSearchParams) {
@@ -125,7 +125,7 @@ const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties, isWishlist 
                 )}
                 {!isMyProperties && !isWishlist && hasFilters && (
                     <p className="text-gray-500 mt-2">
-                        No properties match your search criteria. Try adjusting your filters.
+                        {t('noMatchingProperties')}
                     </p>
                 )}
             </div>
