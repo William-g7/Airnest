@@ -21,7 +21,7 @@ const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties, isWishlist 
     const [lastSearchParams, setLastSearchParams] = useState("");
 
     // 获取搜索筛选条件
-    const { location, checkIn, checkOut, guests } = useSearchStore();
+    const { location, checkIn, checkOut, guests, category } = useSearchStore();
     const searchParams = useSearchParams();
 
     // 序列化searchParams，用于比较变化
@@ -47,18 +47,21 @@ const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties, isWishlist 
                 const checkInParam = searchParams.get('check_in');
                 const checkOutParam = searchParams.get('check_out');
                 const guestsParam = searchParams.get('guests');
+                const categoryParam = searchParams.get('category');
 
                 if (locationParam) params.append('location', locationParam);
                 if (checkInParam) params.append('check_in', checkInParam);
                 if (checkOutParam) params.append('check_out', checkOutParam);
                 if (guestsParam && parseInt(guestsParam) > 1) params.append('guests', guestsParam);
+                if (categoryParam) params.append('category', categoryParam);
 
                 // 如果URL没有参数，使用状态中的值
-                if (params.toString() === '' && (location || checkIn || checkOut || guests > 1)) {
+                if (params.toString() === '' && (location || checkIn || checkOut || guests > 1 || category)) {
                     if (location) params.append('location', location);
                     if (checkIn) params.append('check_in', checkIn);
                     if (checkOut) params.append('check_out', checkOut);
                     if (guests > 1) params.append('guests', guests.toString());
+                    if (category) params.append('category', category);
                 }
 
                 const queryString = params.toString();
@@ -79,7 +82,7 @@ const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties, isWishlist 
         } finally {
             setIsLoading(false);
         }
-    }, [isMyProperties, isWishlist, searchParams, location, checkIn, checkOut, guests, t]);
+    }, [isMyProperties, isWishlist, searchParams, location, checkIn, checkOut, guests, category, t]);
 
     // 只有当URL参数真正变化时才重新获取数据
     useEffect(() => {
@@ -110,10 +113,12 @@ const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties, isWishlist 
             searchParams.get('check_in') ||
             searchParams.get('check_out') ||
             searchParams.get('guests') ||
+            searchParams.get('category') ||
             location ||
             checkIn ||
             checkOut ||
-            guests > 1;
+            guests > 1 ||
+            category;
 
         return (
             <div className="text-center py-10">
