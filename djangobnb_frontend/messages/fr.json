@@ -21,6 +21,22 @@
         "myReservations": "Mes Réservations",
         "myWishlists": "Mes Favoris"
     },
+    "search": {
+        "where": "Où",
+        "checkIn": "Arrivée",
+        "checkOut": "Départ",
+        "who": "Qui",
+        "anywhere": "N'importe où",
+        "addDate": "Ajouter des dates",
+        "search": "Rechercher",
+        "guest": "voyageur",
+        "guests": "voyageurs",
+        "whereTo": "Où allez-vous ?",
+        "searchDestinations": "Rechercher des destinations...",
+        "when": "Quand ?",
+        "whosComing": "Qui vient ?",
+        "closeModal": "Fermer la recherche"
+    },
     "inbox": {
         "title": "Messagerie",
         "conversations": "Conversations",
@@ -153,6 +169,7 @@
         "loadError": "Échec du chargement des propriétés",
         "loading": "Chargement...",
         "noPropertiesFound": "Aucune propriété trouvée",
+        "noPropertiesMatch": "Aucune propriété correspondant à vos critères de recherche n'a été trouvée. Veuillez ajuster vos filtres.",
         "noListedProperties": "Vous n'avez pas encore listé de propriétés.",
         "location": "Emplacement",
         "price": "Prix"
