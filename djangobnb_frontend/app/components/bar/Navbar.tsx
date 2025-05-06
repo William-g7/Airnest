@@ -2,7 +2,7 @@ import SearchFilters from "./SearchFilters";
 import UserNav from "./UserNav";
 import AddPropertyButton from "./AddPropertyButton";
 import { getUserId } from "@/app/auth/session";
-import LanguageSwitcher from "../LanguageSwitcher";
+import LanguageSwitcher from "./LanguageSwitcher";
 import ResetLogo from "./ResetLogo";
 
 const Navbar = async () => {
