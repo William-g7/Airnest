@@ -6,9 +6,12 @@ import { format } from 'date-fns';
 import { useSearchParamsSync } from '@/app/hooks/useSearchParamsSync';
 import DatePicker from '@/app/components/properties/DatePicker';
 import SearchModal from '@/app/components/modals/SearchModal';
+import { useRouter, usePathname } from 'next/navigation';
 
 const SearchFilters = () => {
     const { location, checkIn, checkOut, guests, setLocation, setDates, setGuests } = useSearchStore();
+    const router = useRouter();
+    const pathname = usePathname();
 
     useSearchParamsSync();
 
@@ -46,6 +49,20 @@ const SearchFilters = () => {
     };
 
     const handleSearch = () => {
+        const params = new URLSearchParams();
+        if (location) params.set('location', location);
+        if (checkIn) params.set('check_in', checkIn);
+        if (checkOut) params.set('check_out', checkOut);
+        if (guests > 1) params.set('guests', guests.toString());
+
+        const queryString = params.toString();
+        const homePageUrl = queryString ? `/?${queryString}` : '/';
+
+        if (pathname !== '/') {
+            router.push(homePageUrl);
+            return;
+        }
+
         if (window.innerWidth >= 1024) {
             setActiveFilter(null);
         } else {
