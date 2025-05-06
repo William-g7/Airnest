@@ -11,10 +11,7 @@ const ResetLogo = () => {
 
     const handleLogoClick = () => {
         resetFilters();
-
-        if (window.location.search) {
-            router.replace(pathname);
-        }
+        router.push('/');
     };
 
     return (
