@@ -19,6 +19,7 @@ def property_list(request):
     check_in = request.GET.get('check_in', None)
     check_out = request.GET.get('check_out', None)
     guests = request.GET.get('guests', None)
+    category = request.GET.get('category', None)
     
     if location:
         properties = properties.filter(
@@ -28,6 +29,9 @@ def property_list(request):
         ) | properties.filter(
             country__icontains=location
         )
+    
+    if category:
+        properties = properties.filter(category__iexact=category)
     
     if check_in and check_out:
         try:
