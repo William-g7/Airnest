@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+    --airbnb-color: #ff385c;
+    --airbnb-dark-color: #d40027;
+}
+
+.airbnb-color {
+    color: var(--airbnb-color);
+}
+
 .swiper {
     width: 100%;
     height: 100%;
@@ -43,7 +52,7 @@
 }
 
 .react-datepicker__day--selected {
-    background-color: #d32f2f !important;
+    background-color: var(--airbnb-color) !important;
     color: white !important;
 }
 
