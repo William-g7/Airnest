@@ -3,12 +3,14 @@
 import Categories from "../components/Categories";
 import PropertyList from "../components/properties/PropertyList";
 import { useTranslations } from 'next-intl';
+import { useSearchParamsSync } from "../hooks/useSearchParamsSync";
 
 export default function Home() {
     const t = useTranslations('app');
+    useSearchParamsSync();
 
     return (
-        <main className="max-w-[1500px]mx-auto px-6">
+        <main className="max-w-[1500px] mx-auto px-6">
             <h1 className="text-3xl font-bold text-center mb-6">{t('tagline')}</h1>
             <p className="text-center mb-8 text-gray-600">{t('description')}</p>
 

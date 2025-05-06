@@ -15,15 +15,13 @@ from .forms import PropertyForm
 def property_list(request):
     properties = Property.objects.all()
     
-    # 处理筛选条件
     location = request.GET.get('location', '')
     check_in = request.GET.get('check_in', None)
     check_out = request.GET.get('check_out', None)
     guests = request.GET.get('guests', None)
+    category = request.GET.get('category', None)
     
-    # 应用筛选条件
     if location:
-        # 使用不区分大小写的包含查询
         properties = properties.filter(
             city__icontains=location
         ) | properties.filter(
@@ -32,31 +30,28 @@ def property_list(request):
             country__icontains=location
         )
     
-    # 如果指定了入住和退房日期，筛选出这段时间内没有预订的房源
+    if category:
+        properties = properties.filter(category__iexact=category)
+    
     if check_in and check_out:
         try:
             check_in_date = datetime.strptime(check_in, '%Y-%m-%d').date()
             check_out_date = datetime.strptime(check_out, '%Y-%m-%d').date()
             
-            # 获取所有在指定日期范围内有预订的房源ID
             unavailable_property_ids = Reservation.objects.filter(
                 check_in__lt=check_out_date,
                 check_out__gt=check_in_date
             ).values_list('property_id', flat=True)
             
-            # 排除这些房源
             properties = properties.exclude(id__in=unavailable_property_ids)
         except ValueError:
-            # 日期格式错误，忽略日期筛选
             pass
     
-    # 筛选可容纳指定客人数量的房源
     if guests:
         try:
             guests_count = int(guests)
             properties = properties.filter(guests__gte=guests_count)
         except ValueError:
-            # 客人数量格式错误，忽略客人数筛选
             pass
     
     serializer = PropertySerializer(properties, many=True)

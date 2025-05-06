@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useTranslations } from 'next-intl';
 import apiService from "../../services/apiService";
 import PropertyListItem from "./PropertyListItem";
 import { PropertyType } from "@/app/constants/propertyType";
+import { useSearchStore } from "@/app/stores/searchStore";
+import { useSearchParams } from "next/navigation";
+
 interface PropertyListProps {
     isMyProperties?: boolean;
     isWishlist?: boolean;
@@ -15,14 +18,53 @@ const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties, isWishlist 
     const [properties, setProperties] = useState<PropertyType[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
+    const [lastSearchParams, setLastSearchParams] = useState("");
 
-    const getProperties = async () => {
+    const { location, checkIn, checkOut, guests, category } = useSearchStore();
+    const searchParams = useSearchParams();
+
+    const serializedParams = searchParams.toString();
+
+    // 使用useCallback包装getProperties函数，避免不必要的重新创建
+    const getProperties = useCallback(async () => {
         try {
+            setIsLoading(true);
             let endpoint = '/api/properties/';
+
             if (isMyProperties) {
                 endpoint = '/api/properties/my/';
             } else if (isWishlist) {
                 endpoint = '/api/properties/wishlist/';
+            } else {
+                const params = new URLSearchParams();
+
+                const locationParam = searchParams.get('location');
+                const checkInParam = searchParams.get('check_in');
+                const checkOutParam = searchParams.get('check_out');
+                const guestsParam = searchParams.get('guests');
+                const categoryParam = searchParams.get('category');
+
+                if (locationParam) params.append('location', locationParam);
+                if (checkInParam) params.append('check_in', checkInParam);
+                if (checkOutParam) params.append('check_out', checkOutParam);
+                if (guestsParam && parseInt(guestsParam) > 1) params.append('guests', guestsParam);
+                if (categoryParam) params.append('category', categoryParam);
+
+                // 如果URL没有参数，使用状态中的值
+                if (params.toString() === '' && (location || checkIn || checkOut || guests > 1 || category)) {
+                    if (location) params.append('location', location);
+                    if (checkIn) params.append('check_in', checkIn);
+                    if (checkOut) params.append('check_out', checkOut);
+                    if (guests > 1) params.append('guests', guests.toString());
+                    if (category) params.append('category', category);
+                }
+
+                const queryString = params.toString();
+                if (queryString) {
+                    endpoint = `/api/properties/?${queryString}`;
+                }
+
+                console.log(`Fetching properties with endpoint: ${endpoint}`);
             }
 
             const data = (isMyProperties || isWishlist)
@@ -35,11 +77,24 @@ const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties, isWishlist 
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [isMyProperties, isWishlist, searchParams, location, checkIn, checkOut, guests, category, t]);
 
+
+
+    // 只有当URL参数真正变化时才重新获取数据
+    useEffect(() => {
+        if (serializedParams !== lastSearchParams) {
+            console.log(`Search params changed from "${lastSearchParams}" to "${serializedParams}"`);
+            setLastSearchParams(serializedParams);
+            getProperties();
+        }
+    }, [serializedParams, lastSearchParams, getProperties]);
+
+    // 组件挂载时获取一次数据
     useEffect(() => {
         getProperties();
-    }, [isMyProperties, isWishlist]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     if (isLoading) {
         return <div>{t('loading')}</div>;
@@ -50,12 +105,28 @@ const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties, isWishlist 
     }
 
     if (properties.length === 0) {
+        // 检查是否有任何筛选条件（从URL或状态）
+        const hasFilters = searchParams.get('location') ||
+            searchParams.get('check_in') ||
+            searchParams.get('check_out') ||
+            searchParams.get('guests') ||
+            location ||
+            checkIn ||
+            checkOut ||
+            guests > 1 ||
+            category;
+
         return (
             <div className="text-center py-10">
                 <h3 className="text-lg font-semibold">{t('noPropertiesFound')}</h3>
                 {isMyProperties && (
                     <p className="text-gray-500 mt-2">
                         {t('noListedProperties')}
+                    </p>
+                )}
+                {!isMyProperties && !isWishlist && hasFilters && (
+                    <p className="text-gray-500 mt-2">
+                        {t('noMatchingProperties')}
                     </p>
                 )}
             </div>
