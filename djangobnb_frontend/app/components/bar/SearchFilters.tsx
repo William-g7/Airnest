@@ -6,9 +6,11 @@ import { format } from 'date-fns';
 import { useSearchParamsSync } from '@/app/hooks/useSearchParamsSync';
 import DatePicker from '@/app/components/properties/DatePicker';
 import SearchModal from '@/app/components/modals/SearchModal';
+import { useTranslations } from 'next-intl';
 
 const SearchFilters = () => {
     const { location, checkIn, checkOut, guests, setLocation, setDates, setGuests } = useSearchStore();
+    const t = useTranslations('search');
 
     useSearchParamsSync();
 
@@ -93,8 +95,8 @@ const SearchFilters = () => {
                             className={`px-4 flex flex-col justify-center text-center rounded-full hover:bg-gray-100 transition-colors duration-200 cursor-pointer ${activeFilter === 'location' ? 'bg-gray-100' : ''}`}
                             onClick={() => toggleFilter('location')}
                         >
-                            <p className="text-xs font-semibold">Where</p>
-                            <p className="text-sm truncate">{location || "Anywhere"}</p>
+                            <p className="text-xs font-semibold">{t('where')}</p>
+                            <p className="text-sm truncate">{location || t('anywhere')}</p>
                         </div>
 
                         <span className="h-6 w-[1px] bg-gray-300 mx-2"></span>
@@ -104,9 +106,9 @@ const SearchFilters = () => {
                             className={`px-4 flex flex-col justify-center text-center rounded-full hover:bg-gray-100 transition-colors duration-200 cursor-pointer ${activeFilter === 'checkIn' ? 'bg-gray-100' : ''}`}
                             onClick={() => toggleFilter('checkIn')}
                         >
-                            <p className="text-xs font-semibold">Check in</p>
+                            <p className="text-xs font-semibold">{t('checkIn')}</p>
                             <p className="text-sm truncate">
-                                {checkIn ? format(new Date(checkIn), 'MMM d') : "Add date"}
+                                {checkIn ? format(new Date(checkIn), 'MMM d') : t('addDate')}
                             </p>
                         </div>
 
@@ -117,9 +119,9 @@ const SearchFilters = () => {
                             className={`px-4 flex flex-col justify-center text-center rounded-full hover:bg-gray-100 transition-colors duration-200 cursor-pointer ${activeFilter === 'checkOut' ? 'bg-gray-100' : ''}`}
                             onClick={() => toggleFilter('checkOut')}
                         >
-                            <p className="text-xs font-semibold">Check out</p>
+                            <p className="text-xs font-semibold">{t('checkOut')}</p>
                             <p className="text-sm truncate">
-                                {checkOut ? format(new Date(checkOut), 'MMM d') : "Add date"}
+                                {checkOut ? format(new Date(checkOut), 'MMM d') : t('addDate')}
                             </p>
                         </div>
 
@@ -130,8 +132,8 @@ const SearchFilters = () => {
                             className={`px-4 flex flex-col justify-center text-center rounded-full hover:bg-gray-100 transition-colors duration-200 cursor-pointer ${activeFilter === 'guests' ? 'bg-gray-100' : ''}`}
                             onClick={() => toggleFilter('guests')}
                         >
-                            <p className="text-xs font-semibold">Who</p>
-                            <p className="text-sm truncate">{guests > 1 ? `${guests} guests` : `${guests} guest`}</p>
+                            <p className="text-xs font-semibold">{t('who')}</p>
+                            <p className="text-sm truncate">{guests > 1 ? `${guests} ${t('guests')}` : `${guests} ${t('guest')}`}</p>
                         </div>
                     </div>
 
@@ -140,7 +142,7 @@ const SearchFilters = () => {
                         <button
                             className="cursor-pointer w-12 h-12 flex items-center justify-center bg-airbnb hover:bg-airbnb_dark transition rounded-full text-white shadow-md hover:shadow-lg"
                             onClick={handleSearch}
-                            aria-label="Search"
+                            aria-label={t('search')}
                         >
                             <svg
                                 viewBox="0 0 32 32"
@@ -158,12 +160,12 @@ const SearchFilters = () => {
                     <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white shadow-md rounded-3xl p-4 border">
                         {activeFilter === 'location' && (
                             <div className="p-4">
-                                <h3 className="font-semibold mb-2 text-center">Where to?</h3>
+                                <h3 className="font-semibold mb-2 text-center">{t('whereTo')}</h3>
                                 <input
                                     type="text"
                                     value={location}
                                     onChange={handleLocationChange}
-                                    placeholder="Search destinations..."
+                                    placeholder={t('searchDestinations')}
                                     className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-airbnb"
                                 />
                             </div>
@@ -171,7 +173,7 @@ const SearchFilters = () => {
 
                         {(activeFilter === 'checkIn' || activeFilter === 'checkOut') && (
                             <div className="p-4">
-                                <h3 className="font-semibold mb-2 text-center">When?</h3>
+                                <h3 className="font-semibold mb-2 text-center">{t('when')}</h3>
                                 <DatePicker
                                     checkIn={checkInDate}
                                     checkOut={checkOutDate}
@@ -183,9 +185,9 @@ const SearchFilters = () => {
 
                         {activeFilter === 'guests' && (
                             <div className="p-4">
-                                <h3 className="font-semibold mb-2 text-center">Who's coming?</h3>
+                                <h3 className="font-semibold mb-2 text-center">{t('whosComing')}</h3>
                                 <div className="flex items-center justify-between mb-4">
-                                    <span>Guests</span>
+                                    <span>{guests > 1 ? t('guests') : t('guest')}</span>
                                     <div className="flex items-center">
                                         <button
                                             onClick={() => handleGuestsChange(Math.max(1, guests - 1))}
@@ -216,7 +218,7 @@ const SearchFilters = () => {
                 >
                     <div className="flex items-center flex-1">
                         <span className="text-sm font-medium truncate max-w-[100px] sm:max-w-[140px]">
-                            {location ? location : "Anywhere"}
+                            {location ? location : t('anywhere')}
                         </span>
                     </div>
                     <button
@@ -225,7 +227,7 @@ const SearchFilters = () => {
                             e.stopPropagation();
                             handleSearch();
                         }}
-                        aria-label="Search"
+                        aria-label={t('search')}
                     >
                         <svg
                             viewBox="0 0 32 32"
