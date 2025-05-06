@@ -25,21 +25,37 @@ export default function LoginModal() {
             setIsLoading(true);
             setError("");
 
+            // Basic validation
+            if (!formData.email || !formData.password) {
+                setError(t('pleaseCompleteAllFields'));
+                return;
+            }
+
+            console.log("Attempting login with:", formData.email);
+
             const response = await apiService.postwithouttoken('/api/auth/login/', {
                 email: formData.email,
                 password: formData.password
             });
 
-            if (response.access) {
+            console.log("Login response:", response);
+
+            if (response && response.access) {
                 await handleLogin(response.user.pk, response.access, response.refresh);
                 loginModal.onClose();
                 await router.refresh();
                 router.push('/');
             } else {
+                console.error("Login failed with response:", response);
                 setError(t('loginFailed'));
             }
         } catch (error: any) {
-            setError(error.message || t('loginError'));
+            console.error("Login error:", error);
+            if (error.message === 'AUTH_INVALID_CREDENTIALS') {
+                setError(t('invalidCredentials'));
+            } else {
+                setError(error.message || t('loginError'));
+            }
         } finally {
             setIsLoading(false);
         }

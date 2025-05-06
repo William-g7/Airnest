@@ -112,18 +112,39 @@ const apiService = {
             if (!text) {
                 throw new Error('Empty response received');
             }
+
             try {
                 const responseData = JSON.parse(text);
 
                 if (!response.ok) {
                     if (responseData && responseData.email) {
                         throw new Error(responseData.email[0]);
+                    } else if (responseData && responseData.detail) {
+                        throw new Error(responseData.detail);
+                    } else if (responseData && responseData.non_field_errors) {
+                        throw new Error(responseData.non_field_errors[0]);
+                    } else if (responseData && responseData.password) {
+                        throw new Error(responseData.password[0]);
+                    } else if (typeof responseData === 'object' && Object.keys(responseData).length > 0) {
+                        const firstErrorKey = Object.keys(responseData)[0];
+                        const errorValue = responseData[firstErrorKey];
+                        const errorMessage = Array.isArray(errorValue) ? errorValue[0] : errorValue;
+                        throw new Error(errorMessage || 'API Error');
+                    } else {
+                        throw new Error('AUTH_INVALID_CREDENTIALS');
                     }
-                    throw new Error(responseData?.detail || 'API Error');
                 }
+
                 return responseData;
             } catch (parseError) {
-                throw new Error('Invalid JSON response');
+                console.error('JSON parsing error:', parseError);
+                console.log('Response text:', text);
+
+                if (url.includes('/login/')) {
+                    throw new Error('AUTH_INVALID_CREDENTIALS');
+                } else {
+                    throw new Error('Invalid response from server. Please try again later.');
+                }
             }
         } catch (error) {
             throw error;
