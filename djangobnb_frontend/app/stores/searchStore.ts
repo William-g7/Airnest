@@ -1,0 +1,29 @@
+import { create } from 'zustand';
+
+interface SearchFilters {
+    location: string;
+    checkIn: string | null;
+    checkOut: string | null;
+    guests: number;
+}
+
+interface SearchStore extends SearchFilters {
+    setLocation: (location: string) => void;
+    setDates: (checkIn: string | null, checkOut: string | null) => void;
+    setGuests: (guests: number) => void;
+    resetFilters: () => void;
+    setFilters: (filters: Partial<SearchFilters>) => void;
+}
+
+export const useSearchStore = create<SearchStore>((set) => ({
+    location: '',
+    checkIn: null,
+    checkOut: null,
+    guests: 1,
+
+    setLocation: (location) => set({ location }),
+    setDates: (checkIn, checkOut) => set({ checkIn, checkOut }),
+    setGuests: (guests) => set({ guests }),
+    resetFilters: () => set({ location: '', checkIn: null, checkOut: null, guests: 1 }),
+    setFilters: (filters) => set((state) => ({ ...state, ...filters })),
+})); 
