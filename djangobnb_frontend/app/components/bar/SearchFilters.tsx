@@ -133,7 +133,7 @@ const SearchFilters = () => {
                             onClick={() => toggleFilter('guests')}
                         >
                             <p className="text-xs font-semibold">{t('who')}</p>
-                            <p className="text-sm truncate">{guests > 1 ? `${guests} ${t('guests')}` : `${guests} ${t('guest')}`}</p>
+                            <p className="text-sm truncate">{guests > 1 ? `${guests} ${t('guests')}` : ` ${t('guest')}`}</p>
                         </div>
                     </div>
 
