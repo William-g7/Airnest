@@ -37,6 +37,20 @@
         "whosComing": "Qui vient ?",
         "closeModal": "Fermer la recherche"
     },
+    "datePicker": {
+        "bookingNotes": "Notes de réservation",
+        "bookingDates": "Dates de réservation",
+        "localTimeNote": "Toutes les dates sont à l'heure locale du logement",
+        "checkInTime": "Heure d'arrivée",
+        "checkInAfter": "ou plus tard",
+        "checkOutTime": "Heure de départ",
+        "checkOutBefore": "ou plus tôt",
+        "cleaningTime": "Temps de nettoyage",
+        "hours": "heures",
+        "deepCleaning": "de nettoyage en profondeur",
+        "unavailable": "Indisponible",
+        "needConfirmation": "Nécessite confirmation"
+    },
     "inbox": {
         "title": "Messagerie",
         "conversations": "Conversations",

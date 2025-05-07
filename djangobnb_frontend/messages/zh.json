@@ -37,6 +37,20 @@
         "whosComing": "有几位入住？",
         "closeModal": "关闭搜索框"
     },
+    "datePicker": {
+        "bookingNotes": "预订须知",
+        "bookingDates": "预订日期",
+        "localTimeNote": "所选日期均为房源当地时间",
+        "checkInTime": "入住时间",
+        "checkInAfter": "以后",
+        "checkOutTime": "退房时间",
+        "checkOutBefore": "之前",
+        "cleaningTime": "清洁准备",
+        "hours": "小时",
+        "deepCleaning": "的深度清洁",
+        "unavailable": "不可预订",
+        "needConfirmation": "需提前确认"
+    },
     "inbox": {
         "title": "收件箱",
         "conversations": "聊天列表",

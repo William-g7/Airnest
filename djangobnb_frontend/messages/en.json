@@ -38,6 +38,20 @@
         "closeModal": "Close search modal",
         "viewConversation": "View conversation"
     },
+    "datePicker": {
+        "bookingNotes": "Booking Notes",
+        "bookingDates": "Booking dates",
+        "localTimeNote": "All dates are in property's local time",
+        "checkInTime": "Check-in time",
+        "checkInAfter": "or later",
+        "checkOutTime": "Check-out time",
+        "checkOutBefore": "or earlier",
+        "cleaningTime": "Cleaning time",
+        "hours": "hours",
+        "deepCleaning": "of deep cleaning",
+        "unavailable": "Unavailable",
+        "needConfirmation": "Needs confirmation"
+    },
     "inbox": {
         "title": "Inbox",
         "conversations": "Conversations",
