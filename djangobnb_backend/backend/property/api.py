@@ -422,3 +422,40 @@ def get_wishlist(request):
     properties = [item.property for item in wishlist_items]
     serializer = PropertySerializer(properties, many=True)
     return JsonResponse(serializer.data, safe=False)
+
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
+def get_timezone_list(request):
+    try:
+        all_timezones = pytz.all_timezones
+        
+        grouped_timezones = {}
+        
+        for tz in all_timezones:
+            parts = tz.split('/')
+            region = parts[0] if len(parts) > 0 else 'Other'
+            
+            if region in ['Etc', 'SystemV', 'US']:
+                continue
+                
+            if region not in grouped_timezones:
+                grouped_timezones[region] = []
+            
+            timezone_info = {
+                'value': tz,
+                'label': tz.replace('_', ' ')
+            }
+            
+            grouped_timezones[region].append(timezone_info)
+        
+        result = []
+        for region, timezones in sorted(grouped_timezones.items()):
+            result.append({
+                'group': region,
+                'options': sorted(timezones, key=lambda x: x['label'])
+            })
+        
+        return JsonResponse(result, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

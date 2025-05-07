@@ -12,5 +12,5 @@ urlpatterns = [
     path('reservations/', api.get_user_reservations, name='api_properties_reservations'),
     path('wishlist/', api.get_wishlist, name='api_properties_wishlist'),
     path('<uuid:pk>/toggle-favorite/', api.toggle_favorite, name='api_properties_toggle_favorite'),
-
+    path('timezones/', api.get_timezone_list, name='api_properties_timezones'),
 ]
