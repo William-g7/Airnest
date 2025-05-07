@@ -16,6 +16,7 @@ export type PropertyType = {
     beds: number;
     bathrooms: number;
     description: string;
+    timezone?: string;
     landlord: {
         id: string;
         name?: string;

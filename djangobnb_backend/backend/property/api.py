@@ -199,19 +199,22 @@ def create_reservation(request, pk):
         check_out = check_out.replace(hour=11, minute=0, second=0)
         check_out = property_timezone.localize(check_out)
         
+        # 转换成UTC， 用于存库和比较
         check_in_utc = check_in.astimezone(pytz.UTC)
         check_out_utc = check_out.astimezone(pytz.UTC)
         
+        # 基础日期顺序检查
         if check_in_utc >= check_out_utc:
             return JsonResponse({'error': 'Check-out date must be after check-in date'}, status=400)
         
+        # 计算预订天数和价格
         check_in_date_obj = datetime.strptime(check_in_date, '%Y-%m-%d').date()
         check_out_date_obj = datetime.strptime(check_out_date, '%Y-%m-%d').date()
         days = (check_out_date_obj - check_in_date_obj).days
         
+        # 优先用前端传来的价格计算，后端保底
         if 'total_price' in request.data and request.data['total_price']:
             try:
-
                 total_price = float(request.data['total_price'])
             except (ValueError, TypeError):
                 total_price = float(property.price_per_night) * days
@@ -317,13 +320,10 @@ def get_booked_dates(request, pk):
         partially_booked_dates = []
         
         for reservation in reservations:
-            print(f"处理预订: ID={reservation.id}, UTC入住={reservation.check_in}, UTC退房={reservation.check_out}")
             
             # 将 UTC 时间转换为房源所在时区时间
             check_in_local = reservation.check_in.astimezone(property_timezone)
             check_out_local = reservation.check_out.astimezone(property_timezone)
-            
-            print(f"本地化后: 入住={check_in_local}, 退房={check_out_local}")
             
             # 检查入住日期（整天不可用）
             current_date = check_in_local.date()
@@ -343,10 +343,6 @@ def get_booked_dates(request, pk):
                 booked_dates.append(date_str)
                 current_date += timedelta(days=1)
         
-        # 对于partial_dates，前端应该显示一个不同的颜色或标记，表示"部分可用"
-        print(f"完全预订日期: {booked_dates}")
-        print(f"部分预订日期: {partially_booked_dates}")
-        
         return JsonResponse({
             'booked_dates': booked_dates,
             'partially_booked_dates': partially_booked_dates
@@ -363,15 +359,12 @@ def get_user_reservations(request):
         
         data = []
         for reservation in reservations:
-            # 构建完整的图片URL
             property_images = []
             for image in reservation.property.images.all():
-                # 获取域名部分
                 host = request.get_host()
                 protocol = 'https' if request.is_secure() else 'http'
                 base_url = f"{protocol}://{host}"
                 
-                # 构建完整URL
                 image_url = image.image.url
                 if not image_url.startswith(('http://', 'https://')):
                     if image_url.startswith('/'):
