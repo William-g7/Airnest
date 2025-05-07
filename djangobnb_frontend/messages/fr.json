@@ -49,7 +49,9 @@
         "hours": "heures",
         "deepCleaning": "de nettoyage en profondeur",
         "unavailable": "Indisponible",
-        "needConfirmation": "Nécessite confirmation"
+        "needConfirmation1": "Nécessite une confirmation",
+        "needConfirmation2": "Nécessite une confirmation, peut être affecté par le temps de nettoyage",
+        "partiallyBooked": "Partiellement réservé"
     },
     "inbox": {
         "title": "Messagerie",

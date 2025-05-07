@@ -1,10 +1,19 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import ReactDatePicker from 'react-datepicker';
+import ReactDatePicker, { registerLocale } from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { useTranslations } from 'next-intl';
-import { convertUTCToTimezone, formatDateForAPI, addTimezoneToDate, formatToDateString } from '../../utils/dateUtils';
+import { convertUTCToTimezone, formatDateForAPI, addTimezoneToDate } from '../../utils/dateUtils';
+import { getLocaleState } from '@/app/stores/localeStore';
+
+// 导入 date-fns 的语言包
+import { zhCN, enUS, fr } from 'date-fns/locale';
+
+// 注册支持的语言
+registerLocale('zh-CN', zhCN);
+registerLocale('en-US', enUS);
+registerLocale('fr-FR', fr);
 
 interface DatePickerProps {
     checkIn: Date | null;
@@ -26,8 +35,25 @@ const DatePicker: React.FC<DatePickerProps> = ({
     const t = useTranslations('property');
     const commonT = useTranslations('common');
     const datePickerT = useTranslations('datePicker');
+
     const [propertyTodayDate, setPropertyTodayDate] = useState<Date>(new Date());
     const [isRulesExpanded, setIsRulesExpanded] = useState(false);
+
+    const { intlLocale } = getLocaleState();
+    const datePickerLocale = intlLocale || 'en-US';
+
+    useEffect(() => {
+        // 设置CSS变量为翻译文本
+        document.documentElement.style.setProperty(
+            '--date-tooltip-booked',
+            `"${datePickerT('unavailable')}"`
+        );
+        document.documentElement.style.setProperty(
+            '--date-tooltip-partial',
+            `"${datePickerT('needConfirmation2')}"`
+        );
+    }, [datePickerT]);
+
 
     // 计算房源当地的"今天"日期，防止因为时差订到当地已经过去的日期
     useEffect(() => {
@@ -142,7 +168,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                     </div>
                     <div className="flex items-center">
                         <span className="inline-block w-3 h-3 bg-yellow-200 rounded-full mr-1.5"></span>
-                        <span className="text-gray-600">{datePickerT('needConfirmation')}</span>
+                        <span className="text-gray-600">{datePickerT('needConfirmation1')}</span>
                     </div>
                 </div>
             </div>
@@ -158,6 +184,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                         placeholderText={commonT('addDate')}
                         className="w-full border-none focus:ring-0 p-0 text-gray-600"
                         renderDayContents={renderDayContents}
+                        locale={datePickerLocale}
                         dayClassName={date => {
                             const dateString = formatDateForAPI(date);
                             if (bookedDates.includes(dateString)) {
@@ -180,6 +207,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                         className="w-full border-none focus:ring-0 p-0 text-gray-600"
                         disabled={!checkIn}
                         renderDayContents={renderDayContents}
+                        locale={datePickerLocale}
                         dayClassName={date => {
                             const dateString = formatDateForAPI(date);
                             if (bookedDates.includes(dateString)) {

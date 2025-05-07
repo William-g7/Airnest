@@ -41,16 +41,18 @@
     "datePicker": {
         "bookingNotes": "Booking Notes",
         "bookingDates": "Booking dates",
-        "localTimeNote": "All dates are in property's local time",
+        "localTimeNote": "All times are in the property's local timezone",
         "checkInTime": "Check-in time",
         "checkInAfter": "or later",
         "checkOutTime": "Check-out time",
         "checkOutBefore": "or earlier",
         "cleaningTime": "Cleaning time",
         "hours": "hours",
-        "deepCleaning": "of deep cleaning",
+        "deepCleaning": "for deep cleaning",
         "unavailable": "Unavailable",
-        "needConfirmation": "Needs confirmation"
+        "needConfirmation1": "Requires confirmation",
+        "needConfirmation2": "Requires confirmation, may be affected by cleaning time",
+        "partiallyBooked": "Partially booked"
     },
     "inbox": {
         "title": "Inbox",

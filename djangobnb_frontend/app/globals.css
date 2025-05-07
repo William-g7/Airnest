@@ -69,18 +69,14 @@
     background-color: #ffcdd2 !important;
 }
 
-/* 部分预订日期样式 */
 .react-datepicker__day--partially-booked {
     background-color: #fff9c4 !important;
-    /* 浅黄色背景 */
     color: #333 !important;
     border: 1px dashed #ffd54f !important;
-    /* 虚线黄色边框 */
 }
 
 .react-datepicker__day--partially-booked:hover {
     background-color: #ffe082 !important;
-    /* 鼠标悬停时的深黄色 */
 }
 
 .react-datepicker__input-container input {
@@ -92,7 +88,7 @@
 }
 
 .date-tooltip:hover::after {
-    content: '已被预订';
+    content: var(--date-tooltip-booked);
     position: absolute;
     bottom: 100%;
     left: 50%;
@@ -123,7 +119,7 @@
 }
 
 .date-tooltip-partial:hover::after {
-    content: '需提前确认，可能受清洁时间影响';
+    content: var(--date-tooltip-partial);
     position: absolute;
     bottom: 100%;
     left: 50%;

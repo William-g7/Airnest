@@ -19,14 +19,14 @@
         "myAccount": "我的账户",
         "myProperties": "我的房源",
         "myReservations": "我的预订",
-        "myWishlists": "我的心愿单"
+        "myWishlists": "我的收藏"
     },
     "search": {
-        "where": "地点",
+        "where": "目的地",
         "checkIn": "入住",
         "checkOut": "退房",
         "who": "人数",
-        "anywhere": "任何地点",
+        "anywhere": "任何地方",
         "addDate": "添加日期",
         "search": "搜索",
         "guest": "位客人",
@@ -35,21 +35,24 @@
         "searchDestinations": "搜索目的地...",
         "when": "何时入住？",
         "whosComing": "有几位入住？",
-        "closeModal": "关闭搜索框"
+        "closeModal": "关闭搜索框",
+        "viewConversation": "查看对话"
     },
     "datePicker": {
         "bookingNotes": "预订须知",
         "bookingDates": "预订日期",
         "localTimeNote": "所选日期均为房源当地时间",
         "checkInTime": "入住时间",
-        "checkInAfter": "以后",
+        "checkInAfter": "及之后",
         "checkOutTime": "退房时间",
-        "checkOutBefore": "之前",
+        "checkOutBefore": "及之前",
         "cleaningTime": "清洁准备",
         "hours": "小时",
-        "deepCleaning": "的深度清洁",
+        "deepCleaning": "用于深度清洁",
         "unavailable": "不可预订",
-        "needConfirmation": "需提前确认"
+        "needConfirmation1": "需要联系房东",
+        "needConfirmation2": "需要联系房东，可能受清洁时间影响",
+        "partiallyBooked": "部分预订"
     },
     "inbox": {
         "title": "收件箱",
@@ -60,20 +63,20 @@
         "startConversation": "查看房源并点击“联系房东”以开始与房东聊天。",
         "authRequired": "请登录查看您的聊天",
         "sendMessage": "发送消息",
-        "typeMessage": "在此输入您的消息...",
+        "typeMessage": "在这里输入您的消息...",
         "sending": "发送中...",
-        "loadError": "加载聊天失败",
-        "messageSentError": "发送消息失败",
-        "viewConversation": "查看聊天"
+        "loadError": "无法加载聊天，请稍后再试",
+        "messageSentError": "发送消息时出错",
+        "viewConversation": "查看对话"
     },
     "landlord": {
         "superhost": "超赞房东",
         "yearsHosting": "已做房东{years}年",
         "hostListings": "{name}的房源",
-        "noListings": "该房东暂时没有可用房源。",
+        "noListings": "该房东暂时没有可用房源",
         "propertiesCount": "{count}处房源",
         "responseRate": "100%回复率",
-        "contactText": "联系房东预订房源或询问任何相关问题。"
+        "contactText": "联系房东预订房源或询问任何相关问题"
     },
     "profile": {
         "title": "个人资料",
@@ -82,7 +85,7 @@
         "saving": "保存中...",
         "saveChanges": "保存更改",
         "name": "姓名",
-        "email": "电子邮箱",
+        "email": "邮箱",
         "memberSince": "注册时间",
         "notSet": "未设置",
         "loadError": "加载个人资料失败",
@@ -97,7 +100,7 @@
         "cancel": "取消",
         "confirm": "确认",
         "loading": "加载中...",
-        "error": "发生错误",
+        "error": "出错了",
         "success": "成功！",
         "viewMore": "查看更多",
         "contact": "联系房东",
@@ -147,11 +150,11 @@
         "categoryDescription": "以下哪项最能体现您的房源特色？",
         "placeTypeDescription": "客人将入住哪种类型的房屋？",
         "locationDescription": "您的房屋位于哪里？",
-        "locationNote": "房屋的具体地址仅在客人预订后才会提供给对方。",
+        "locationNote": "房屋的具体地址仅在客人预订后才会提供给对方",
         "basicsDescription": "分享房屋的基本信息",
-        "basicsNote": "您可以随后补充更多细节。",
+        "basicsNote": "您可以随后补充更多细节",
         "photosDescription": "上传一些房源照片",
-        "photosNote": "通过图片向客人展示房屋特色和周边环境。",
+        "photosNote": "通过图片向客人展示房屋特色和周边环境",
         "detailsDescription": "设置价格并完善其他信息",
         "detailsNote": "撰写吸引人的标题和介绍，让更多人看到您的房屋！",
         "createListing": "创建房源",
@@ -198,15 +201,15 @@
     "placeTypes": {
         "entire": {
             "title": "整套房源",
-            "description": "住客可享用整个住宿空间，不与他人共享。"
+            "description": "住客可享用整个住宿空间，不与他人共享"
         },
         "room": {
             "title": "独立房间",
-            "description": "住客拥有住宅中的独立房间，并可使用共享区域。"
+            "description": "住客拥有住宅中的独立房间，并可使用共享区域"
         },
         "shared": {
             "title": "青旅多人间",
-            "description": "住客入住带有24小时现场工作人员管理的共享房间。"
+            "description": "住客入住带有24小时现场工作人员管理的共享房间"
         }
     },
     "properties": {
@@ -227,10 +230,10 @@
         "confirmPassword": "确认密码",
         "pleaseLogin": "请登录",
         "createAccount": "创建账号",
-        "loginFailed": "登录失败，请重试。",
+        "loginFailed": "登录失败，请重试",
         "loginError": "登录失败",
         "pleaseCompleteAllFields": "请填写所有字段",
-        "invalidCredentials": "登录失败，请检查您的用户名和密码后重试。",
+        "invalidCredentials": "登录失败，请检查您的用户名和密码后重试",
         "loading": "加载中...",
         "passwordsNotMatch": "两次输入的密码不匹配",
         "somethingWentWrong": "出现错误",
@@ -243,17 +246,17 @@
         "loadError": "加载房源失败"
     },
     "mywishlists": {
-        "title": "我的心愿单",
+        "title": "我的收藏",
         "loading": "加载中...",
-        "loadError": "加载心愿单失败",
-        "noSavedProperties": "没有喜欢的房源",
-        "propertiesWillAppearHere": "您喜欢的房源将显示在这里"
+        "loadError": "加载收藏失败",
+        "noSavedProperties": "没有收藏的房源",
+        "propertiesWillAppearHere": "您收藏的房源将显示在这里"
     },
     "myreservations": {
         "title": "我的预订",
         "loading": "加载中...",
         "loadError": "加载预订失败",
-        "noReservations": "您目前没有任何预订。",
+        "noReservations": "您目前没有任何预订",
         "checkIn": "入住",
         "checkOut": "退房",
         "duration": "时长",
