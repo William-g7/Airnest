@@ -27,6 +27,9 @@ class Property(models.Model):
     city = models.CharField(max_length=255)
     address = models.CharField(max_length=255)
     postal_code = models.CharField(max_length=20)
+    
+    #timezone
+    timezone = models.CharField(max_length=50, default='UTC')
 
     #relationship and metadata
     landlord = models.ForeignKey(User, related_name='properties', on_delete=models.CASCADE)
@@ -45,8 +48,8 @@ class Reservation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     property = models.ForeignKey(Property, related_name='reservations', on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name='reservations', on_delete=models.CASCADE)
-    check_in = models.DateField()
-    check_out = models.DateField()
+    check_in = models.DateTimeField()
+    check_out = models.DateTimeField()
     guests = models.IntegerField()
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)

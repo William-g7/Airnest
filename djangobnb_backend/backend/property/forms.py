@@ -20,5 +20,6 @@ class PropertyForm(ModelForm):
             'address',
             'postal_code',
             'category',
-            'place_type',  
+            'place_type',
+            'timezone',
         )

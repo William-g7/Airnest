@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from datetime import datetime, timedelta
-
+import pytz
 from .models import Property, PropertyImage, Reservation, Wishlist
 from .serializers import PropertySerializer, PropertyLandlordSerializer
 from .forms import PropertyForm
@@ -12,6 +12,7 @@ from .forms import PropertyForm
 @api_view(['GET'])
 @authentication_classes([])
 @permission_classes([])
+# 该api用来获取符合条件的房源，默认情况全部展示，可以按照地理位置、类别、入住/退房日期进行筛选
 def property_list(request):
     properties = Property.objects.all()
     
@@ -20,7 +21,8 @@ def property_list(request):
     check_out = request.GET.get('check_out', None)
     guests = request.GET.get('guests', None)
     category = request.GET.get('category', None)
-    
+   
+    # 基本过滤，按照地理位置进行模糊匹配
     if location:
         properties = properties.filter(
             city__icontains=location
@@ -30,22 +32,95 @@ def property_list(request):
             country__icontains=location
         )
     
+    # 基本过滤，按照地理位置进行精确匹配
     if category:
         properties = properties.filter(category__iexact=category)
     
+    # 按照入住/退房日期排除不可用房源
     if check_in and check_out:
         try:
             check_in_date = datetime.strptime(check_in, '%Y-%m-%d').date()
             check_out_date = datetime.strptime(check_out, '%Y-%m-%d').date()
             
-            unavailable_property_ids = Reservation.objects.filter(
-                check_in__lt=check_out_date,
-                check_out__gt=check_in_date
-            ).values_list('property_id', flat=True)
+            CLEANING_BUFFER_MINUTES = 120
             
+            CHECK_IN_HOUR = 15
+            CHECK_OUT_HOUR = 11
+            
+            unavailable_property_ids = set()
+            
+            for prop in properties:
+                # 获取房源时区
+                prop_timezone = pytz.timezone(prop.timezone)
+                
+                # 创建用户搜索的入住时间（房源当地时区下的下午3点）
+                user_checkin_local = datetime.combine(
+                    check_in_date, 
+                    datetime.min.time().replace(hour=CHECK_IN_HOUR)
+                )
+                user_checkin_local = prop_timezone.localize(user_checkin_local)
+                
+                # 创建用户搜索的退房时间（房源当地时区下的上午11点）
+                user_checkout_local = datetime.combine(
+                    check_out_date, 
+                    datetime.min.time().replace(hour=CHECK_OUT_HOUR)
+                )
+                user_checkout_local = prop_timezone.localize(user_checkout_local)
+                
+                # 转换为UTC用于数据库比较
+                user_checkin_utc = user_checkin_local.astimezone(pytz.UTC)
+                user_checkout_utc = user_checkout_local.astimezone(pytz.UTC)
+                
+                # 获取房源的预订
+                reservations = Reservation.objects.filter(property=prop)
+                
+                is_unavailable = False
+                
+                for reservation in reservations:
+                    # 将UTC预订时间转换为房源当地时间
+                    existing_checkin_local = reservation.check_in.astimezone(prop_timezone)
+                    existing_checkout_local = reservation.check_out.astimezone(prop_timezone)
+                    
+                    # 检查标准的日期重叠
+                    if (user_checkin_local < existing_checkout_local and 
+                        user_checkout_local > existing_checkin_local):
+                        unavailable_property_ids.add(prop.id)
+                        is_unavailable = True
+                        break
+                    
+                    # 特殊情况检查：考虑清洁缓冲时间
+                    # 1. 如果用户想要的入住时间紧跟在现有预订的退房时间之后
+                    # 需要检查清洁缓冲时间是否足够
+                    if (user_checkin_local >= existing_checkout_local and
+                        (user_checkin_local - existing_checkout_local).total_seconds() / 60 < CLEANING_BUFFER_MINUTES):
+                        unavailable_property_ids.add(prop.id)
+                        is_unavailable = True
+                        break
+                    
+                    # 2. 如果现有预订的入住时间紧跟在用户想要的退房时间之后
+                    # 同样需要检查清洁缓冲时间
+                    if (existing_checkin_local >= user_checkout_local and
+                        (existing_checkin_local - user_checkout_local).total_seconds() / 60 < CLEANING_BUFFER_MINUTES):
+                        unavailable_property_ids.add(prop.id)
+                        is_unavailable = True
+                        break
+                
+                if is_unavailable:
+                    continue  # 已经添加到不可用列表，跳过后续检查
+                
+                # 确保房源当前日期规则
+                # 获取房源当地现在的时间
+                property_now = datetime.now(prop_timezone)
+                
+                # 如果用户想要的入住日期已经过了（在房源当地时区），则该房源不可用
+                if check_in_date < property_now.date():
+                    unavailable_property_ids.add(prop.id)
+            
+            # 排除不可用的房源
             properties = properties.exclude(id__in=unavailable_property_ids)
-        except ValueError:
-            pass
+            
+        except ValueError as e:
+            print(f"日期解析错误: {e}")
     
     if guests:
         try:
@@ -100,42 +175,120 @@ def create_property(request):
     except Exception as e:
         print(f"Error creating property: {e}")
         return JsonResponse({'error': str(e)}, status=400)
-    
+
+# 该api用来创建预订，需要传入房源id、入住日期、退房日期、客人数量、时区
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def create_reservation(request, pk):
     try:
-        check_in = datetime.strptime(request.data['check_in'], '%Y-%m-%d').date()
-        check_out = datetime.strptime(request.data['check_out'], '%Y-%m-%d').date()
+        check_in_date = request.data['check_in'] 
+        check_out_date = request.data['check_out'] 
         guests = int(request.data['guests'])
-        
+
         property = Property.objects.get(pk=pk)
+    
+        property_timezone = pytz.timezone(property.timezone)
         
-        if check_in >= check_out:
+        # 解析入住时间转换成naive datetime，设置固定的入住/退房时间，最后附加时区信息转换成aware datetime
+        check_in = datetime.strptime(check_in_date, '%Y-%m-%d')
+        check_in = check_in.replace(hour=15, minute=0, second=0)
+        check_in = property_timezone.localize(check_in)
+        
+        check_out = datetime.strptime(check_out_date, '%Y-%m-%d')
+        check_out = check_out.replace(hour=11, minute=0, second=0)
+        check_out = property_timezone.localize(check_out)
+        
+        check_in_utc = check_in.astimezone(pytz.UTC)
+        check_out_utc = check_out.astimezone(pytz.UTC)
+        
+        if check_in_utc >= check_out_utc:
             return JsonResponse({'error': 'Check-out date must be after check-in date'}, status=400)
+        
+        check_in_date_obj = datetime.strptime(check_in_date, '%Y-%m-%d').date()
+        check_out_date_obj = datetime.strptime(check_out_date, '%Y-%m-%d').date()
+        days = (check_out_date_obj - check_in_date_obj).days
+        
+        if 'total_price' in request.data and request.data['total_price']:
+            try:
+
+                total_price = float(request.data['total_price'])
+            except (ValueError, TypeError):
+                total_price = float(property.price_per_night) * days
+                total_price += total_price * 0.1 
+                total_price += total_price * 0.15 
+                total_price += total_price * 0.12 
+        else:
+            total_price = float(property.price_per_night) * days
+            subtotal = total_price
+            total_price += subtotal * 0.1  
+            total_price += subtotal * 0.15  
+            total_price += subtotal * 0.12  
+        
+        # 查询冲突的预订 - 使用UTC时间进行比较
+        # 查找已有的预订，考虑房源时区
+        overlapping_bookings = False
+        existing_reservations = Reservation.objects.filter(property=property)
+        
+        # 以防万一，检查今天在房源时区是否已经过去
+        property_now = datetime.now(property_timezone)
+        property_today = property_now.replace(hour=0, minute=0, second=0, microsecond=0)
+        requested_checkin_local = datetime.strptime(check_in_date, '%Y-%m-%d')
+        requested_checkin_local = property_timezone.localize(requested_checkin_local)
+        
+        if requested_checkin_local < property_today:
+            return JsonResponse({'error': '在房源当地时区，不能预订过去的日期'}, status=400)
+        
+        print(f"房源当地现在时间: {property_now}")
+        print(f"预订入住日在当地: {requested_checkin_local}")
+        
+        # 清洁缓冲时间（分钟）
+        CLEANING_BUFFER_MINUTES = 120
+        
+        # 检查每个现有预订是否与新预订冲突
+        for reservation in existing_reservations:
+            # 将现有预订的UTC时间转换为房源当地时间
+            existing_checkin_local = reservation.check_in.astimezone(property_timezone)
+            existing_checkout_local = reservation.check_out.astimezone(property_timezone)
             
-        overlapping_bookings = Reservation.objects.filter(
-            property=property,
-            check_in__lte=check_out,
-            check_out__gte=check_in
-        ).exists()
+            # 标准重叠检查 - 检查两个时间段是否有任何重叠
+            # 当一个预订的结束时间大于另一个的开始时间，且一个预订的开始时间小于另一个的结束时间时，存在重叠
+            if (check_in < existing_checkout_local and check_out > existing_checkin_local):
+                overlapping_bookings = True
+                print(f"检测到标准预订重叠: 已有预订 {existing_checkin_local} 至 {existing_checkout_local}")
+                break
+            
+            # 额外检查: 清洁缓冲时间
+            # 如果新预订的入住时间太接近现有预订的退房时间（需要考虑清洁时间）
+            if (check_in >= existing_checkout_local and 
+                (check_in - existing_checkout_local).total_seconds() / 60 < CLEANING_BUFFER_MINUTES):
+                overlapping_bookings = True
+                print(f"检测到清洁时间冲突: 已有预订退房时间 {existing_checkout_local}, 与新预订入住时间 {check_in} 之间差距不足 {CLEANING_BUFFER_MINUTES} 分钟")
+                break
+                
+            # 如果现有预订的入住时间太接近新预订的退房时间（同样需要考虑清洁时间）
+            if (existing_checkin_local >= check_out and 
+                (existing_checkin_local - check_out).total_seconds() / 60 < CLEANING_BUFFER_MINUTES):
+                overlapping_bookings = True
+                print(f"检测到清洁时间冲突: 新预订退房时间 {check_out}, 与已有预订入住时间 {existing_checkin_local} 之间差距不足 {CLEANING_BUFFER_MINUTES} 分钟")
+                break
         
         if overlapping_bookings:
-            return JsonResponse({'error': 'These dates are not available'}, status=400)
-            
-        days = (check_out - check_in).days
-        total_price = property.price_per_night * days
+            return JsonResponse({'error': '这些日期不可用。可能与现有预订冲突或需要更多清洁时间。'}, status=400)
         
-        Reservation.objects.create(
+        print(f"最终价格: {total_price}")
+        
+        # 创建预订，存储UTC时间
+        reservation = Reservation.objects.create(
             property=property,
             user=request.user,
-            check_in=check_in,
-            check_out=check_out,
+            check_in=check_in_utc,
+            check_out=check_out_utc,
             guests=guests,
             total_price=total_price
         )
         
+        print(f"成功创建预订: ID={reservation.id}, 入住={reservation.check_in}, 退房={reservation.check_out}, 总价={reservation.total_price}")
         return JsonResponse({'success': True})
     except Property.DoesNotExist:
         return JsonResponse({'error': 'Property not found'}, status=404)
@@ -150,14 +303,54 @@ def get_booked_dates(request, pk):
         property = Property.objects.get(pk=pk)
         reservations = Reservation.objects.filter(property=property)
         
+        # 获取房源时区
+        property_timezone = pytz.timezone(property.timezone)
+        print(f"获取预订日期 - 房源时区: {property.timezone}")
+        
+        # 清洁缓冲时间（分钟）
+        CLEANING_BUFFER_MINUTES = 120
+        
+        # 完全预订的日期（整天不可预订）
         booked_dates = []
+        
+        # 部分预订的日期（由于清洁时间限制，一天中某些时段不可预订）
+        partially_booked_dates = []
+        
         for reservation in reservations:
-            current_date = reservation.check_in
-            while current_date <= reservation.check_out:
-                booked_dates.append(current_date.strftime('%Y-%m-%d'))
+            print(f"处理预订: ID={reservation.id}, UTC入住={reservation.check_in}, UTC退房={reservation.check_out}")
+            
+            # 将 UTC 时间转换为房源所在时区时间
+            check_in_local = reservation.check_in.astimezone(property_timezone)
+            check_out_local = reservation.check_out.astimezone(property_timezone)
+            
+            print(f"本地化后: 入住={check_in_local}, 退房={check_out_local}")
+            
+            # 检查入住日期（整天不可用）
+            current_date = check_in_local.date()
+            end_date = check_out_local.date()
+            
+            # 计算可能受清洁时间影响的日期
+            if check_out_local.hour == 11 and check_out_local.minute == 0:  # 标准上午11点退房
+                # 计算是否有足够时间在退房日当天为新客人清洁房间
+                # 从退房时间算起，退房日期中午11点到下午3点有4小时，远大于2小时清洁时间，所以退房日也可以入住
+                checkout_date_str = end_date.strftime('%Y-%m-%d')
+                if checkout_date_str not in partially_booked_dates:
+                    partially_booked_dates.append(checkout_date_str)
+            
+            # 将入住期间的日期标记为已预订（不包括退房日期，因为退房是上午11点，当天下午可以入住）
+            while current_date < end_date:  # 注意：这里不包括退房日期
+                date_str = current_date.strftime('%Y-%m-%d')
+                booked_dates.append(date_str)
                 current_date += timedelta(days=1)
         
-        return JsonResponse({'booked_dates': booked_dates})
+        # 对于partial_dates，前端应该显示一个不同的颜色或标记，表示"部分可用"
+        print(f"完全预订日期: {booked_dates}")
+        print(f"部分预订日期: {partially_booked_dates}")
+        
+        return JsonResponse({
+            'booked_dates': booked_dates,
+            'partially_booked_dates': partially_booked_dates
+        })
     except Property.DoesNotExist:
         return JsonResponse({'error': 'Property not found'}, status=404)
 
@@ -170,18 +363,36 @@ def get_user_reservations(request):
         
         data = []
         for reservation in reservations:
-            property_images = [{'imageURL': image.image.url} 
-                             for image in reservation.property.images.all()]
+            # 构建完整的图片URL
+            property_images = []
+            for image in reservation.property.images.all():
+                # 获取域名部分
+                host = request.get_host()
+                protocol = 'https' if request.is_secure() else 'http'
+                base_url = f"{protocol}://{host}"
+                
+                # 构建完整URL
+                image_url = image.image.url
+                if not image_url.startswith(('http://', 'https://')):
+                    if image_url.startswith('/'):
+                        image_url = f"{base_url}{image_url}"
+                    else:
+                        image_url = f"{base_url}/{image_url}"
+                
+                property_images.append({'imageURL': image_url})
+            
+            property_timezone = reservation.property.timezone
             
             reservation_data = {
                 'id': reservation.id,
                 'property': {
                     'id': reservation.property.id,
                     'title': reservation.property.title,
-                    'images': property_images
+                    'images': property_images,
+                    'timezone': property_timezone  
                 },
-                'check_in': reservation.check_in,
-                'check_out': reservation.check_out,
+                'check_in': reservation.check_in.isoformat(),  
+                'check_out': reservation.check_out.isoformat(),  
                 'guests': reservation.guests,
                 'total_price': float(reservation.total_price),
                 'created_at': reservation.created_at
