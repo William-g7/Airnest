@@ -25,14 +25,17 @@ export function getLocalizedPath(
 }
 
 // 从URL获取当前语言
-export function getLocaleFromPathname(pathname: string): string | null {
-    if (!pathname) return null;
+export function getLocaleFromPathname(pathname: string): string {
+    if (!pathname) {
+        return 'en';
+    }
 
     const segments = pathname.split('/').filter(Boolean);
     const firstSegment = segments[0];
 
-    if (locales.includes(firstSegment as any)) {
+    if (firstSegment && locales.includes(firstSegment as any)) {
         return firstSegment;
     }
-    return null;
+
+    return 'en';
 } 
