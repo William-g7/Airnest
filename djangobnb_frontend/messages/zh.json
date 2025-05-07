@@ -259,6 +259,11 @@
         "duration": "时长",
         "totalPrice": "总价",
         "viewProperty": "查看房源",
-        "nights": "晚"
+        "nights": "晚",
+        "noImage": "暂无图片",
+        "notEarlierThan": "不早于",
+        "notLaterThan": "不晚于",
+        "checkInInstructions": "请在入住当天的15:00之后办理入住",
+        "checkOutInstructions": "请在离店当天的11:00之前办理退房"
     }
 }

@@ -229,7 +229,12 @@
         "duration": "Durée",
         "totalPrice": "Prix total",
         "viewProperty": "Voir la propriété",
-        "nights": "nuits"
+        "nights": "nuits",
+        "noImage": "Aucune image disponible",
+        "notEarlierThan": "pas avant",
+        "notLaterThan": "pas après",
+        "checkInInstructions": "Veuillez arriver après 15h00 le jour de votre arrivée",
+        "checkOutInstructions": "Veuillez partir avant 11h00 le jour de votre départ"
     },
     "profile": {
         "title": "Profil",

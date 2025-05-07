@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchStore } from '@/app/stores/searchStore';
-import { format } from 'date-fns';
 import { useSearchParamsSync } from '@/app/hooks/useSearchParamsSync';
 import DatePicker from '@/app/components/properties/DatePicker';
 import SearchModal from '@/app/components/modals/SearchModal';
 import { useTranslations } from 'next-intl';
+import { formatLocalizedDate, formatDateForAPI } from '@/app/utils/dateUtils';
 
 const SearchFilters = () => {
     const { location, checkIn, checkOut, guests, setLocation, setDates, setGuests } = useSearchStore();
@@ -26,8 +26,8 @@ const SearchFilters = () => {
 
     const handleDateChange = (dates: [Date | null, Date | null]) => {
         const [start, end] = dates;
-        const startStr = start ? format(start, 'yyyy-MM-dd') : null;
-        const endStr = end ? format(end, 'yyyy-MM-dd') : null;
+        const startStr = start ? formatDateForAPI(start) : null;
+        const endStr = end ? formatDateForAPI(end) : null;
         setDates(startStr, endStr);
 
         if (start && end && activeFilter) {
@@ -108,7 +108,7 @@ const SearchFilters = () => {
                         >
                             <p className="text-xs font-semibold">{t('checkIn')}</p>
                             <p className="text-sm truncate">
-                                {checkIn ? format(new Date(checkIn), 'MMM d') : t('addDate')}
+                                {checkIn ? formatLocalizedDate(checkIn, 'UTC', 'short') : t('addDate')}
                             </p>
                         </div>
 
@@ -121,7 +121,7 @@ const SearchFilters = () => {
                         >
                             <p className="text-xs font-semibold">{t('checkOut')}</p>
                             <p className="text-sm truncate">
-                                {checkOut ? format(new Date(checkOut), 'MMM d') : t('addDate')}
+                                {checkOut ? formatLocalizedDate(checkOut, 'UTC', 'short') : t('addDate')}
                             </p>
                         </div>
 
@@ -250,7 +250,9 @@ const SearchFilters = () => {
                     setDates={setDates}
                     setGuests={setGuests}
                     onClose={handleCloseFullSearch}
-                    onSearch={handleSearch}
+                    onSearch={() => {
+                        setShowFullSearch(false);
+                    }}
                 />
             )}
         </>

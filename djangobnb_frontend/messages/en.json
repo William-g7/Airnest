@@ -242,6 +242,11 @@
         "duration": "Duration",
         "totalPrice": "Total price",
         "viewProperty": "View Property",
-        "nights": "nights"
+        "nights": "nights",
+        "noImage": "No image available",
+        "notEarlierThan": "not earlier than",
+        "notLaterThan": "not later than",
+        "checkInInstructions": "Please check in after 3:00 PM on your arrival date",
+        "checkOutInstructions": "Please check out before 11:00 AM on your departure date"
     }
 }
