@@ -164,7 +164,17 @@
         "propertyDescription": "Add a description",
         "descriptionPlaceholder": "Share what makes your place special...",
         "pricePerNight": "Set your price per night",
-        "characters": "characters"
+        "characters": "characters",
+        "streetAddress": "Street Address",
+        "city": "City",
+        "stateProvince": "State/Province",
+        "country": "Country",
+        "selectCountry": "Select Country",
+        "postalCode": "Postal Code",
+        "timezone": "Timezone",
+        "loadingTimezones": "Loading timezones...",
+        "selectTimezone": "Select timezone",
+        "timezoneHelp": "This helps guests understand check-in/check-out times in their local timezone"
     },
     "categories": {
         "omg": "OMG!",
