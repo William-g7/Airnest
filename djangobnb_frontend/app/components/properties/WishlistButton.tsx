@@ -3,7 +3,7 @@
 interface WishlistButtonProps {
     propertyId: string;
     isFavorited: boolean;
-    onToggle: (e: React.MouseEvent) => Promise<void>;
+    onToggle: (e: React.MouseEvent) => void;
 }
 
 const WishlistButton: React.FC<WishlistButtonProps> = ({ propertyId, isFavorited, onToggle }) => {
