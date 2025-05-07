@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { Inter } from 'next/font/google';
 import { ReactNode } from 'react';
 import { locales } from '../../i18n/routing';
+import { LocaleInitializer } from '../components/LocaleInitializer';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -31,6 +32,7 @@ export default async function LocaleLayout({
 
     return (
         <NextIntlClientProvider locale={locale} messages={messages}>
+            <LocaleInitializer />
             {children}
         </NextIntlClientProvider>
     );
