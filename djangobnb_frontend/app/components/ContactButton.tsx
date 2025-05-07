@@ -1,11 +1,10 @@
 'use client'
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { getUserId } from "@/app/auth/session";
 import apiService from "@/app/services/apiService";
 import { useLoginModal } from "./hooks/useLoginModal";
 import { useTranslations, useLocale } from 'next-intl';
+import { useAuth } from "../hooks/useAuth";
 
 interface ContactButtonProps {
     landlordId: string;
@@ -14,21 +13,12 @@ interface ContactButtonProps {
 const ContactButton = ({ landlordId }: ContactButtonProps) => {
     const router = useRouter();
     const loginModal = useLoginModal();
-    const [userId, setUserId] = useState<string | null>(null);
     const t = useTranslations('common');
     const locale = useLocale();
-
-    useEffect(() => {
-        const fetchUserId = async () => {
-            const id = await getUserId();
-            setUserId(id);
-        };
-        fetchUserId();
-    }, []);
+    const { userId, isAuthenticated } = useAuth();
 
     const handleContact = async () => {
-        if (!userId) {
-            console.log('User not logged in, opening login modal');
+        if (!isAuthenticated || !userId) {
             loginModal.onOpen();
             return;
         }

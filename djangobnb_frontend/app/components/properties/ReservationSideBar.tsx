@@ -8,6 +8,7 @@ import apiService from '@/app/services/apiService';
 import { useLoginModal } from '../hooks/useLoginModal';
 import { useTranslations } from 'next-intl';
 import { formatDateForAPI, calculateNights } from '@/app/utils/dateUtils';
+import { useAuth } from '@/app/hooks/useAuth';
 
 const ReservationSideBar = ({ property }: { property: PropertyType }) => {
     const t = useTranslations('property');
@@ -18,22 +19,7 @@ const ReservationSideBar = ({ property }: { property: PropertyType }) => {
     const loginModal = useLoginModal();
     const [bookedDates, setBookedDates] = useState<string[]>([]);
     const [partiallyBookedDates, setPartiallyBookedDates] = useState<string[]>([]);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-    useEffect(() => {
-        const checkLoginStatus = async () => {
-            try {
-                const response = await apiService.getwithtoken('/api/auth/me/');
-                const loggedIn = !!response?.pk;
-                setIsLoggedIn(loggedIn);
-            } catch (error) {
-                console.error('Error checking login status:', error);
-                setIsLoggedIn(false);
-            }
-        };
-
-        checkLoginStatus();
-    }, []);
+    const { isAuthenticated } = useAuth();
 
     const getNights = () => {
         if (dates[0] && dates[1]) {
@@ -66,6 +52,12 @@ const ReservationSideBar = ({ property }: { property: PropertyType }) => {
             return;
         }
 
+        if (!isAuthenticated) {
+            console.log('User not logged in, opening login modal');
+            loginModal.onOpen();
+            return;
+        }
+
         try {
             setIsLoading(true);
 
@@ -73,32 +65,30 @@ const ReservationSideBar = ({ property }: { property: PropertyType }) => {
             const checkInDateStr = formatDateForAPI(dates[0]);
             const checkOutDateStr = formatDateForAPI(dates[1]);
 
-            try {
-                const response = await apiService.post(`/api/properties/${property.id}/reserve/`, {
-                    check_in: checkInDateStr,
-                    check_out: checkOutDateStr,
-                    guests: guests,
-                    total_price: totals.total
-                });
+            const response = await apiService.post(`/api/properties/${property.id}/reserve/`, {
+                check_in: checkInDateStr,
+                check_out: checkOutDateStr,
+                guests: guests,
+                total_price: totals.total
+            });
 
-                if (response.success) {
-                    router.push({
-                        pathname: '/myreservations'
-                    });
-                } else {
-                    alert(response.error || t('reservationFailed'));
-                }
-            } catch (err: any) {
-                if (err.message?.includes('authentication') || err.message?.includes('token')) {
-                    loginModal.onOpen();
-                } else {
-                    alert(t('reservationFailed'));
-                }
-                console.error('Error making reservation:', err);
+            if (response.success) {
+                router.push({
+                    pathname: '/myreservations'
+                });
+            } else {
+                alert(response.error || t('reservationFailed'));
             }
-        } catch (error: any) {
-            console.error('Error:', error);
-            alert(t('reservationFailed'));
+        } catch (err: any) {
+            console.error('Error making reservation:', err);
+
+            if (err.response?.status === 401 ||
+                err.message?.includes('authentication') ||
+                err.message?.includes('token')) {
+                loginModal.onOpen();
+            } else {
+                alert(t('reservationFailed'));
+            }
         } finally {
             setIsLoading(false);
         }
