@@ -22,7 +22,7 @@ class PropertySerializer(serializers.ModelSerializer):
             'category', 'place_type', 'bedrooms', 'bathrooms',
             'guests', 'beds', 'country', 'state', 'city',
             'address', 'postal_code', 'landlord', 'created_at',
-            'images'
+            'images', 'timezone'
         ]
 
 
@@ -35,7 +35,7 @@ class PropertyLandlordSerializer(serializers.ModelSerializer):
             'category', 'place_type', 'bedrooms', 'bathrooms',
             'guests', 'beds', 'country', 'state', 'city',
             'address', 'postal_code', 'landlord', 'created_at',
-            'images']
+            'images', 'timezone']
 
 class PropertyListSerializer(serializers.ModelSerializer):
     images = PropertyImageSerializer(many=True, read_only=True)
@@ -44,5 +44,5 @@ class PropertyListSerializer(serializers.ModelSerializer):
         model = Property
         fields = [
             'id', 'title', 'price_per_night', 'city', 
-            'country', 'guests', 'images'
+            'country', 'guests', 'images', 'timezone'
         ]
