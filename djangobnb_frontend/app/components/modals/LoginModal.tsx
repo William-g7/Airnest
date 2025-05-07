@@ -8,11 +8,13 @@ import Modal from "./Modal";
 import CustomButton from "../forms/CustomButton";
 import apiService from "@/app/services/apiService";
 import { useTranslations } from 'next-intl';
+import { useAuthStore } from "@/app/stores/authStore";
 
 export default function LoginModal() {
     const t = useTranslations('auth');
     const loginModal = useLoginModal();
     const router = useRouter();
+    const { setAuthenticated } = useAuthStore();
     const [formData, setFormData] = useState({
         email: '',
         password: ''
@@ -25,7 +27,6 @@ export default function LoginModal() {
             setIsLoading(true);
             setError("");
 
-            // Basic validation
             if (!formData.email || !formData.password) {
                 setError(t('pleaseCompleteAllFields'));
                 return;
@@ -42,6 +43,7 @@ export default function LoginModal() {
 
             if (response && response.access) {
                 await handleLogin(response.user.pk, response.access, response.refresh);
+                setAuthenticated(response.user.pk);
                 loginModal.onClose();
                 await router.refresh();
                 router.push('/');

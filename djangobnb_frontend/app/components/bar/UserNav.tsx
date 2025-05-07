@@ -7,17 +7,22 @@ import { useSignupModal } from "../hooks/useSignupModal";
 import LogoutButton from "./LogoutButton";
 import MenuLink from "./MenuLink";
 import { useTranslations } from 'next-intl';
+import { useAuthStore } from "@/app/stores/authStore";
 
 interface UserNavProps {
     userId: string | null;
 }
 
-const UserNav: React.FC<UserNavProps> = ({ userId }) => {
+const UserNav: React.FC<UserNavProps> = ({ userId: initialUserId }) => {
     const [isOpen, setIsOpen] = useState(false);
     const loginModal = useLoginModal();
     const signupModal = useSignupModal();
     const router = useRouter();
     const t = useTranslations('navigation');
+
+    // 优先使用 Zustand 存储的 userId，如果为 null 则使用从服务器传递的初始值
+    const { userId: storeUserId, isAuthenticated } = useAuthStore();
+    const userId = storeUserId || initialUserId;
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
