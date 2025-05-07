@@ -37,6 +37,22 @@
         "whosComing": "Qui vient ?",
         "closeModal": "Fermer la recherche"
     },
+    "datePicker": {
+        "bookingNotes": "Notes de réservation",
+        "bookingDates": "Dates de réservation",
+        "localTimeNote": "Toutes les dates sont à l'heure locale du logement",
+        "checkInTime": "Heure d'arrivée",
+        "checkInAfter": "ou plus tard",
+        "checkOutTime": "Heure de départ",
+        "checkOutBefore": "ou plus tôt",
+        "cleaningTime": "Temps de nettoyage",
+        "hours": "heures",
+        "deepCleaning": "de nettoyage en profondeur",
+        "unavailable": "Indisponible",
+        "needConfirmation1": "Nécessite une confirmation",
+        "needConfirmation2": "Nécessite une confirmation, peut être affecté par le temps de nettoyage",
+        "partiallyBooked": "Partiellement réservé"
+    },
     "inbox": {
         "title": "Messagerie",
         "conversations": "Conversations",
@@ -215,7 +231,12 @@
         "duration": "Durée",
         "totalPrice": "Prix total",
         "viewProperty": "Voir la propriété",
-        "nights": "nuits"
+        "nights": "nuits",
+        "noImage": "Aucune image disponible",
+        "notEarlierThan": "pas avant",
+        "notLaterThan": "pas après",
+        "checkInInstructions": "Veuillez arriver après 15h00 le jour de votre arrivée",
+        "checkOutInstructions": "Veuillez partir avant 11h00 le jour de votre départ"
     },
     "profile": {
         "title": "Profil",

@@ -1,8 +1,8 @@
 'use client'
 
-import { format } from 'date-fns';
 import DatePicker from '@/app/components/properties/DatePicker';
 import { useTranslations } from 'next-intl';
+import { formatDateForAPI } from '@/app/utils/dateUtils';
 
 interface SearchModalProps {
     location: string;
@@ -37,8 +37,8 @@ const SearchModal = ({
 
     const handleDateChange = (dates: [Date | null, Date | null]) => {
         const [start, end] = dates;
-        const startStr = start ? format(start, 'yyyy-MM-dd') : null;
-        const endStr = end ? format(end, 'yyyy-MM-dd') : null;
+        const startStr = start ? formatDateForAPI(start) : null;
+        const endStr = end ? formatDateForAPI(end) : null;
         setDates(startStr, endStr);
     };
 

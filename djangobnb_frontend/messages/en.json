@@ -38,6 +38,22 @@
         "closeModal": "Close search modal",
         "viewConversation": "View conversation"
     },
+    "datePicker": {
+        "bookingNotes": "Booking Notes",
+        "bookingDates": "Booking dates",
+        "localTimeNote": "All times are in the property's local timezone",
+        "checkInTime": "Check-in time",
+        "checkInAfter": "or later",
+        "checkOutTime": "Check-out time",
+        "checkOutBefore": "or earlier",
+        "cleaningTime": "Cleaning time",
+        "hours": "hours",
+        "deepCleaning": "for deep cleaning",
+        "unavailable": "Unavailable",
+        "needConfirmation1": "Requires confirmation",
+        "needConfirmation2": "Requires confirmation, may be affected by cleaning time",
+        "partiallyBooked": "Partially booked"
+    },
     "inbox": {
         "title": "Inbox",
         "conversations": "Conversations",
@@ -228,6 +244,11 @@
         "duration": "Duration",
         "totalPrice": "Total price",
         "viewProperty": "View Property",
-        "nights": "nights"
+        "nights": "nights",
+        "noImage": "No image available",
+        "notEarlierThan": "not earlier than",
+        "notLaterThan": "not later than",
+        "checkInInstructions": "Please check in after 3:00 PM on your arrival date",
+        "checkOutInstructions": "Please check out before 11:00 AM on your departure date"
     }
 }

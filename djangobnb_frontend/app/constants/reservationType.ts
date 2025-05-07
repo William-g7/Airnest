@@ -4,6 +4,7 @@ export interface ReservationType {
         id: number;
         title: string;
         images: Array<{ imageURL: string }>;
+        timezone: string;
     };
     check_in: string;
     check_out: string;
