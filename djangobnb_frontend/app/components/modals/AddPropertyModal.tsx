@@ -27,7 +27,8 @@ export default function AddPropertyModal() {
         city: '',
         state: '',
         country: '',
-        postalCode: ''
+        postalCode: '',
+        timezone: 'UTC'
     });
     const [basicInfo, setBasicInfo] = useState({
         guests: 1,
@@ -63,7 +64,8 @@ export default function AddPropertyModal() {
                 return location.street !== '' &&
                     location.city !== '' &&
                     location.country !== '' &&
-                    location.postalCode !== '';
+                    location.postalCode !== '' &&
+                    location.timezone !== '';
             case 4:
                 return true;
             case 5:
@@ -109,6 +111,7 @@ export default function AddPropertyModal() {
             formData.append('city', location.city);
             formData.append('address', location.street);
             formData.append('postal_code', location.postalCode);
+            formData.append('timezone', location.timezone);
 
             for (const [index, image] of images.entries()) {
                 const file = await fetch(image).then(r => r.blob());
@@ -198,6 +201,12 @@ export default function AddPropertyModal() {
                         </p>
                         <PropertyDetailsForm details={propertyDetails} setDetails={setPropertyDetails} />
                     </>
+                )}
+
+                {error && (
+                    <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md">
+                        {error}
+                    </div>
                 )}
             </div>
 
