@@ -4,18 +4,19 @@ import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useSignupModal } from "../hooks/useSignupModal";
 import { useLoginModal } from "../hooks/useLoginModal";
-
 import Modal from "./Modal";
 import CustomButton from "../forms/CustomButton";
 import apiService from "@/app/services/apiService";
 import { handleLogin } from "@/app/auth/session";
 import { useTranslations } from 'next-intl';
+import { useAuthStore } from "@/app/stores/authStore";
 
 export default function SignupModal() {
     const t = useTranslations('auth');
     const router = useRouter();
     const signupModal = useSignupModal();
     const loginModal = useLoginModal();
+    const { setAuthenticated } = useAuthStore();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
@@ -43,7 +44,7 @@ export default function SignupModal() {
 
             if (response.access) {
                 await handleLogin(response.user_pk, response.access, response.refresh);
-
+                setAuthenticated(response.user_pk);
                 signupModal.onClose();
                 router.push('/');
             } else {

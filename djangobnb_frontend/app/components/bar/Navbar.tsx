@@ -5,8 +5,10 @@ import { getUserId } from "@/app/auth/session";
 import LanguageSwitcher from "./LanguageSwitcher";
 import ResetLogo from "./ResetLogo";
 
+// 导航栏保持为服务器组件, 使用服务器端的 getUserId 来初始化
 const Navbar = async () => {
     const userId = await getUserId();
+
     return (
         <nav className="w-full fixed top-0 left-0 py-5 right-0 z-20 bg-white">
             <div className="max-w-[1500px] mx-auto px-4 sm:px-6">
