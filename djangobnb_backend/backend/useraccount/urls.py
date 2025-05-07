@@ -13,6 +13,8 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='rest_login'),
     path('logout/', LogoutView.as_view(), name='rest_logout'),
     path('me/', UserDetailsView.as_view(), name='user_details'),
+    path('token/refresh/', get_refresh_view().as_view(), name='token_refresh'),
+    path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('profile/<uuid:pk>/', api.profile_detail, name='api_profile_detail'),
     path('landlords/<uuid:pk>/', api.landlord_detail, name='api_landlord_detail'),
 ]
