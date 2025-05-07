@@ -3,11 +3,13 @@
 import { PropertyType } from "@/app/constants/propertyType";
 import Image from "next/image";
 import WishlistButton from "./WishlistButton";
-import { useState, useEffect } from "react";
+import { useCallback } from "react";
 import { useLoginModal } from "../hooks/useLoginModal";
-import apiService from "@/app/services/apiService";
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
+import { useAuth } from "@/app/hooks/useAuth";
+import { useFavoritesStore } from "@/app/stores/favoritesStore";
+import { debounce } from "@/app/utils/debounce";
 
 interface PropertyListItemProps {
     property: PropertyType;
@@ -15,51 +17,40 @@ interface PropertyListItemProps {
 
 const PropertyListItem: React.FC<PropertyListItemProps> = ({ property }) => {
     const t = useTranslations('properties');
-    const [isFavorited, setIsFavorited] = useState(false);
     const router = useRouter();
     const loginModal = useLoginModal();
 
-    useEffect(() => {
-        const checkIfFavorited = async () => {
+    const { isAuthenticated } = useAuth();
+    const { isFavorite, toggleFavorite } = useFavoritesStore();
+
+    const debouncedToggleWishlist = useCallback(
+        debounce(async (e: React.MouseEvent) => {
+            e.stopPropagation();
+
+            if (!isAuthenticated) {
+                loginModal.onOpen();
+                return;
+            }
+
             try {
-                const response = await apiService.getwithtoken('/api/properties/wishlist/');
-                const wishlist = response;
-                setIsFavorited(wishlist.some((item: PropertyType) => item.id === property.id));
+                await toggleFavorite(property.id);
             } catch (error: any) {
-                if (error.message !== 'HTTP error! status: 401') {
-                    console.error('Error checking wishlist status:', error);
+                if (error.message === 'No authentication token available') {
+                    loginModal.onOpen();
+                } else {
+                    console.error('Error toggling wishlist:', error);
                 }
             }
-        };
-
-        checkIfFavorited();
-    }, [property.id]);
-
-    const handleToggleWishlist = async (e: React.MouseEvent) => {
-        e.stopPropagation();
-
-        try {
-            const response = await apiService.post(`/api/properties/${property.id}/toggle-favorite/`, {
-                propertyId: property.id
-            });
-            if (response.status === 'added' || response.status === 'removed') {
-                setIsFavorited(response.status === 'added');
-            }
-        } catch (error: any) {
-            if (error.message === 'No authentication token available') {
-                loginModal.onOpen();
-            } else {
-                console.error('Error toggling wishlist:', error);
-            }
-        }
-    };
+        }, 300),
+        [property.id, isAuthenticated, loginModal, toggleFavorite]
+    );
 
     return (
         <div className="relative group">
             <WishlistButton
                 propertyId={property.id}
-                isFavorited={isFavorited}
-                onToggle={handleToggleWishlist}
+                isFavorited={isFavorite(property.id)}
+                onToggle={debouncedToggleWishlist}
             />
             <div className="cursor-pointer"
                 onClick={() => router.push({ pathname: '/properties/[id]', params: { id: property.id } })}>
