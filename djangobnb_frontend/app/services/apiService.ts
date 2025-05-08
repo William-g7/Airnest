@@ -1,7 +1,157 @@
 import { getAccessToken } from "../auth/session";
+import { tokenService } from "./tokenService";
+import { useAuthStore } from "../stores/authStore";
 
 interface RequestOptions {
     forceRefresh?: boolean;
+}
+
+// 用于防止多个请求同时触发刷新
+let isRefreshing = false;
+let refreshPromise: Promise<string | null> | null = null;
+let refreshCallbacks: Array<(token: string | null) => void> = [];
+
+// 添加回调到队列
+const addRefreshCallback = (callback: (token: string | null) => void) => {
+    refreshCallbacks.push(callback);
+};
+
+// 执行所有回调
+const executeRefreshCallbacks = (token: string | null) => {
+    refreshCallbacks.forEach(callback => callback(token));
+    refreshCallbacks = [];
+};
+
+// 处理令牌刷新的函数，避免多个请求同时触发刷新
+async function handleTokenRefresh(): Promise<string | null> {
+    // 如果已经在刷新中，返回现有的刷新Promise
+    if (isRefreshing) {
+        return new Promise((resolve) => {
+            addRefreshCallback((token) => {
+                resolve(token);
+            });
+        });
+    }
+
+    isRefreshing = true;
+    refreshPromise = tokenService.refreshToken();
+
+    try {
+        const newToken = await refreshPromise;
+        executeRefreshCallbacks(newToken);
+        return newToken;
+    } catch (error) {
+        executeRefreshCallbacks(null);
+        return null;
+    } finally {
+        isRefreshing = false;
+        refreshPromise = null;
+    }
+}
+
+// 通用的认证请求执行函数
+async function executeAuthenticatedRequest<T>(
+    method: string,
+    url: string,
+    data?: any,
+    customHeaders?: Record<string, string>
+): Promise<T> {
+    const token = await getAccessToken();
+    if (!token) {
+        throw new Error('No authentication token available');
+    }
+
+    try {
+        return await makeRequest<T>(method, url, token, data, customHeaders);
+    } catch (error: any) {
+        if (error.message.includes('HTTP error! status: 401')) {
+            console.log('Token expired, attempting to refresh...');
+
+            const newToken = await handleTokenRefresh();
+
+            if (newToken) {
+                return await makeRequest<T>(method, url, newToken, data, customHeaders);
+            } else {
+                useAuthStore.getState().setUnauthenticated();
+                throw new Error('Authentication failed. Please login again.');
+            }
+        }
+        throw error;
+    }
+}
+
+// 执行实际的HTTP请求
+async function makeRequest<T>(
+    method: string,
+    url: string,
+    token: string,
+    data?: any,
+    customHeaders?: Record<string, string>
+): Promise<T> {
+    const requestUrl = `${process.env.NEXT_PUBLIC_API_URL}${url}`;
+    const headers: Record<string, string> = {
+        'Authorization': `Bearer ${token}`,
+        ...customHeaders
+    };
+
+    const options: RequestInit = {
+        method,
+        headers,
+        credentials: 'include'
+    };
+
+    if (data) {
+        if (data instanceof FormData) {
+            delete headers['Content-Type'];
+            options.body = data;
+        } else {
+            headers['Content-Type'] = 'application/json';
+            options.body = JSON.stringify(data);
+        }
+    }
+
+    const response = await fetch(requestUrl, options);
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    if (method === 'DELETE' && response.status === 204) {
+        return {} as T;
+    }
+
+    const text = await response.text();
+    if (!text) {
+        return {} as T;
+    }
+
+    try {
+        return JSON.parse(text) as T;
+    } catch (error) {
+        throw new Error('Invalid JSON response');
+    }
+}
+
+// 处理未认证请求的错误
+function handleUnauthenticatedResponseError(response: Response, responseData: any): void {
+    if (!response.ok) {
+        if (responseData && responseData.email) {
+            throw new Error(responseData.email[0]);
+        } else if (responseData && responseData.detail) {
+            throw new Error(responseData.detail);
+        } else if (responseData && responseData.non_field_errors) {
+            throw new Error(responseData.non_field_errors[0]);
+        } else if (responseData && responseData.password) {
+            throw new Error(responseData.password[0]);
+        } else if (typeof responseData === 'object' && Object.keys(responseData).length > 0) {
+            const firstErrorKey = Object.keys(responseData)[0];
+            const errorValue = responseData[firstErrorKey];
+            const errorMessage = Array.isArray(errorValue) ? errorValue[0] : errorValue;
+            throw new Error(errorMessage || 'API Error');
+        } else {
+            throw new Error('AUTH_INVALID_CREDENTIALS');
+        }
+    }
 }
 
 const apiService = {
@@ -21,6 +171,7 @@ const apiService = {
                 method: 'GET',
                 headers,
                 cache: options.forceRefresh ? 'reload' : 'default',
+                credentials: 'include',
             });
 
             if (!response.ok) {
@@ -28,7 +179,6 @@ const apiService = {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
-            console.log(data);
             return data;
         } catch (error) {
             console.error('API request failed:', error);
@@ -36,61 +186,18 @@ const apiService = {
         }
     },
 
-    getwithtoken: async function (url: string): Promise<any> {
+    getwithtoken: async function <T = any>(url: string): Promise<T> {
         try {
-            const token = await getAccessToken();
-
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            if (!response.ok) {
-                console.log(response);
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            return data;
+            return await executeAuthenticatedRequest<T>('GET', url);
         } catch (error) {
-            console.log(error);
+            console.error('API request failed:', error);
             throw error;
         }
     },
 
-    post: async function (url: string, data: any): Promise<any> {
+    post: async function <T = any>(url: string, data: any): Promise<T> {
         try {
-            const token = await getAccessToken();
-
-            if (!token) {
-                throw new Error('No authentication token available');
-            }
-
-            const headers: Record<string, string> = {
-                'Authorization': `Bearer ${token}`,
-            };
-            if (!(data instanceof FormData)) {
-                headers['Content-Type'] = 'application/json';
-                data = JSON.stringify(data);
-            }
-
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
-                method: 'POST',
-                headers: headers,
-                body: data,
-                credentials: 'include'
-            });
-
-            const responseText = await response.text();
-
-            try {
-                const json = JSON.parse(responseText);
-                return json;
-            } catch (parseError) {
-                throw new Error('Invalid JSON response');
-            }
+            return await executeAuthenticatedRequest<T>('POST', url, data);
         } catch (error) {
             console.error('POST request error:', error);
             throw error;
@@ -106,6 +213,7 @@ const apiService = {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(data),
+                credentials: 'include',
             });
 
             const text = await response.text();
@@ -115,26 +223,7 @@ const apiService = {
 
             try {
                 const responseData = JSON.parse(text);
-
-                if (!response.ok) {
-                    if (responseData && responseData.email) {
-                        throw new Error(responseData.email[0]);
-                    } else if (responseData && responseData.detail) {
-                        throw new Error(responseData.detail);
-                    } else if (responseData && responseData.non_field_errors) {
-                        throw new Error(responseData.non_field_errors[0]);
-                    } else if (responseData && responseData.password) {
-                        throw new Error(responseData.password[0]);
-                    } else if (typeof responseData === 'object' && Object.keys(responseData).length > 0) {
-                        const firstErrorKey = Object.keys(responseData)[0];
-                        const errorValue = responseData[firstErrorKey];
-                        const errorMessage = Array.isArray(errorValue) ? errorValue[0] : errorValue;
-                        throw new Error(errorMessage || 'API Error');
-                    } else {
-                        throw new Error('AUTH_INVALID_CREDENTIALS');
-                    }
-                }
-
+                handleUnauthenticatedResponseError(response, responseData);
                 return responseData;
             } catch (parseError) {
                 console.error('JSON parsing error:', parseError);
@@ -151,27 +240,23 @@ const apiService = {
         }
     },
 
-    patch: async function (url: string, data: any): Promise<any> {
+    patch: async function <T = any>(url: string, data: any): Promise<T> {
         try {
-            const token = await getAccessToken();
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: data,
-            });
-            if (!response.ok) {
-                console.log(response);
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            return await response.json();
+            return await executeAuthenticatedRequest<T>('PATCH', url, data);
         } catch (error) {
-            console.log(error);
+            console.error('PATCH request error:', error);
+            throw error;
+        }
+    },
+
+    delete: async function <T = any>(url: string): Promise<T> {
+        try {
+            return await executeAuthenticatedRequest<T>('DELETE', url);
+        } catch (error) {
+            console.error('DELETE request error:', error);
+            throw error;
         }
     }
-
 };
 
 export default apiService;
