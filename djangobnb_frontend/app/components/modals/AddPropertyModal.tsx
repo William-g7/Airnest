@@ -53,7 +53,6 @@ export default function AddPropertyModal() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
-    // 检查用户是否已登录
     useEffect(() => {
         if (addPropertyModal.isOpen && !isAuthenticated) {
             addPropertyModal.onClose();
