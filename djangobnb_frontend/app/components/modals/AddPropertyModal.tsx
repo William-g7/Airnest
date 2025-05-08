@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAddPropertyModal } from '../hooks/useAddPropertyModal'
+import { useLoginModal } from '../hooks/useLoginModal'
+import { useAuthStore } from '@/app/stores/authStore'
 import Modal from './Modal'
 import Categories from '../addproperty/Catogories'
 import PlaceTypes from '../addproperty/PlaceTypes'
@@ -45,9 +47,20 @@ export default function AddPropertyModal() {
     });
 
     const addPropertyModal = useAddPropertyModal();
+    const loginModal = useLoginModal();
+    const { isAuthenticated } = useAuthStore();
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+
+    // 检查用户是否已登录
+    useEffect(() => {
+        if (addPropertyModal.isOpen && !isAuthenticated) {
+            addPropertyModal.onClose();
+            loginModal.onOpen();
+        }
+    }, [addPropertyModal.isOpen, isAuthenticated, addPropertyModal, loginModal]);
+
     const onBack = () => {
         if (currentStep > 1) {
             setCurrentStep(prev => prev - 1);
