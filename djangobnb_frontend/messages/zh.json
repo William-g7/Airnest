@@ -83,13 +83,19 @@
         "editProfile": "编辑资料",
         "cancel": "取消",
         "saving": "保存中...",
+        "loading": "加载中...",
         "saveChanges": "保存更改",
         "name": "姓名",
         "email": "邮箱",
         "memberSince": "注册时间",
         "notSet": "未设置",
         "loadError": "加载个人资料失败",
-        "updateError": "更新个人资料失败"
+        "updateError": "更新个人资料失败",
+        "avatarSizeLimit": "图片必须小于{maxSizeMB}MB",
+        "avatarTypeLimit": "只允许JPEG、PNG或WebP格式的图片",
+        "avatar": "头像",
+        "avatarUpload": "上传头像",
+        "profileNotFound": "未找到个人资料"
     },
     "common": {
         "search": "搜索",

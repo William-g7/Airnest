@@ -84,12 +84,18 @@
         "cancel": "Cancel",
         "saving": "Saving...",
         "saveChanges": "Save Changes",
+        "loading": "Loading...",
         "name": "Name",
         "email": "Email",
         "memberSince": "Member Since",
         "notSet": "Not set",
         "loadError": "Failed to load profile",
-        "updateError": "Failed to update profile"
+        "updateError": "Failed to update profile",
+        "avatarSizeLimit": "Image must be less than {maxSizeMB}MB",
+        "avatarTypeLimit": "Only JPEG, PNG or WebP images are allowed",
+        "avatar": "Profile Picture",
+        "avatarUpload": "Choose File",
+        "profileNotFound": "Profile not found"
     },
     "common": {
         "search": "Search",

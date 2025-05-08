@@ -22,12 +22,16 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string, 
     const router = useRouter();
 
     const [isEditing, setIsEditing] = useState(false);
-    const [error, setError] = useState("");
+    const [loadError, setLoadError] = useState("");
+    const [formError, setFormError] = useState("");
     const [isLoading, setIsLoading] = useState(true);
     const [profile, setProfile] = useState<ProfileData | null>(null);
     const [newAvatar, setNewAvatar] = useState<File | null>(null);
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
     const [name, setName] = useState("");
+
+    const MAX_AVATAR_SIZE_MB = 2;
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -37,30 +41,43 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string, 
                 setName(response.name || '');
             } catch (error) {
                 console.error('Error fetching profile:', error);
-                setError("Failed to load profile");
+                setLoadError(t('loadError'));
             } finally {
                 setIsLoading(false);
             }
         };
 
         fetchProfile();
-    }, [userId]);
+    }, [userId, t]);
 
     if (isLoading) {
-        return <div className="text-center mt-8">Loading...</div>;
+        return <div className="text-center mt-8">{t('loading')}</div>;
     }
 
-    if (error) {
-        return <div className="text-center mt-8 text-red-500">{error}</div>;
+    if (loadError && !profile) {
+        return <div className="text-center mt-8 text-red-500">{loadError}</div>;
     }
 
     if (!profile) {
-        return <div className="text-center mt-8">Profile not found</div>;
+        return <div className="text-center mt-8">{t('profileNotFound')}</div>;
     }
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
+
+            if (!ALLOWED_TYPES.includes(file.type)) {
+                setFormError(t('avatarTypeLimit'));
+                return;
+            }
+
+            const fileSizeMB = file.size / (1024 * 1024);
+            if (fileSizeMB > MAX_AVATAR_SIZE_MB) {
+                setFormError(t('avatarSizeLimit', { maxSizeMB: MAX_AVATAR_SIZE_MB }));
+                return;
+            }
+
+            setFormError("");
             setNewAvatar(file);
             setAvatarPreview(URL.createObjectURL(file));
         }
@@ -69,7 +86,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string, 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        setError("");
+        setFormError("");
 
         try {
             const formData = new FormData();
@@ -92,7 +109,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string, 
             setName(updatedProfile.name || '');
         } catch (error: any) {
             console.error('Profile update error:', error);
-            setError(error.message || "Failed to update profile");
+            setFormError(error.message || t('updateError'));
         } finally {
             setIsLoading(false);
         }
@@ -114,7 +131,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string, 
 
                         {isEditing ? (
                             <form onSubmit={handleSubmit} className="space-y-6">
-                                <div className="flex flex-col items-center gap-4">
+                                <div className="flex flex-col items-center gap-6">
                                     <div className="relative w-32 h-32">
                                         <Image
                                             src={avatarPreview || profile.avatar_url || '/images/default-avatar.png'}
@@ -123,33 +140,52 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string, 
                                             className="rounded-full object-cover"
                                         />
                                     </div>
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleImageChange}
-                                        className="text-sm"
-                                    />
+
+                                    <div className="flex flex-col items-center">
+                                        <label
+                                            htmlFor="avatar-upload"
+                                            className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md cursor-pointer transition"
+                                        >
+                                            {t('avatarUpload')}
+                                        </label>
+                                        <input
+                                            id="avatar-upload"
+                                            type="file"
+                                            accept="image/jpeg, image/png, image/webp"
+                                            onChange={handleImageChange}
+                                            className="hidden"
+                                        />
+                                        <p className="text-xs text-gray-500 mt-2">
+                                            {t('avatarSizeLimit', { maxSizeMB: MAX_AVATAR_SIZE_MB })}
+                                        </p>
+                                    </div>
                                 </div>
 
+                                {formError && (
+                                    <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded-md">
+                                        {formError}
+                                    </div>
+                                )}
+
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label htmlFor="name" className="block text-sm font-medium text-gray-500">
                                         {t('name')}
                                     </label>
                                     <input
                                         type="text"
+                                        id="name"
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
-                                        className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-airbnb"
+                                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                                     />
                                 </div>
 
                                 <div className="flex justify-end">
                                     <CustomButton
-                                        label={isLoading ? t('saving') : t('saveChanges')}
-                                        onClick={() => { }}
-                                        disabled={isLoading}
-                                        className="w-auto px-6"
+                                        label={t('saveChanges')}
                                         type="submit"
+                                        className="w-auto px-4 py-2"
+                                        onClick={() => { }}
                                     />
                                 </div>
                             </form>
