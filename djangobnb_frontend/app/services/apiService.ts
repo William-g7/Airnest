@@ -1,9 +1,11 @@
 import { getAccessToken } from "../auth/session";
 import { tokenService } from "./tokenService";
 import { useAuthStore } from "../stores/authStore";
+import { handleApiError, showErrorToast } from '../utils/errorHandler';
 
 interface RequestOptions {
     forceRefresh?: boolean;
+    suppressToast?: boolean;
 }
 
 // 用于防止多个请求同时触发刷新
@@ -54,26 +56,45 @@ async function executeAuthenticatedRequest<T>(
     method: string,
     url: string,
     data?: any,
-    customHeaders?: Record<string, string>
+    customHeaders?: Record<string, string>,
+    options: { suppressToast?: boolean } = {}
 ): Promise<T> {
     const token = await getAccessToken();
     if (!token) {
-        throw new Error('No authentication token available');
+        const error = new Error('No authentication token available');
+        if (!options.suppressToast) {
+            showErrorToast(error);
+        }
+        throw error;
     }
 
     try {
         return await makeRequest<T>(method, url, token, data, customHeaders);
     } catch (error: any) {
         if (error.message.includes('HTTP error! status: 401')) {
+            try {
+                const newToken = await handleTokenRefresh();
 
-            const newToken = await handleTokenRefresh();
-
-            if (newToken) {
-                return await makeRequest<T>(method, url, newToken, data, customHeaders);
-            } else {
-                useAuthStore.getState().setUnauthenticated();
-                throw new Error('Authentication failed. Please login again.');
+                if (newToken) {
+                    return await makeRequest<T>(method, url, newToken, data, customHeaders);
+                } else {
+                    useAuthStore.getState().setUnauthenticated();
+                    const authError = new Error('Authentication failed. Please login again.');
+                    if (!options.suppressToast) {
+                        showErrorToast(authError);
+                    }
+                    throw authError;
+                }
+            } catch (refreshError) {
+                if (!options.suppressToast) {
+                    showErrorToast(refreshError);
+                }
+                throw refreshError;
             }
+        }
+
+        if (!options.suppressToast) {
+            showErrorToast(error);
         }
         throw error;
     }
@@ -132,25 +153,26 @@ async function makeRequest<T>(
 }
 
 // 处理未认证请求的错误
-function handleUnauthenticatedResponseError(response: Response, responseData: any): void {
+function handleUnauthenticatedResponseError(response: Response, responseData: any): Error {
     if (!response.ok) {
         if (responseData && responseData.email) {
-            throw new Error(responseData.email[0]);
+            return new Error(responseData.email[0]);
         } else if (responseData && responseData.detail) {
-            throw new Error(responseData.detail);
+            return new Error(responseData.detail);
         } else if (responseData && responseData.non_field_errors) {
-            throw new Error(responseData.non_field_errors[0]);
+            return new Error(responseData.non_field_errors[0]);
         } else if (responseData && responseData.password) {
-            throw new Error(responseData.password[0]);
+            return new Error(responseData.password[0]);
         } else if (typeof responseData === 'object' && Object.keys(responseData).length > 0) {
             const firstErrorKey = Object.keys(responseData)[0];
             const errorValue = responseData[firstErrorKey];
             const errorMessage = Array.isArray(errorValue) ? errorValue[0] : errorValue;
-            throw new Error(errorMessage || 'API Error');
+            return new Error(errorMessage || 'API Error');
         } else {
-            throw new Error('AUTH_INVALID_CREDENTIALS');
+            return new Error('AUTH_INVALID_CREDENTIALS');
         }
     }
+    return new Error('Unknown error');
 }
 
 const apiService = {
@@ -174,34 +196,37 @@ const apiService = {
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const error = new Error(`HTTP error! status: ${response.status}`);
+                showErrorToast(error);
+                throw error;
             }
             const data = await response.json();
             return data;
         } catch (error) {
+            showErrorToast(error);
             throw error;
         }
     },
 
-    getwithtoken: async function <T = any>(url: string): Promise<T> {
+    getwithtoken: async function <T = any>(url: string, options: { suppressToast?: boolean } = {}): Promise<T> {
         try {
-            return await executeAuthenticatedRequest<T>('GET', url);
+            return await executeAuthenticatedRequest<T>('GET', url, undefined, undefined, options);
         } catch (error) {
             console.error('API request failed:', error);
             throw error;
         }
     },
 
-    post: async function <T = any>(url: string, data: any): Promise<T> {
+    post: async function <T = any>(url: string, data: any, options: { suppressToast?: boolean } = {}): Promise<T> {
         try {
-            return await executeAuthenticatedRequest<T>('POST', url, data);
+            return await executeAuthenticatedRequest<T>('POST', url, data, undefined, options);
         } catch (error) {
             console.error('POST request error:', error);
             throw error;
         }
     },
 
-    postwithouttoken: async function (url: string, data: any): Promise<any> {
+    postwithouttoken: async function (url: string, data: any, options: { suppressToast?: boolean } = {}): Promise<any> {
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
                 method: 'POST',
@@ -215,40 +240,56 @@ const apiService = {
 
             const text = await response.text();
             if (!text) {
-                throw new Error('Empty response received');
+                const error = new Error('Empty response received');
+                if (!options.suppressToast) {
+                    showErrorToast(error);
+                }
+                throw error;
             }
 
             try {
                 const responseData = JSON.parse(text);
-                handleUnauthenticatedResponseError(response, responseData);
+                if (!response.ok) {
+                    const error = handleUnauthenticatedResponseError(response, responseData);
+                    if (!options.suppressToast) {
+                        showErrorToast(error);
+                    }
+                    throw error;
+                }
                 return responseData;
             } catch (parseError) {
                 console.error('JSON parsing error:', parseError);
                 console.log('Response text:', text);
 
-                if (url.includes('/login/')) {
-                    throw new Error('AUTH_INVALID_CREDENTIALS');
-                } else {
-                    throw new Error('Invalid response from server. Please try again later.');
+                const error = url.includes('/login/')
+                    ? new Error('AUTH_INVALID_CREDENTIALS')
+                    : new Error('Invalid response from server. Please try again later.');
+
+                if (!options.suppressToast) {
+                    showErrorToast(error);
                 }
+                throw error;
             }
         } catch (error) {
+            if (!options.suppressToast) {
+                showErrorToast(error);
+            }
             throw error;
         }
     },
 
-    patch: async function <T = any>(url: string, data: any): Promise<T> {
+    patch: async function <T = any>(url: string, data: any, options: { suppressToast?: boolean } = {}): Promise<T> {
         try {
-            return await executeAuthenticatedRequest<T>('PATCH', url, data);
+            return await executeAuthenticatedRequest<T>('PATCH', url, data, undefined, options);
         } catch (error) {
             console.error('PATCH request error:', error);
             throw error;
         }
     },
 
-    delete: async function <T = any>(url: string): Promise<T> {
+    delete: async function <T = any>(url: string, options: { suppressToast?: boolean } = {}): Promise<T> {
         try {
-            return await executeAuthenticatedRequest<T>('DELETE', url);
+            return await executeAuthenticatedRequest<T>('DELETE', url, undefined, undefined, options);
         } catch (error) {
             console.error('DELETE request error:', error);
             throw error;
