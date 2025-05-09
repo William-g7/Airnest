@@ -13,4 +13,6 @@ urlpatterns = [
     path('wishlist/', api.get_wishlist, name='api_properties_wishlist'),
     path('<uuid:pk>/toggle-favorite/', api.toggle_favorite, name='api_properties_toggle_favorite'),
     path('timezones/', api.get_timezone_list, name='api_properties_timezones'),
+    path('<uuid:property_id>/images/update-order/', api.update_property_images_order, name='api_properties_update_images_order'),
+    path('<uuid:property_id>/images/<int:image_id>/', api.delete_property_image, name='api_properties_delete_image'),
 ]

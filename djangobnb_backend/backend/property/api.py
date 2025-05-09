@@ -6,8 +6,9 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from datetime import datetime, timedelta
 import pytz
 from .models import Property, PropertyImage, Reservation, Wishlist
-from .serializers import PropertySerializer, PropertyLandlordSerializer
+from .serializers import PropertySerializer, PropertyLandlordSerializer, PropertyImageSerializer
 from .forms import PropertyForm
+from django.db import models
 
 @api_view(['GET'])
 @authentication_classes([])
@@ -132,14 +133,65 @@ def property_list(request):
     serializer = PropertySerializer(properties, many=True)
     return JsonResponse(serializer.data, safe=False)
 
-@api_view(['GET'])
-@authentication_classes([])
+@api_view(['GET', 'PATCH'])
+@authentication_classes([JWTAuthentication])
 @permission_classes([])
 def property_detail(request,pk):
-    print(pk)
-    property = Property.objects.get(pk=pk)
-    serializer = PropertyLandlordSerializer(property, many=False)
-    return JsonResponse(serializer.data, safe=False)
+    try:
+        property = Property.objects.get(pk=pk)
+        
+        # GET方法 - 返回房源详情
+        if request.method == 'GET':
+            serializer = PropertyLandlordSerializer(property, many=False)
+            return JsonResponse(serializer.data, safe=False)
+        
+        # PATCH方法 - 更新房源信息
+        elif request.method == 'PATCH':
+            # 验证用户是否是房源拥有者
+            if not request.user.is_authenticated:
+                return JsonResponse({'error': 'Authentication required'}, status=401)
+            
+            if property.landlord != request.user:
+                return JsonResponse({'error': 'You do not have permission to update this property'}, status=403)
+            
+            # 使用PropertyForm处理更新 - 注意request.data可能来自FormData
+            form = PropertyForm(request.data, instance=property)
+            
+            if form.is_valid():
+                property = form.save()
+                
+                # 处理新上传的图片
+                new_images = request.FILES.getlist('images')
+                
+                if new_images:
+                    # 获取当前最大的order值
+                    max_order = 0
+                    existing_images = PropertyImage.objects.filter(property=property)
+                    if existing_images.exists():
+                        max_order = existing_images.aggregate(models.Max('order'))['order__max'] + 1
+                    
+                    # 添加新图片
+                    for index, image in enumerate(new_images):
+                        # 设置顺序
+                        order = max_order + index
+                        # 如果没有图片，则设置为主图
+                        is_main = not existing_images.exists() and index == 0
+                        
+                        PropertyImage.objects.create(
+                            property=property,
+                            image=image,
+                            order=order,
+                            is_main=is_main
+                        )
+                
+                return JsonResponse({'success': True})
+            else:
+                return JsonResponse({'errors': form.errors, 'success': False}, status=400)
+    except Property.DoesNotExist:
+        return JsonResponse({'error': 'Property not found'}, status=404)
+    except Exception as e:
+        print(f"Error updating property: {e}")
+        return JsonResponse({'error': str(e), 'success': False}, status=400)
 
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
@@ -162,10 +214,17 @@ def create_property(request):
             property.save()
             
             images = request.FILES.getlist('images')
-            for image in images:
+            
+            # 处理图片上传和顺序
+            for index, image in enumerate(images):
+                # 第一张图片默认为主图
+                is_main = index == 0
+                
                 PropertyImage.objects.create(
                     property=property,
-                    image=image
+                    image=image,
+                    order=index,
+                    is_main=is_main
                 )
             
             return JsonResponse({'success': True})
@@ -459,3 +518,113 @@ def get_timezone_list(request):
         return JsonResponse(result, safe=False)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def update_property_images_order(request, property_id):
+    """
+    更新房源图片的顺序
+    """
+    try:
+        property = Property.objects.get(pk=property_id, landlord=request.user)
+        
+        # 获取图片顺序数据
+        image_orders = request.data.get('image_orders', [])
+        print(f"收到图片排序请求 - 房源ID: {property_id}, 图片数量: {len(image_orders)}")
+        print(f"排序数据: {image_orders}")
+        
+        if not image_orders:
+            return JsonResponse({'error': '未提供图片排序数据'}, status=400)
+        
+        # 首先将所有图片设为非主图
+        PropertyImage.objects.filter(property=property).update(is_main=False)
+        
+        # 保存图片ID和其新顺序的映射
+        updated_images = []
+        
+        for image_data in image_orders:
+            image_id = image_data.get('id')
+            new_order = image_data.get('order')
+            
+            # 验证数据
+            if image_id and isinstance(new_order, int):
+                try:
+                    # 确保图片属于该房源
+                    image = PropertyImage.objects.get(id=image_id, property=property)
+                    image.order = new_order
+                    # 将第一张图片（order=0）设为主图
+                    if new_order == 0:
+                        image.is_main = True
+                        print(f"设置图片ID {image_id} 为主图")
+                    image.save()
+                    updated_images.append(image)
+                    print(f"已更新图片 ID: {image_id}, 新顺序: {new_order}, 是否主图: {image.is_main}")
+                except PropertyImage.DoesNotExist:
+                    print(f"图片ID {image_id} 不存在")
+                    pass  # 忽略不存在的图片
+        
+        # 获取并返回更新后的图片列表（按顺序排序）
+        images = PropertyImage.objects.filter(property=property).order_by('order')
+        serializer = PropertyImageSerializer(images, many=True)
+        response_data = serializer.data
+        
+        # 打印最终图片顺序
+        print("更新后的图片顺序:")
+        for img in response_data:
+            print(f"ID: {img['id']}, 顺序: {img.get('order')}, 主图: {img.get('is_main')}")
+        
+        return JsonResponse(response_data, safe=False)
+    
+    except Property.DoesNotExist:
+        return JsonResponse({'error': '找不到该房源或您无权限操作'}, status=404)
+    except Exception as e:
+        print(f"更新图片顺序时出错: {str(e)}")
+        return JsonResponse({'error': str(e)}, status=400)
+
+@api_view(['DELETE'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def delete_property_image(request, property_id, image_id):
+    """删除房源图片"""
+    try:
+        # 验证该房源属于当前用户
+        property = Property.objects.get(pk=property_id, landlord=request.user)
+        
+        # 获取要删除的图片并验证其属于该房源
+        try:
+            image = PropertyImage.objects.get(id=image_id, property=property)
+        except PropertyImage.DoesNotExist:
+            return JsonResponse({'error': '找不到该图片'}, status=404)
+        
+        # 检查是否只有一张图片，如果是则不允许删除
+        if PropertyImage.objects.filter(property=property).count() <= 1:
+            return JsonResponse({'error': '无法删除房源的唯一图片'}, status=400)
+        
+        # 检查是否为主图
+        is_main = image.is_main
+        
+        # 删除图片
+        image.delete()
+        
+        # 如果删除的是主图，则将第一张图片（order最小的）设为主图
+        if is_main:
+            new_main_image = PropertyImage.objects.filter(property=property).order_by('order').first()
+            if new_main_image:
+                new_main_image.is_main = True
+                new_main_image.save()
+        
+        # 返回剩余的图片列表
+        images = PropertyImage.objects.filter(property=property).order_by('order')
+        serializer = PropertyImageSerializer(images, many=True)
+        
+        return JsonResponse({
+            'success': True,
+            'message': '图片已成功删除',
+            'images': serializer.data
+        })
+    
+    except Property.DoesNotExist:
+        return JsonResponse({'error': '找不到该房源或您无权限操作'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
