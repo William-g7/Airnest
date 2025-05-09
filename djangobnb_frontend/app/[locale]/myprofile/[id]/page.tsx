@@ -7,6 +7,7 @@ import apiService from '@/app/services/apiService';
 import CustomButton from '@/app/components/forms/CustomButton';
 import { useTranslations } from 'next-intl';
 import toast from 'react-hot-toast';
+import { useErrorHandler } from '@/app/hooks/useErrorHandler';
 
 interface ProfileData {
     id: string;
@@ -21,6 +22,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string, 
     const userId = resolvedParams.id;
     const t = useTranslations('profile');
     const router = useRouter();
+    const { handleError, ErrorType, getError } = useErrorHandler();
 
     const [isEditing, setIsEditing] = useState(false);
     const [loadError, setLoadError] = useState("");
@@ -37,19 +39,19 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string, 
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const response = await apiService.getwithtoken(`/api/auth/profile/${userId}/`);
+                const response = await apiService.getwithtoken(`/api/auth/profile/${userId}/`, { suppressToast: true });
                 setProfile(response);
                 setName(response.name || '');
             } catch (error) {
                 console.error('Error fetching profile:', error);
-                setLoadError(t('loadError'));
+                setLoadError(getError(error) || t('loadError'));
             } finally {
                 setIsLoading(false);
             }
         };
 
         fetchProfile();
-    }, [userId, t]);
+    }, [userId, t, getError]);
 
     if (isLoading) {
         return <div className="text-center mt-8">{t('loading')}</div>;
@@ -103,14 +105,14 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string, 
                 formData.append('avatar', newAvatar);
             }
 
-            const response = await apiService.patch(`/api/auth/profile/${userId}/`, formData);
+            const response = await apiService.patch(`/api/auth/profile/${userId}/`, formData, { suppressToast: true });
 
             setProfile(response);
             setIsEditing(false);
             setAvatarPreview(null);
             setNewAvatar(null);
 
-            const updatedProfile = await apiService.getwithtoken(`/api/auth/profile/${userId}/`);
+            const updatedProfile = await apiService.getwithtoken(`/api/auth/profile/${userId}/`, { suppressToast: true });
             setProfile(updatedProfile);
             setName(updatedProfile.name || '');
 
@@ -123,8 +125,24 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string, 
             }
         } catch (error: any) {
             console.error('Profile update error:', error);
-            setFormError(error.message || t('updateError'));
-            toast.error(error.message || t('updateError'));
+
+            // 处理API返回的特定字段错误
+            if (error.response?.data) {
+                const fieldErrors = error.response.data;
+                if (typeof fieldErrors === 'object') {
+                    // 构建错误消息
+                    const errorKeys = Object.keys(fieldErrors);
+                    if (errorKeys.length > 0) {
+                        const firstError = fieldErrors[errorKeys[0]];
+                        setFormError(Array.isArray(firstError) ? firstError[0] : firstError);
+                        return;
+                    }
+                }
+            }
+
+            // 如果没有特定字段错误，使用错误处理钩子
+            const errorMessage = getError(error) || t('updateError');
+            setFormError(errorMessage);
         } finally {
             setIsLoading(false);
         }
