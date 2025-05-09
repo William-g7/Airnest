@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { useRouter } from '@/i18n/navigation';
 import { useLoginModal } from '@/app/components/hooks/useLoginModal';
+import { useAddPropertyModal } from '@/app/components/hooks/useAddPropertyModal';
 import apiService from '@/app/services/apiService';
+import { useAuthStore } from '@/app/stores/authStore';
 import WishlistButton from '@/app/components/properties/WishlistButton';
 import Image from "next/image";
 import { Link } from '@/i18n/navigation';
@@ -11,6 +12,7 @@ import { PropertyType } from '@/app/constants/propertyType';
 import dynamic from 'next/dynamic';
 import ContactButton from "@/app/components/ContactButton";
 import { useTranslations } from 'next-intl';
+import CustomButton from '@/app/components/forms/CustomButton';
 
 const PropertyImageCarousel = dynamic(
     () => import('./PropertyImageCarousel'),
@@ -35,8 +37,10 @@ const ReservationSideBar = dynamic(
 const PropertyDetail = ({ property }: { property: PropertyType }) => {
     const t = useTranslations('property');
     const [isFavorited, setIsFavorited] = useState(false);
-    const router = useRouter();
     const loginModal = useLoginModal();
+    const addPropertyModal = useAddPropertyModal();
+    const authStore = useAuthStore();
+    const isLandlord = authStore.userId && property.landlord && authStore.userId === property.landlord.id.toString();
 
     useEffect(() => {
         const checkIfFavorited = async () => {
@@ -70,6 +74,10 @@ const PropertyDetail = ({ property }: { property: PropertyType }) => {
             }
             console.error('Error toggling wishlist:', error);
         }
+    };
+
+    const handleEditProperty = () => {
+        addPropertyModal.onOpenForEdit(property);
     };
 
     return (
@@ -121,7 +129,7 @@ const PropertyDetail = ({ property }: { property: PropertyType }) => {
                             {property.landlord.avatar_url ? (
                                 <div className="py-6 flex items-center space-x-4">
                                     <Image
-                                        src={property.landlord.avatar_url}
+                                        src={property.landlord.avatar_url || '/profile-placeholder.jpg'}
                                         alt={t('hostAlt')}
                                         width={50}
                                         height={50}
@@ -145,7 +153,15 @@ const PropertyDetail = ({ property }: { property: PropertyType }) => {
                             )}
                         </Link>
                         <div className="w-[200px]">
-                            <ContactButton landlordId={property.landlord.id} />
+                            {isLandlord ? (
+                                <CustomButton
+                                    onClick={handleEditProperty}
+                                    label={t('editProperty')}
+                                    className="w-full"
+                                />
+                            ) : (
+                                <ContactButton landlordId={property.landlord.id} />
+                            )}
                         </div>
                     </div>
 

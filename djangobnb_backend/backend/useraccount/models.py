@@ -3,6 +3,7 @@ import uuid
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserManager
 from django.db import models
+from .utils import avatar_upload_path
 
 
 class CustomUserManager(UserManager):
@@ -32,7 +33,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
     name = models.CharField(max_length=255, blank=True, null=True)
-    avatar = models.ImageField(upload_to='uploads/avatars', blank=True, null=True)
+    avatar = models.ImageField(upload_to=avatar_upload_path, blank=True, null=True)
 
     is_active = models.BooleanField(default=True)
     is_superuser = models.BooleanField(default=False)

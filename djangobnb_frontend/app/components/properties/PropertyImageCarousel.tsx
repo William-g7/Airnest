@@ -3,13 +3,13 @@
 import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
-
+import { PropertyImage } from '@/app/constants/propertyType';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
 interface ImageCarouselProps {
-    images: { imageURL: string }[];
+    images: PropertyImage[];
     title: string;
 }
 
@@ -36,7 +36,7 @@ const ImageCarousel = ({ images, title }: ImageCarouselProps) => {
                         <SwiperSlide key={index}>
                             <div className="relative w-full h-full">
                                 <Image
-                                    src={image.imageURL}
+                                    src={image.mediumURL || image.imageURL || '/placeholder.jpg'}
                                     alt={`${title} - Image ${index + 1}`}
                                     fill
                                     className="object-cover"

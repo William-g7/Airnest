@@ -65,7 +65,6 @@ async function executeAuthenticatedRequest<T>(
         return await makeRequest<T>(method, url, token, data, customHeaders);
     } catch (error: any) {
         if (error.message.includes('HTTP error! status: 401')) {
-            console.log('Token expired, attempting to refresh...');
 
             const newToken = await handleTokenRefresh();
 
@@ -109,26 +108,26 @@ async function makeRequest<T>(
             options.body = JSON.stringify(data);
         }
     }
-
-    const response = await fetch(requestUrl, options);
-
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    if (method === 'DELETE' && response.status === 204) {
-        return {} as T;
-    }
-
-    const text = await response.text();
-    if (!text) {
-        return {} as T;
-    }
-
     try {
-        return JSON.parse(text) as T;
+        const response = await fetch(requestUrl, options);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        if (method === 'DELETE' && response.status === 204) {
+            return {} as T;
+        }
+        const text = await response.text();
+        if (!text) {
+            return {} as T;
+        }
+        try {
+            const parsedData = JSON.parse(text) as T;
+            return parsedData;
+        } catch (error) {
+            throw new Error('Invalid JSON response');
+        }
     } catch (error) {
-        throw new Error('Invalid JSON response');
+        throw error;
     }
 }
 
@@ -175,13 +174,11 @@ const apiService = {
             });
 
             if (!response.ok) {
-                console.log(response);
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
             return data;
         } catch (error) {
-            console.error('API request failed:', error);
             throw error;
         }
     },
@@ -254,6 +251,30 @@ const apiService = {
             return await executeAuthenticatedRequest<T>('DELETE', url);
         } catch (error) {
             console.error('DELETE request error:', error);
+            throw error;
+        }
+    },
+
+    getPropertyReservations: async function (propertyId: string): Promise<any> {
+        return this.getwithtoken(`/api/properties/${propertyId}/reservations/`);
+    },
+
+    updatePropertyImagesOrder: async function (propertyId: string, imageOrders: Array<{ id: number, order: number }>): Promise<any> {
+        const url = `/api/properties/${propertyId}/images/update-order/`;
+        try {
+            const response = await this.post(url, { image_orders: imageOrders });
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    deletePropertyImage: async function (propertyId: string, imageId: number): Promise<any> {
+        const url = `/api/properties/${propertyId}/images/${imageId}/`;
+        try {
+            const response = await this.delete(url);
+            return response;
+        } catch (error) {
             throw error;
         }
     }

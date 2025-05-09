@@ -14,6 +14,9 @@ import ImageUpload from '../addproperty/ImageUpload'
 import PropertyDetailsForm from '../addproperty/PropertyDetailsForm'
 import apiService from '@/app/services/apiService';
 import { useTranslations } from 'next-intl'
+import ImageManager from '../addproperty/ImageManager'
+import toast from 'react-hot-toast'
+import { ImageData } from '../addproperty/ImageManager'
 
 const TOTAL_STEPS = 6;
 
@@ -39,6 +42,7 @@ export default function AddPropertyModal() {
         bathrooms: 1
     });
     const [images, setImages] = useState<string[]>([]);
+    const [existingImages, setExistingImages] = useState<ImageData[]>([]);
 
     const [propertyDetails, setPropertyDetails] = useState({
         title: '',
@@ -52,6 +56,72 @@ export default function AddPropertyModal() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+
+    useEffect(() => {
+        if (addPropertyModal.isOpen && addPropertyModal.isEditMode && addPropertyModal.propertyToEdit) {
+            const property = addPropertyModal.propertyToEdit;
+
+            setCategory(property.category);
+            setPlaceType(property.place_type);
+            setLocation({
+                street: property.address,
+                city: property.city,
+                state: property.state,
+                country: property.country,
+                postalCode: property.postal_code,
+                timezone: property.timezone || 'UTC'
+            });
+            setBasicInfo({
+                guests: property.guests,
+                bedrooms: property.bedrooms,
+                beds: property.beds,
+                bathrooms: property.bathrooms
+            });
+            setPropertyDetails({
+                title: property.title,
+                description: property.description,
+                price: property.price_per_night
+            });
+
+            if (property.images && property.images.length > 0) {
+                const mappedImages = property.images.map(img => ({
+                    id: img.id,
+                    imageURL: img.imageURL,
+                    thumbnailURL: img.thumbnailURL,
+                    is_main: img.is_main,
+                    order: img.order
+                }));
+                setExistingImages(mappedImages);
+            } else {
+                setExistingImages([]);
+            }
+        } else {
+            setCurrentStep(1);
+            setCategory('');
+            setPlaceType('');
+            setLocation({
+                street: '',
+                city: '',
+                state: '',
+                country: '',
+                postalCode: '',
+                timezone: 'UTC'
+            });
+            setBasicInfo({
+                guests: 1,
+                bedrooms: 1,
+                beds: 1,
+                bathrooms: 1
+            });
+            setImages([]);
+            setExistingImages([]);
+            setPropertyDetails({
+                title: '',
+                description: '',
+                price: 0
+            });
+        }
+    }, [addPropertyModal.isOpen, addPropertyModal.isEditMode, addPropertyModal.propertyToEdit]);
 
     useEffect(() => {
         if (addPropertyModal.isOpen && !isAuthenticated) {
@@ -81,7 +151,7 @@ export default function AddPropertyModal() {
             case 4:
                 return true;
             case 5:
-                return images.length > 0;
+                return addPropertyModal.isEditMode ? true : images.length > 0;
             case 6:
                 return propertyDetails.title !== '' &&
                     propertyDetails.description !== '' &&
@@ -101,11 +171,14 @@ export default function AddPropertyModal() {
         }
     }
 
+    const handleImagesChange = (updatedImages: ImageData[]) => {
+        setExistingImages(updatedImages as any);
+    };
+
     const onSubmit = async () => {
         try {
             setIsLoading(true);
             setError("");
-            console.log('Starting submission...');
 
             const formData = new FormData();
 
@@ -125,27 +198,45 @@ export default function AddPropertyModal() {
             formData.append('postal_code', location.postalCode);
             formData.append('timezone', location.timezone);
 
-            for (const [index, image] of images.entries()) {
-                const file = await fetch(image).then(r => r.blob());
-                formData.append('images', file, `image${index}.jpg`);
-            }
+            if (addPropertyModal.isEditMode && addPropertyModal.propertyToEdit) {
+                for (const [index, image] of images.entries()) {
+                    const file = await fetch(image).then(r => r.blob());
+                    formData.append('new_images', file, `image${index}.jpg`);
+                }
 
-            console.log('Sending request to API...');
-            const response = await apiService.post('/api/properties/create/', formData);
-            console.log('API Response:', response);
+                const response = await apiService.patch(
+                    `/api/properties/${addPropertyModal.propertyToEdit.id}/`,
+                    formData
+                );
 
-            if (response.success) {
-                console.log('Success! Closing modal...');
-                addPropertyModal.onClose();
-                router.push('/');
-                router.refresh();
+                if (response.success) {
+                    toast.success(t('updateSuccess'));
+                    addPropertyModal.onClose();
+                    router.refresh();
+                } else {
+                    setError(response.errors || response.error || t('updateFailed'));
+                }
+
             } else {
-                console.log('API Error:', response);
-                setError(response.errors || response.error || "Failed to create property. Please try again.");
+                for (const [index, image] of images.entries()) {
+                    const file = await fetch(image).then(r => r.blob());
+                    formData.append('images', file, `image${index}.jpg`);
+                }
+
+                const response = await apiService.post('/api/properties/create/', formData);
+
+                if (response.success) {
+                    toast.success(t('createSuccess'));
+                    addPropertyModal.onClose();
+                    router.push('/');
+                    router.refresh();
+                } else {
+                    setError(response.errors || response.error || t('createFailed'));
+                }
             }
         } catch (error: any) {
             console.error('Submission error:', error);
-            setError(error.message || "An error occurred while creating the property.");
+            setError(error.message || "An error occurred");
         } finally {
             setIsLoading(false);
         }
@@ -200,7 +291,25 @@ export default function AddPropertyModal() {
                         <p className="text-gray-500 mb-6">
                             {t('photosNote')}
                         </p>
-                        <ImageUpload images={images} setImages={setImages} />
+                        {addPropertyModal.isEditMode ? (
+                            <div className="space-y-8">
+                                {addPropertyModal.propertyToEdit && existingImages.length > 0 && (
+                                    <div className="mb-8">
+                                        <ImageManager
+                                            propertyId={addPropertyModal.propertyToEdit.id}
+                                            initialImages={existingImages}
+                                            onImagesChange={handleImagesChange}
+                                        />
+                                    </div>
+                                )}
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-4">{t('uploadNewImages')}</h3>
+                                    <ImageUpload images={images} setImages={setImages} />
+                                </div>
+                            </div>
+                        ) : (
+                            <ImageUpload images={images} setImages={setImages} />
+                        )}
                     </>
                 )}
                 {currentStep === 6 && (
@@ -232,7 +341,6 @@ export default function AddPropertyModal() {
                         {commonT('previous')}
                     </button>
 
-                    {/* Progress Indicator */}
                     <div className="flex-grow mx-4">
                         <div className="relative h-1 bg-gray-200 rounded">
                             <div
@@ -252,7 +360,9 @@ export default function AddPropertyModal() {
                                     'bg-gray-300 text-gray-500 cursor-not-allowed'}
                         `}
                     >
-                        {isLoading ? commonT('loading') : currentStep === TOTAL_STEPS ? t('createListing') : commonT('next')}
+                        {isLoading ? commonT('loading') : currentStep === TOTAL_STEPS ?
+                            (addPropertyModal.isEditMode ? t('updateListing') : t('createListing')) :
+                            commonT('next')}
                     </button>
                 </div>
             </div>
@@ -261,7 +371,7 @@ export default function AddPropertyModal() {
 
     return (
         <Modal
-            label={t('title')}
+            label={addPropertyModal.isEditMode ? t('editTitle') : t('title')}
             isOpen={addPropertyModal.isOpen}
             close={addPropertyModal.onClose}
             content={content}

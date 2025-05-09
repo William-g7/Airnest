@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import { ReactNode } from 'react';
 import { locales } from '../../i18n/routing';
 import { LocaleInitializer } from '../components/LocaleInitializer';
+import ToasterProvider from '../providers/ToasterProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -33,6 +34,7 @@ export default async function LocaleLayout({
     return (
         <NextIntlClientProvider locale={locale} messages={messages}>
             <LocaleInitializer />
+            <ToasterProvider />
             {children}
         </NextIntlClientProvider>
     );
