@@ -14,7 +14,6 @@ export interface ImageData {
     id: number;
     imageURL: string;
     thumbnailURL?: string | null;
-    mediumURL?: string | null;
     is_main: boolean;
     order: number;
 }
@@ -103,13 +102,7 @@ const ImageManager = ({ propertyId, initialImages, onImagesChange }: ImageManage
     // 再次将后端传来的图片数据按照order排序
     useEffect(() => {
         if (initialImages && initialImages.length > 0) {
-            const sortedImages = [...initialImages].map(img => {
-                return {
-                    ...img,
-                    thumbnailURL: img.thumbnailURL || '/placeholder.jpg',
-                };
-            }).sort((a, b) => a.order - b.order);
-
+            const sortedImages = [...initialImages].sort((a, b) => a.order - b.order);
             setImages(sortedImages);
         }
     }, [initialImages]);
@@ -157,8 +150,8 @@ const ImageManager = ({ propertyId, initialImages, onImagesChange }: ImageManage
                 if (response && Array.isArray(response)) {
                     const backendImages = [...response].map(img => ({
                         id: img.id,
-                        imageURL: img.imageURL || '/placeholder.jpg',
-                        thumbnailURL: img.thumbnailURL || '/placeholder.jpg',
+                        imageURL: img.imageURL,
+                        thumbnailURL: img.thumbnailURL,
                         is_main: img.is_main || (img.order === 0),
                         order: img.order
                     })).sort((a, b) => a.order - b.order);

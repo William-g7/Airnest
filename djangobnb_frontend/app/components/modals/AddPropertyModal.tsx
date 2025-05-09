@@ -84,7 +84,14 @@ export default function AddPropertyModal() {
             });
 
             if (property.images && property.images.length > 0) {
-                setExistingImages(property.images);
+                const mappedImages = property.images.map(img => ({
+                    id: img.id,
+                    imageURL: img.imageURL,
+                    thumbnailURL: img.thumbnailURL,
+                    is_main: img.is_main,
+                    order: img.order
+                }));
+                setExistingImages(mappedImages);
             } else {
                 setExistingImages([]);
             }
