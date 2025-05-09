@@ -95,7 +95,9 @@
         "avatarTypeLimit": "Only JPEG, PNG or WebP images are allowed",
         "avatar": "Profile Picture",
         "avatarUpload": "Choose File",
-        "profileNotFound": "Profile not found"
+        "profileNotFound": "Profile not found",
+        "updateSuccess": "Profile updated successfully",
+        "avatarUpdateSuccess": "Profile picture updated successfully"
     },
     "common": {
         "search": "Search",
@@ -161,7 +163,8 @@
         "updateFailed": "Update failed. Please try again.",
         "deleteFailed": "Delete failed. Please try again.",
         "updateError": "An error occurred while updating. Please try again.",
-        "deleteImageConfirm": "Are you sure you want to delete this image?"
+        "deleteImageConfirm": "Are you sure you want to delete this image?",
+        "reservationSuccess": "Reservation made successfully"
     },
     "addProperty": {
         "djangobnbYourHome": "Share your home",
@@ -275,7 +278,10 @@
         "loading": "Loading...",
         "passwordsNotMatch": "Passwords do not match",
         "somethingWentWrong": "Something went wrong",
-        "alreadyHaveAccount": "Already have an account?"
+        "alreadyHaveAccount": "Already have an account?",
+        "loginSuccess": "Logged in successfully",
+        "logoutSuccess": "Logged out successfully",
+        "signupSuccess": "Account created successfully"
     },
     "myproperties": {
         "title": "My Properties",
@@ -335,5 +341,20 @@
         "dragToReorder": "Drag images to reorder. Click 'Set as Main' to make an image the primary photo.",
         "mainPhoto": "Main Photo",
         "setAsMain": "Set as Main"
+    },
+    "favorites": {
+        "added": "Added to your favorites",
+        "removed": "Removed from your favorites",
+        "error": "Failed to update favorites"
+    },
+    "errors": {
+        "AUTH_INVALID_CREDENTIALS": "Invalid credentials. Please check your username and password.",
+        "NETWORK_ERROR": "Network error. Please check your connection.",
+        "SERVER_ERROR": "Server error. Please try again later.",
+        "UNAUTHORIZED": "You need to login to perform this action.",
+        "FORBIDDEN": "You don't have permission to perform this action.",
+        "NOT_FOUND": "The requested resource was not found.",
+        "VALIDATION_ERROR": "Please check your input and try again.",
+        "DEFAULT": "An error occurred. Please try again."
     }
 }
