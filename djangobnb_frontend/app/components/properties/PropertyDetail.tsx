@@ -13,6 +13,7 @@ import dynamic from 'next/dynamic';
 import ContactButton from "@/app/components/ContactButton";
 import { useTranslations } from 'next-intl';
 import CustomButton from '@/app/components/forms/CustomButton';
+import toast from 'react-hot-toast';
 
 const PropertyImageCarousel = dynamic(
     () => import('./PropertyImageCarousel'),
@@ -36,6 +37,7 @@ const ReservationSideBar = dynamic(
 
 const PropertyDetail = ({ property }: { property: PropertyType }) => {
     const t = useTranslations('property');
+    const tFavorites = useTranslations('favorites');
     const [isFavorited, setIsFavorited] = useState(false);
     const loginModal = useLoginModal();
     const addPropertyModal = useAddPropertyModal();
@@ -67,12 +69,20 @@ const PropertyDetail = ({ property }: { property: PropertyType }) => {
             });
             if (response.status === 'added' || response.status === 'removed') {
                 setIsFavorited(response.status === 'added');
+
+                if (response.status === 'added') {
+                    toast.success(tFavorites('added'));
+                } else {
+                    toast.success(tFavorites('removed'));
+                }
             }
         } catch (error: any) {
             if (error.message === 'No authentication token available') {
                 loginModal.onOpen();
+            } else {
+                console.error('Error toggling wishlist:', error);
+                toast.error(tFavorites('error'));
             }
-            console.error('Error toggling wishlist:', error);
         }
     };
 

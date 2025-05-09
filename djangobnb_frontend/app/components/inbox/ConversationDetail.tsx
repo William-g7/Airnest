@@ -7,6 +7,7 @@ import { MessageType } from "@/app/[locale]/inbox/[id]/page";
 import { UserType } from "@/app/[locale]/inbox/page";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import toast from 'react-hot-toast';
 
 interface ConversationDetailProps {
     token: string;
@@ -63,21 +64,26 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({
     const sendMessage = async () => {
         if (!newMessage.trim()) return;
 
-        sendJsonMessage({
-            event: 'chat_message',
-            data: {
-                body: newMessage,
-                name: myUser?.name,
-                sent_to_id: otherUser?.id,
-                conversation_id: conversation.id
-            }
-        });
+        try {
+            sendJsonMessage({
+                event: 'chat_message',
+                data: {
+                    body: newMessage,
+                    name: myUser?.name,
+                    sent_to_id: otherUser?.id,
+                    conversation_id: conversation.id
+                }
+            });
 
-        setNewMessage('');
+            setNewMessage('');
 
-        setTimeout(() => {
-            scrollToBottom()
-        }, 50);
+            setTimeout(() => {
+                scrollToBottom()
+            }, 50);
+        } catch (error) {
+            console.error('Error sending message:', error);
+            toast.error(t('messageSentError'));
+        }
     }
 
     const scrollToBottom = () => {

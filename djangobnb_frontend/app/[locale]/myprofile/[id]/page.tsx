@@ -6,6 +6,7 @@ import Image from 'next/image';
 import apiService from '@/app/services/apiService';
 import CustomButton from '@/app/components/forms/CustomButton';
 import { useTranslations } from 'next-intl';
+import toast from 'react-hot-toast';
 
 interface ProfileData {
     id: string;
@@ -68,12 +69,14 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string, 
 
             if (!ALLOWED_TYPES.includes(file.type)) {
                 setFormError(t('avatarTypeLimit'));
+                toast.error(t('avatarTypeLimit'));
                 return;
             }
 
             const fileSizeMB = file.size / (1024 * 1024);
             if (fileSizeMB > MAX_AVATAR_SIZE_MB) {
                 setFormError(t('avatarSizeLimit', { maxSizeMB: MAX_AVATAR_SIZE_MB }));
+                toast.error(t('avatarSizeLimit', { maxSizeMB: MAX_AVATAR_SIZE_MB }));
                 return;
             }
 
@@ -90,10 +93,13 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string, 
 
         try {
             const formData = new FormData();
-            if (name !== profile?.name) {
+            const nameChanged = name !== profile?.name;
+            const avatarChanged = !!newAvatar;
+
+            if (nameChanged) {
                 formData.append('name', name);
             }
-            if (newAvatar) {
+            if (avatarChanged) {
                 formData.append('avatar', newAvatar);
             }
 
@@ -107,9 +113,18 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string, 
             const updatedProfile = await apiService.getwithtoken(`/api/auth/profile/${userId}/`);
             setProfile(updatedProfile);
             setName(updatedProfile.name || '');
+
+            if (avatarChanged && nameChanged) {
+                toast.success(t('updateSuccess'));
+            } else if (avatarChanged) {
+                toast.success(t('avatarUpdateSuccess'));
+            } else if (nameChanged) {
+                toast.success(t('updateSuccess'));
+            }
         } catch (error: any) {
             console.error('Profile update error:', error);
             setFormError(error.message || t('updateError'));
+            toast.error(error.message || t('updateError'));
         } finally {
             setIsLoading(false);
         }
