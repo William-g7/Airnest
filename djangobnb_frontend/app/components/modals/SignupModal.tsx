@@ -12,6 +12,7 @@ import { useTranslations } from 'next-intl';
 import { useAuthStore } from "@/app/stores/authStore";
 import toast from "react-hot-toast";
 import { useErrorHandler } from "@/app/hooks/useErrorHandler";
+import AuthModalErrorBoundary from "./AuthModalErrorBoundary";
 
 export default function SignupModal() {
     const t = useTranslations('auth');
@@ -83,96 +84,98 @@ export default function SignupModal() {
     };
 
     const content = (
-        <div className="flex flex-col gap-4">
-            <h2 className="mb-4 text-2xl font-bold">{t('createAccount')}</h2>
+        <AuthModalErrorBoundary>
+            <div className="flex flex-col gap-4">
+                <h2 className="mb-4 text-2xl font-bold">{t('createAccount')}</h2>
 
-            {error && (
-                <div className="p-3 text-sm bg-red-100 text-red-600 rounded-lg">
-                    {error}
-                </div>
-            )}
+                {error && (
+                    <div className="p-3 text-sm bg-red-100 text-red-600 rounded-lg">
+                        {error}
+                    </div>
+                )}
 
-            <form className="flex flex-col gap-4">
-                <div className="flex flex-col">
-                    <input
-                        type="email"
-                        placeholder={t('email')}
-                        value={formData.email}
-                        onChange={(e) => {
-                            setFormData(prev => ({
-                                ...prev,
-                                email: e.target.value
-                            }));
-                            setEmailError("");
-                        }}
-                        className={`p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-airbnb ${emailError ? 'border-red-500' : ''
-                            }`}
+                <form className="flex flex-col gap-4">
+                    <div className="flex flex-col">
+                        <input
+                            type="email"
+                            placeholder={t('email')}
+                            value={formData.email}
+                            onChange={(e) => {
+                                setFormData(prev => ({
+                                    ...prev,
+                                    email: e.target.value
+                                }));
+                                setEmailError("");
+                            }}
+                            className={`p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-airbnb ${emailError ? 'border-red-500' : ''
+                                }`}
+                            disabled={isLoading}
+                        />
+                        {emailError && (
+                            <span className="text-sm text-red-500 mt-1">{emailError}</span>
+                        )}
+                    </div>
+
+                    <div className="flex flex-col">
+                        <input
+                            type="password"
+                            placeholder={t('password')}
+                            value={formData.password}
+                            onChange={(e) => {
+                                setFormData(prev => ({
+                                    ...prev,
+                                    password: e.target.value
+                                }));
+                                setPasswordError("");
+                            }}
+                            className={`p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-airbnb ${passwordError ? 'border-red-500' : ''
+                                }`}
+                            disabled={isLoading}
+                        />
+                    </div>
+
+                    <div className="flex flex-col">
+                        <input
+                            type="password"
+                            placeholder={t('confirmPassword')}
+                            value={formData.password2}
+                            onChange={(e) => {
+                                setFormData(prev => ({
+                                    ...prev,
+                                    password2: e.target.value
+                                }));
+                                setPasswordError("");
+                            }}
+                            className={`p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-airbnb ${passwordError ? 'border-red-500' : ''
+                                }`}
+                            disabled={isLoading}
+                        />
+                        {passwordError && (
+                            <span className="text-sm text-red-500 mt-1">{passwordError}</span>
+                        )}
+                    </div>
+
+                    <CustomButton
+                        label={isLoading ? t('loading') : t('signup')}
+                        onClick={onSubmit}
                         disabled={isLoading}
                     />
-                    {emailError && (
-                        <span className="text-sm text-red-500 mt-1">{emailError}</span>
-                    )}
-                </div>
+                </form>
 
-                <div className="flex flex-col">
-                    <input
-                        type="password"
-                        placeholder={t('password')}
-                        value={formData.password}
-                        onChange={(e) => {
-                            setFormData(prev => ({
-                                ...prev,
-                                password: e.target.value
-                            }));
-                            setPasswordError("");
+                <div className="text-center text-gray-500 text-sm">
+                    {t('alreadyHaveAccount')}{" "}
+                    <button
+                        onClick={() => {
+                            signupModal.onClose();
+                            loginModal.onOpen();
                         }}
-                        className={`p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-airbnb ${passwordError ? 'border-red-500' : ''
-                            }`}
-                        disabled={isLoading}
-                    />
+                        className="text-airbnb hover:underline"
+                    >
+                        {t('login')}
+                    </button>
                 </div>
-
-                <div className="flex flex-col">
-                    <input
-                        type="password"
-                        placeholder={t('confirmPassword')}
-                        value={formData.password2}
-                        onChange={(e) => {
-                            setFormData(prev => ({
-                                ...prev,
-                                password2: e.target.value
-                            }));
-                            setPasswordError("");
-                        }}
-                        className={`p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-airbnb ${passwordError ? 'border-red-500' : ''
-                            }`}
-                        disabled={isLoading}
-                    />
-                    {passwordError && (
-                        <span className="text-sm text-red-500 mt-1">{passwordError}</span>
-                    )}
-                </div>
-
-                <CustomButton
-                    label={isLoading ? t('loading') : t('signup')}
-                    onClick={onSubmit}
-                    disabled={isLoading}
-                />
-            </form>
-
-            <div className="text-center text-gray-500 text-sm">
-                {t('alreadyHaveAccount')}{" "}
-                <button
-                    onClick={() => {
-                        signupModal.onClose();
-                        loginModal.onOpen();
-                    }}
-                    className="text-airbnb hover:underline"
-                >
-                    {t('login')}
-                </button>
             </div>
-        </div>
+        </AuthModalErrorBoundary>
     );
 
     return (
