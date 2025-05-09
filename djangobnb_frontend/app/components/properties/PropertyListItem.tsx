@@ -56,7 +56,7 @@ const PropertyListItem: React.FC<PropertyListItemProps> = ({ property }) => {
                 onClick={() => router.push({ pathname: '/properties/[id]', params: { id: property.id } })}>
                 <div className="relative overflow-hidden aspect-square rounded-xl">
                     <Image
-                        src={property.images?.[0]?.imageURL || '/placeholder.jpg'}
+                        src={property.images?.[0]?.thumbnailURL || property.images?.[0]?.imageURL || '/placeholder.jpg'}
                         alt={property.title}
                         sizes="(max-width: 768px) 768px, (max-width: 1200px) 768px, 768px"
                         fill
