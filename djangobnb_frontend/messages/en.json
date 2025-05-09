@@ -260,7 +260,10 @@
         "price": "Price",
         "manageImages": "Manage Images",
         "edit": "Edit",
-        "manage": "Manage"
+        "manage": "Manage",
+        "errorMessage": "We couldn't load the property listings. Please try again later.",
+        "refreshPage": "Refresh Page",
+        "backToHome": "Back to Home"
     },
     "auth": {
         "login": "Login",
@@ -281,7 +284,9 @@
         "alreadyHaveAccount": "Already have an account?",
         "loginSuccess": "Logged in successfully",
         "logoutSuccess": "Logged out successfully",
-        "signupSuccess": "Account created successfully"
+        "signupSuccess": "Account created successfully",
+        "authError": "Authentication Error",
+        "authErrorMessage": "There was a problem with the authentication process. Please try again."
     },
     "myproperties": {
         "title": "My Properties",
@@ -355,6 +360,11 @@
         "FORBIDDEN": "You don't have permission to perform this action.",
         "NOT_FOUND": "The requested resource was not found.",
         "VALIDATION_ERROR": "Please check your input and try again.",
-        "DEFAULT": "An error occurred. Please try again."
+        "DEFAULT": "An error occurred. Please try again.",
+        "errorBoundary": {
+            "title": "Something went wrong",
+            "message": "We encountered an error loading this part of the page",
+            "retry": "Try again"
+        }
     }
 }

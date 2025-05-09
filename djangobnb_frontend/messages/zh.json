@@ -259,7 +259,10 @@
         "location": "位置",
         "price": "价格",
         "manageImages": "管理图片",
-        "edit": "编辑"
+        "edit": "编辑",
+        "errorMessage": "我们无法加载房源列表，请稍后再试",
+        "refreshPage": "刷新页面",
+        "backToHome": "返回首页"
     },
     "auth": {
         "login": "登录",
@@ -280,7 +283,9 @@
         "alreadyHaveAccount": "已有账号？",
         "loginSuccess": "登录成功",
         "logoutSuccess": "已安全退出",
-        "signupSuccess": "账号创建成功"
+        "signupSuccess": "账号创建成功",
+        "authError": "认证错误",
+        "authErrorMessage": "认证过程中出现问题，请重试"
     },
     "myproperties": {
         "title": "我的房源",
@@ -347,13 +352,18 @@
         "error": "更新收藏失败"
     },
     "errors": {
-        "AUTH_INVALID_CREDENTIALS": "用户名或密码错误，请重新检查",
+        "AUTH_INVALID_CREDENTIALS": "无效的凭据，请检查您的用户名和密码",
         "NETWORK_ERROR": "网络错误，请检查您的网络连接",
-        "SERVER_ERROR": "服务器错误，请稍后再试",
+        "SERVER_ERROR": "服务器错误，请稍后重试",
         "UNAUTHORIZED": "您需要登录才能执行此操作",
         "FORBIDDEN": "您没有权限执行此操作",
-        "NOT_FOUND": "请求的资源未找到",
+        "NOT_FOUND": "未找到请求的资源",
         "VALIDATION_ERROR": "请检查您的输入并重试",
-        "DEFAULT": "发生错误，请重试"
+        "DEFAULT": "发生错误，请重试",
+        "errorBoundary": {
+            "title": "出现了问题",
+            "message": "加载此部分内容时遇到错误",
+            "retry": "重试"
+        }
     }
 }

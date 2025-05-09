@@ -239,7 +239,10 @@
         "price": "Prix",
         "manageImages": "Gérer les Images",
         "edit": "Modifier",
-        "manage": "Gérer"
+        "manage": "Gérer",
+        "errorMessage": "Nous n'avons pas pu charger la liste des propriétés. Veuillez réessayer plus tard.",
+        "refreshPage": "Actualiser la Page",
+        "backToHome": "Retour à l'Accueil"
     },
     "auth": {
         "login": "Se connecter",
@@ -258,7 +261,11 @@
         "passwordsNotMatch": "Les mots de passe ne correspondent pas",
         "somethingWentWrong": "Quelque chose s'est mal passé",
         "alreadyHaveAccount": "Vous avez déjà un compte ?",
-        "signupSuccess": "Compte créé avec succès"
+        "signupSuccess": "Compte créé avec succès",
+        "loginSuccess": "Connexion réussie",
+        "logoutSuccess": "Déconnexion réussie",
+        "authError": "Erreur d'Authentification",
+        "authErrorMessage": "Un problème est survenu lors du processus d'authentification. Veuillez réessayer."
     },
     "myproperties": {
         "title": "Mes propriétés",
@@ -350,6 +357,14 @@
         "BOOKING_CONFLICT": "Les dates sélectionnées ne sont plus disponibles.",
         "PAYMENT_ERROR": "Erreur lors du paiement. Veuillez réessayer.",
         "UNKNOWN_ERROR": "Une erreur inconnue s'est produite. Veuillez réessayer.",
-        "AUTH_INVALID_CREDENTIALS": "Identifiants invalides. Veuillez vérifier votre email et mot de passe."
+        "AUTH_INVALID_CREDENTIALS": "Identifiants invalides. Veuillez vérifier votre email et mot de passe.",
+        "DEFAULT": "Une erreur s'est produite. Veuillez réessayer.",
+        "UNAUTHORIZED": "Vous devez vous connecter pour effectuer cette action.",
+        "FORBIDDEN": "Vous n'avez pas la permission d'effectuer cette action.",
+        "errorBoundary": {
+            "title": "Un problème est survenu",
+            "message": "Nous avons rencontré une erreur lors du chargement de cette partie de la page",
+            "retry": "Réessayer"
+        }
     }
 }
