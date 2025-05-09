@@ -1,7 +1,7 @@
 import { getAccessToken } from "../auth/session";
 import { tokenService } from "./tokenService";
 import { useAuthStore } from "../stores/authStore";
-import { handleApiError, showErrorToast } from '../utils/errorHandler';
+import { showErrorToast } from '../utils/errorHandler';
 
 interface RequestOptions {
     forceRefresh?: boolean;

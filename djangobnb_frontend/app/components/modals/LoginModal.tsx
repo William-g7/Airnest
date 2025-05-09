@@ -10,12 +10,14 @@ import apiService from "@/app/services/apiService";
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from "@/app/stores/authStore";
 import toast from "react-hot-toast";
+import { useErrorHandler } from "@/app/hooks/useErrorHandler";
 
 export default function LoginModal() {
     const t = useTranslations('auth');
     const loginModal = useLoginModal();
     const router = useRouter();
     const { setAuthenticated } = useAuthStore();
+    const { handleError, ErrorType } = useErrorHandler();
     const [formData, setFormData] = useState({
         email: '',
         password: ''
@@ -38,7 +40,7 @@ export default function LoginModal() {
             const response = await apiService.postwithouttoken('/api/auth/login/', {
                 email: formData.email,
                 password: formData.password
-            });
+            }, { suppressToast: true });
 
             console.log("Login response:", response);
 
@@ -55,12 +57,18 @@ export default function LoginModal() {
             }
         } catch (error: any) {
             console.error("Login error:", error);
-            if (error.message === 'AUTH_INVALID_CREDENTIALS') {
+
+            if (error.message?.includes(ErrorType.AUTH_INVALID_CREDENTIALS)) {
                 setError(t('invalidCredentials'));
-                toast.error(t('invalidCredentials'));
+            } else if (error.response?.data?.email) {
+                setError(error.response.data.email[0]);
+            } else if (error.response?.data?.password) {
+                setError(error.response.data.password[0]);
+            } else if (error.response?.data?.non_field_errors) {
+                setError(error.response.data.non_field_errors[0]);
             } else {
-                setError(error.message || t('loginError'));
-                toast.error(error.message || t('loginError'));
+                setError(t('loginError'));
+                handleError(error);
             }
         } finally {
             setIsLoading(false);
