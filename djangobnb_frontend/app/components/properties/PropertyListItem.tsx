@@ -10,6 +10,7 @@ import { useRouter } from '@/i18n/navigation';
 import { useAuth } from "@/app/hooks/useAuth";
 import { useFavoritesStore } from "@/app/stores/favoritesStore";
 import { debounce } from "@/app/utils/debounce";
+import toast from 'react-hot-toast';
 
 interface PropertyListItemProps {
     property: PropertyType;
@@ -17,6 +18,7 @@ interface PropertyListItemProps {
 
 const PropertyListItem: React.FC<PropertyListItemProps> = ({ property }) => {
     const t = useTranslations('properties');
+    const tFavorites = useTranslations('favorites');
     const router = useRouter();
     const loginModal = useLoginModal();
 
@@ -33,16 +35,24 @@ const PropertyListItem: React.FC<PropertyListItemProps> = ({ property }) => {
             }
 
             try {
+                const wasInFavorites = isFavorite(property.id);
                 await toggleFavorite(property.id);
+
+                if (wasInFavorites) {
+                    toast.success(tFavorites('removed'));
+                } else {
+                    toast.success(tFavorites('added'));
+                }
             } catch (error: any) {
                 if (error.message === 'No authentication token available') {
                     loginModal.onOpen();
                 } else {
                     console.error('Error toggling wishlist:', error);
+                    toast.error(tFavorites('error'));
                 }
             }
         }, 300),
-        [property.id, isAuthenticated, loginModal, toggleFavorite]
+        [property.id, isAuthenticated, loginModal, toggleFavorite, isFavorite, tFavorites]
     );
 
     return (

@@ -9,12 +9,16 @@ import CustomButton from "../forms/CustomButton";
 import apiService from "@/app/services/apiService";
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from "@/app/stores/authStore";
+import toast from "react-hot-toast";
+import { useErrorHandler } from "@/app/hooks/useErrorHandler";
+import AuthModalErrorBoundary from "./AuthModalErrorBoundary";
 
 export default function LoginModal() {
     const t = useTranslations('auth');
     const loginModal = useLoginModal();
     const router = useRouter();
     const { setAuthenticated } = useAuthStore();
+    const { handleError, ErrorType } = useErrorHandler();
     const [formData, setFormData] = useState({
         email: '',
         password: ''
@@ -32,75 +36,74 @@ export default function LoginModal() {
                 return;
             }
 
-            console.log("Attempting login with:", formData.email);
-
             const response = await apiService.postwithouttoken('/api/auth/login/', {
                 email: formData.email,
                 password: formData.password
-            });
+            }, { suppressToast: true });
 
-            console.log("Login response:", response);
-
-            if (response && response.access) {
-                await handleLogin(response.user.pk, response.access, response.refresh);
-                setAuthenticated(response.user.pk);
+            if (response.access) {
+                await handleLogin(response.user_pk, response.access, response.refresh);
+                setAuthenticated(response.user_pk);
                 loginModal.onClose();
-                await router.refresh();
+                toast.success(t('loginSuccess'));
                 router.push('/');
             } else {
-                console.error("Login failed with response:", response);
-                setError(t('loginFailed'));
+                setError(t('invalidCredentials'));
             }
         } catch (error: any) {
-            console.error("Login error:", error);
-            if (error.message === 'AUTH_INVALID_CREDENTIALS') {
-                setError(t('invalidCredentials'));
+            console.error('Login error:', error);
+
+            if (error.response?.data?.non_field_errors) {
+                setError(error.response.data.non_field_errors[0]);
             } else {
-                setError(error.message || t('loginError'));
+                setError(t('loginError'));
+                handleError(error);
             }
         } finally {
             setIsLoading(false);
         }
-    }
+    };
 
     const content = (
-        <div className="flex flex-col gap-4">
-            <h2 className="mb-4 text-2xl font-bold">{t('pleaseLogin')}</h2>
+        <AuthModalErrorBoundary>
+            <div className="flex flex-col gap-4">
+                <h2 className="mb-4 text-2xl font-bold">{t('pleaseLogin')}</h2>
 
-            {error && (
-                <div className="p-3 text-sm bg-red-100 text-red-600 rounded-lg">
-                    {error}
-                </div>
-            )}
-            <form className="flex flex-col gap-4">
-                <input
-                    type="email"
-                    placeholder={t('email')}
-                    value={formData.email}
-                    onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        email: e.target.value
-                    }))}
-                    className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-airbnb"
-                />
-                <input
-                    type="password"
-                    placeholder={t('password')}
-                    value={formData.password}
-                    onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        password: e.target.value
-                    }))}
-                    className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-airbnb"
-                />
-                <CustomButton
-                    label={isLoading ? t('loading') : t('login')}
-                    onClick={() => {
-                        onSubmit();
-                    }}
-                />
-            </form>
-        </div>
+                {error && (
+                    <div className="p-3 text-sm bg-red-100 text-red-600 rounded-lg">
+                        {error}
+                    </div>
+                )}
+                <form className="flex flex-col gap-4">
+                    <input
+                        type="email"
+                        placeholder={t('email')}
+                        value={formData.email}
+                        onChange={(e) => setFormData(prev => ({
+                            ...prev,
+                            email: e.target.value
+                        }))}
+                        className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-airbnb"
+                    />
+                    <input
+                        type="password"
+                        placeholder={t('password')}
+                        value={formData.password}
+                        onChange={(e) => setFormData(prev => ({
+                            ...prev,
+                            password: e.target.value
+                        }))}
+                        className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-airbnb"
+                    />
+                    <CustomButton
+                        label={isLoading ? t('loading') : t('login')}
+                        onClick={() => {
+                            onSubmit();
+                        }}
+                    />
+                </form>
+            </div>
+        </AuthModalErrorBoundary>
     );
 
     return (

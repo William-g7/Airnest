@@ -9,6 +9,7 @@ import { useLoginModal } from '../hooks/useLoginModal';
 import { useTranslations } from 'next-intl';
 import { formatDateForAPI, calculateNights } from '@/app/utils/dateUtils';
 import { useAuth } from '@/app/hooks/useAuth';
+import toast from 'react-hot-toast';
 
 const ReservationSideBar = ({ property }: { property: PropertyType }) => {
     const t = useTranslations('property');
@@ -48,7 +49,7 @@ const ReservationSideBar = ({ property }: { property: PropertyType }) => {
 
     const handleReservation = async () => {
         if (!dates[0] || !dates[1]) {
-            alert(t('selectDates'));
+            toast.error(t('selectDates'));
             return;
         }
 
@@ -73,11 +74,12 @@ const ReservationSideBar = ({ property }: { property: PropertyType }) => {
             });
 
             if (response.success) {
+                toast.success(t('reservationSuccess'));
                 router.push({
                     pathname: '/myreservations'
                 });
             } else {
-                alert(response.error || t('reservationFailed'));
+                toast.error(response.error || t('reservationFailed'));
             }
         } catch (err: any) {
             console.error('Error making reservation:', err);
@@ -87,7 +89,7 @@ const ReservationSideBar = ({ property }: { property: PropertyType }) => {
                 err.message?.includes('token')) {
                 loginModal.onOpen();
             } else {
-                alert(t('reservationFailed'));
+                toast.error(t('reservationFailed'));
             }
         } finally {
             setIsLoading(false);

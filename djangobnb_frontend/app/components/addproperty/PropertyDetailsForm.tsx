@@ -16,7 +16,7 @@ interface PropertyDetailsType {
 const MAX_TITLE_LENGTH = 50;
 const MAX_DESCRIPTION_LENGTH = 500;
 
-const PropertyDetailsForm: React.FC<PropertyDetailsFormProps> = ({ details, setDetails }) => {
+const PropertyDetailsForm = ({ details, setDetails }: PropertyDetailsFormProps) => {
     const t = useTranslations('addProperty');
 
     return (

@@ -6,6 +6,8 @@ import Image from 'next/image';
 import apiService from '@/app/services/apiService';
 import CustomButton from '@/app/components/forms/CustomButton';
 import { useTranslations } from 'next-intl';
+import toast from 'react-hot-toast';
+import { useErrorHandler } from '@/app/hooks/useErrorHandler';
 
 interface ProfileData {
     id: string;
@@ -20,6 +22,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string, 
     const userId = resolvedParams.id;
     const t = useTranslations('profile');
     const router = useRouter();
+    const { handleError, ErrorType, getError } = useErrorHandler();
 
     const [isEditing, setIsEditing] = useState(false);
     const [loadError, setLoadError] = useState("");
@@ -36,19 +39,19 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string, 
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const response = await apiService.getwithtoken(`/api/auth/profile/${userId}/`);
+                const response = await apiService.getwithtoken(`/api/auth/profile/${userId}/`, { suppressToast: true });
                 setProfile(response);
                 setName(response.name || '');
             } catch (error) {
                 console.error('Error fetching profile:', error);
-                setLoadError(t('loadError'));
+                setLoadError(getError(error) || t('loadError'));
             } finally {
                 setIsLoading(false);
             }
         };
 
         fetchProfile();
-    }, [userId, t]);
+    }, [userId, t, getError]);
 
     if (isLoading) {
         return <div className="text-center mt-8">{t('loading')}</div>;
@@ -68,12 +71,14 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string, 
 
             if (!ALLOWED_TYPES.includes(file.type)) {
                 setFormError(t('avatarTypeLimit'));
+                toast.error(t('avatarTypeLimit'));
                 return;
             }
 
             const fileSizeMB = file.size / (1024 * 1024);
             if (fileSizeMB > MAX_AVATAR_SIZE_MB) {
                 setFormError(t('avatarSizeLimit', { maxSizeMB: MAX_AVATAR_SIZE_MB }));
+                toast.error(t('avatarSizeLimit', { maxSizeMB: MAX_AVATAR_SIZE_MB }));
                 return;
             }
 
@@ -90,26 +95,54 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string, 
 
         try {
             const formData = new FormData();
-            if (name !== profile?.name) {
+            const nameChanged = name !== profile?.name;
+            const avatarChanged = !!newAvatar;
+
+            if (nameChanged) {
                 formData.append('name', name);
             }
-            if (newAvatar) {
+            if (avatarChanged) {
                 formData.append('avatar', newAvatar);
             }
 
-            const response = await apiService.patch(`/api/auth/profile/${userId}/`, formData);
+            const response = await apiService.patch(`/api/auth/profile/${userId}/`, formData, { suppressToast: true });
 
             setProfile(response);
             setIsEditing(false);
             setAvatarPreview(null);
             setNewAvatar(null);
 
-            const updatedProfile = await apiService.getwithtoken(`/api/auth/profile/${userId}/`);
+            const updatedProfile = await apiService.getwithtoken(`/api/auth/profile/${userId}/`, { suppressToast: true });
             setProfile(updatedProfile);
             setName(updatedProfile.name || '');
+
+            if (avatarChanged && nameChanged) {
+                toast.success(t('updateSuccess'));
+            } else if (avatarChanged) {
+                toast.success(t('avatarUpdateSuccess'));
+            } else if (nameChanged) {
+                toast.success(t('updateSuccess'));
+            }
         } catch (error: any) {
             console.error('Profile update error:', error);
-            setFormError(error.message || t('updateError'));
+
+            // 处理API返回的特定字段错误
+            if (error.response?.data) {
+                const fieldErrors = error.response.data;
+                if (typeof fieldErrors === 'object') {
+                    // 构建错误消息
+                    const errorKeys = Object.keys(fieldErrors);
+                    if (errorKeys.length > 0) {
+                        const firstError = fieldErrors[errorKeys[0]];
+                        setFormError(Array.isArray(firstError) ? firstError[0] : firstError);
+                        return;
+                    }
+                }
+            }
+
+            // 如果没有特定字段错误，使用错误处理钩子
+            const errorMessage = getError(error) || t('updateError');
+            setFormError(errorMessage);
         } finally {
             setIsLoading(false);
         }

@@ -141,7 +141,8 @@
         "updateFailed": "Échec de la mise à jour. Veuillez réessayer.",
         "deleteFailed": "Échec de la suppression. Veuillez réessayer.",
         "updateError": "Une erreur s'est produite lors de la mise à jour. Veuillez réessayer.",
-        "deleteImageConfirm": "Êtes-vous sûr de vouloir supprimer cette image ?"
+        "deleteImageConfirm": "Êtes-vous sûr de vouloir supprimer cette image ?",
+        "reservationSuccess": "Réservation effectuée avec succès"
     },
     "addProperty": {
         "djangobnbYourHome": "Partager votre maison",
@@ -232,13 +233,16 @@
         "loadError": "Échec du chargement des propriétés",
         "loading": "Chargement...",
         "noPropertiesFound": "Aucune propriété trouvée",
-        "noPropertiesMatch": "No properties match your search criteria. Please adjust your filters.",
+        "noPropertiesMatch": "Aucune propriété ne correspond à vos critères de recherche. Veuillez ajuster vos filtres.",
         "noListedProperties": "Vous n'avez pas encore listé de propriétés.",
         "location": "Emplacement",
         "price": "Prix",
         "manageImages": "Gérer les Images",
         "edit": "Modifier",
-        "manage": "Gérer"
+        "manage": "Gérer",
+        "errorMessage": "Nous n'avons pas pu charger la liste des propriétés. Veuillez réessayer plus tard.",
+        "refreshPage": "Actualiser la Page",
+        "backToHome": "Retour à l'Accueil"
     },
     "auth": {
         "login": "Se connecter",
@@ -256,7 +260,12 @@
         "loading": "Chargement...",
         "passwordsNotMatch": "Les mots de passe ne correspondent pas",
         "somethingWentWrong": "Quelque chose s'est mal passé",
-        "alreadyHaveAccount": "Vous avez déjà un compte ?"
+        "alreadyHaveAccount": "Vous avez déjà un compte ?",
+        "signupSuccess": "Compte créé avec succès",
+        "loginSuccess": "Connexion réussie",
+        "logoutSuccess": "Déconnexion réussie",
+        "authError": "Erreur d'Authentification",
+        "authErrorMessage": "Un problème est survenu lors du processus d'authentification. Veuillez réessayer."
     },
     "myproperties": {
         "title": "Mes propriétés",
@@ -305,7 +314,9 @@
         "avatarTypeLimit": "Seules les images JPEG, PNG ou WebP sont autorisées",
         "avatar": "Photo de profil",
         "avatarUpload": "Télécharger une photo de profil",
-        "profileNotFound": "Profil non trouvé"
+        "profileNotFound": "Profil non trouvé",
+        "updateSuccess": "Profil mis à jour avec succès",
+        "avatarUpdateSuccess": "Photo de profil mise à jour avec succès"
     },
     "PropertyManagement": {
         "manageProperty": "Gérer la Propriété",
@@ -335,5 +346,25 @@
         "dragToReorder": "Faites glisser les images pour les réorganiser. Cliquez sur 'Définir comme Principale' pour faire d'une image la photo principale.",
         "mainPhoto": "Photo Principale",
         "setAsMain": "Définir comme Principale"
+    },
+    "errors": {
+        "NETWORK_ERROR": "Erreur de réseau. Veuillez vérifier votre connexion Internet.",
+        "SERVER_ERROR": "Erreur du serveur. Veuillez réessayer plus tard.",
+        "AUTH_ERROR": "Erreur d'authentification. Veuillez vous reconnecter.",
+        "VALIDATION_ERROR": "Veuillez vérifier les informations saisies.",
+        "NOT_FOUND": "La ressource demandée n'a pas été trouvée.",
+        "PERMISSION_DENIED": "Vous n'avez pas les droits pour effectuer cette action.",
+        "BOOKING_CONFLICT": "Les dates sélectionnées ne sont plus disponibles.",
+        "PAYMENT_ERROR": "Erreur lors du paiement. Veuillez réessayer.",
+        "UNKNOWN_ERROR": "Une erreur inconnue s'est produite. Veuillez réessayer.",
+        "AUTH_INVALID_CREDENTIALS": "Identifiants invalides. Veuillez vérifier votre email et mot de passe.",
+        "DEFAULT": "Une erreur s'est produite. Veuillez réessayer.",
+        "UNAUTHORIZED": "Vous devez vous connecter pour effectuer cette action.",
+        "FORBIDDEN": "Vous n'avez pas la permission d'effectuer cette action.",
+        "errorBoundary": {
+            "title": "Un problème est survenu",
+            "message": "Nous avons rencontré une erreur lors du chargement de cette partie de la page",
+            "retry": "Réessayer"
+        }
     }
 }
