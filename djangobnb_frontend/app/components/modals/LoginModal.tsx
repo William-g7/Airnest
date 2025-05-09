@@ -9,6 +9,7 @@ import CustomButton from "../forms/CustomButton";
 import apiService from "@/app/services/apiService";
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from "@/app/stores/authStore";
+import toast from "react-hot-toast";
 
 export default function LoginModal() {
     const t = useTranslations('auth');
@@ -45,6 +46,7 @@ export default function LoginModal() {
                 await handleLogin(response.user.pk, response.access, response.refresh);
                 setAuthenticated(response.user.pk);
                 loginModal.onClose();
+                toast.success(t('loginSuccess'));
                 await router.refresh();
                 router.push('/');
             } else {
@@ -55,8 +57,10 @@ export default function LoginModal() {
             console.error("Login error:", error);
             if (error.message === 'AUTH_INVALID_CREDENTIALS') {
                 setError(t('invalidCredentials'));
+                toast.error(t('invalidCredentials'));
             } else {
                 setError(error.message || t('loginError'));
+                toast.error(error.message || t('loginError'));
             }
         } finally {
             setIsLoading(false);

@@ -10,6 +10,7 @@ import apiService from "@/app/services/apiService";
 import { handleLogin } from "@/app/auth/session";
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from "@/app/stores/authStore";
+import toast from "react-hot-toast";
 
 export default function SignupModal() {
     const t = useTranslations('auth');
@@ -33,6 +34,7 @@ export default function SignupModal() {
 
             if (formData.password !== formData.password2) {
                 setError(t('passwordsNotMatch'));
+                toast.error(t('passwordsNotMatch'));
                 return;
             }
 
@@ -46,12 +48,15 @@ export default function SignupModal() {
                 await handleLogin(response.user_pk, response.access, response.refresh);
                 setAuthenticated(response.user_pk);
                 signupModal.onClose();
+                toast.success(t('signupSuccess'));
                 router.push('/');
             } else {
                 setError(t('somethingWentWrong'));
+                toast.error(t('somethingWentWrong'));
             }
         } catch (error: any) {
             setError(error.message || t('somethingWentWrong'));
+            toast.error(error.message || t('somethingWentWrong'));
         } finally {
             setIsLoading(false);
         }
