@@ -14,6 +14,7 @@ import ContactButton from "@/app/components/ContactButton";
 import { useTranslations } from 'next-intl';
 import CustomButton from '@/app/components/forms/CustomButton';
 import toast from 'react-hot-toast';
+import { useTranslate } from '@/app/hooks/useTranslate';
 
 const PropertyImageCarousel = dynamic(
     () => import('./PropertyImageCarousel'),
@@ -43,6 +44,12 @@ const PropertyDetail = ({ property }: { property: PropertyType }) => {
     const addPropertyModal = useAddPropertyModal();
     const authStore = useAuthStore();
     const isLandlord = authStore.userId && property.landlord && authStore.userId === property.landlord.id.toString();
+    const { useLiveTranslation } = useTranslate();
+
+    const { translation: translatedTitle, isLoading: titleLoading } = useLiveTranslation(property.title);
+    const { translation: translatedDescription, isLoading: descLoading } = useLiveTranslation(property.description);
+    const { translation: translatedCity, isLoading: cityLoading } = useLiveTranslation(property.city);
+    const { translation: translatedCountry, isLoading: countryLoading } = useLiveTranslation(property.country);
 
     useEffect(() => {
         const checkIfFavorited = async () => {
@@ -104,10 +111,17 @@ const PropertyDetail = ({ property }: { property: PropertyType }) => {
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
                 <div className="md:col-span-7 lg:col-span-8">
-                    <h1 className="text-4xl font-semibold mb-4">{property.title}</h1>
+                    <h1 className="text-4xl font-semibold mb-4">
+                        {titleLoading ? (
+                            <span className="animate-pulse">{property.title}</span>
+                        ) : (
+                            translatedTitle
+                        )}
+                    </h1>
 
                     <div className="text-lg text-gray-600 mb-2">
-                        <p>📍 {property.city}, {property.country}</p>
+                        <p>📍 {cityLoading ? property.city : translatedCity},
+                            {countryLoading ? property.country : translatedCountry}</p>
                     </div>
 
                     <div className="flex flex-wrap gap-2 text-lg text-gray-600 mb-2">
@@ -180,7 +194,11 @@ const PropertyDetail = ({ property }: { property: PropertyType }) => {
                     <div className="py-6">
                         <h2 className="text-2xl font-semibold mb-4">{t('aboutPlace')}</h2>
                         <p className="text-gray-600 whitespace-pre-line">
-                            {property.description}
+                            {descLoading ? (
+                                <span className="animate-pulse">{property.description}</span>
+                            ) : (
+                                translatedDescription
+                            )}
                         </p>
                     </div>
                 </div>

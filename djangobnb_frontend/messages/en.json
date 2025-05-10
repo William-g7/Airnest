@@ -115,7 +115,10 @@
         "addDate": "Add date",
         "back": "Back",
         "previous": "Previous",
-        "next": "Next"
+        "next": "Next",
+        "translationAvailable": "Translation available",
+        "originalText": "Original text",
+        "translatedText": "Translated text"
     },
     "property": {
         "title": "Title",
@@ -252,12 +255,17 @@
         }
     },
     "properties": {
+        "loading": "Loading properties...",
         "loadError": "Failed to load properties",
-        "loading": "Loading...",
         "noPropertiesFound": "No properties found",
-        "noListedProperties": "You haven't listed any properties yet.",
+        "noListedProperties": "You haven't listed any properties yet. Add your first property to start hosting!",
+        "noPropertiesMatch": "No properties match your search criteria. Try modifying your filters.",
         "location": "Location",
         "price": "Price",
+        "translating": "Translating content",
+        "translationInProgress": "Translation in progress...",
+        "translationComplete": "Translation complete",
+        "translationFailed": "Translation failed, showing original text",
         "manageImages": "Manage Images",
         "edit": "Edit",
         "manage": "Manage",
