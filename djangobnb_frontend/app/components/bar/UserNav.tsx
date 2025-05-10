@@ -19,8 +19,6 @@ const UserNav: React.FC<UserNavProps> = ({ userId: initialUserId }) => {
     const signupModal = useSignupModal();
     const router = useRouter();
     const t = useTranslations('navigation');
-
-    // 优先使用 Zustand 存储的 userId，如果为 null 则使用从服务器传递的初始值
     const { userId: storeUserId, isAuthenticated } = useAuthStore();
     const userId = storeUserId || initialUserId;
 
@@ -50,6 +48,7 @@ const UserNav: React.FC<UserNavProps> = ({ userId: initialUserId }) => {
         setIsOpen(!isOpen);
     };
 
+    const showUserMenu = userId && isAuthenticated;
     return (
         <div className="relative">
             <div
@@ -70,14 +69,14 @@ const UserNav: React.FC<UserNavProps> = ({ userId: initialUserId }) => {
             <div
                 className={`
                     absolute right-0 mt-3 w-[220px] bg-white border rounded-xl shadow-lg 
-                    transition-all duration-300 ease-in-out transform
+                    transition-all duration-300 ease-in-out transform z-50
                     ${isOpen
                         ? 'opacity-100 translate-y-0'
                         : 'opacity-0 translate-y-[-10px] pointer-events-none'
                     }
                 `}
             >
-                {userId ? (
+                {showUserMenu ? (
                     <>
                         <div className="py-2">
                             <MenuLink label={t('messages')} onClick={() => { setIsOpen(false); router.push('/inbox') }} />

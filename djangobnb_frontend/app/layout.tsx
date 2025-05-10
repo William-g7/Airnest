@@ -3,6 +3,8 @@ import "./globals.css";
 import { Geist, Geist_Mono } from "next/font/google";
 import AuthProvider from "./components/AuthProvider";
 import ErrorBoundaryProvider from "./providers/ErrorBoundaryProvider";
+import { Toaster } from "react-hot-toast";
+import AuthStatusDetector from "./components/AuthStatusDetector";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,8 +30,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <Toaster position="top-center" />
         <AuthProvider>
           <ErrorBoundaryProvider>
+            <AuthStatusDetector />
             {children}
           </ErrorBoundaryProvider>
         </AuthProvider>
