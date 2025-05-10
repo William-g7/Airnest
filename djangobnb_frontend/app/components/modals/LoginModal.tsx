@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useLoginModal } from "../hooks/useLoginModal";
-import { handleLogin } from "@/app/auth/session";
 import Modal from "./Modal";
 import CustomButton from "../forms/CustomButton";
 import apiService from "@/app/services/apiService";
@@ -12,6 +11,7 @@ import { useAuthStore } from "@/app/stores/authStore";
 import toast from "react-hot-toast";
 import { useErrorHandler } from "@/app/hooks/useErrorHandler";
 import AuthModalErrorBoundary from "./AuthModalErrorBoundary";
+import { clientSessionService } from "@/app/services/clientSessionService";
 
 export default function LoginModal() {
     const t = useTranslations('auth');
@@ -42,11 +42,24 @@ export default function LoginModal() {
             }, { suppressToast: true });
 
             if (response.access) {
-                await handleLogin(response.user_pk, response.access, response.refresh);
-                setAuthenticated(response.user_pk);
+                const userId = response.user_id || response.user_pk || (response.user && response.user.pk);
+
+                if (!userId) {
+                    toast.error(t('loginError'));
+                    setIsLoading(false);
+                    return;
+                }
+
+                await clientSessionService.handleLogin(userId, response.access, response.refresh);
+
+                setAuthenticated(userId);
+
                 loginModal.onClose();
                 toast.success(t('loginSuccess'));
-                router.push('/');
+
+                setTimeout(() => {
+                    router.push('/');
+                }, 100);
             } else {
                 setError(t('invalidCredentials'));
             }

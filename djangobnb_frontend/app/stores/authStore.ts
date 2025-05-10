@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { getUserId, getAccessToken } from '@/app/auth/session';
+import { clientSessionService } from '../services/clientSessionService';
 
 interface AuthState {
     userId: string | null;
@@ -19,7 +20,11 @@ export const useAuthStore = create<AuthState>((set) => ({
     checkAuth: async () => {
         set({ loading: true });
         try {
-            const userId = await getUserId();
+            let userId = await getUserId();
+            if (!userId) {
+                userId = clientSessionService.getUserId();
+            }
+
             if (userId) {
                 set({ userId, isAuthenticated: true, loading: false });
             } else {
@@ -32,10 +37,24 @@ export const useAuthStore = create<AuthState>((set) => ({
     },
 
     setAuthenticated: (userId: string) => {
+        if (!userId) {
+            return;
+        }
         set({ userId, isAuthenticated: true, loading: false });
+
+        try {
+            localStorage.setItem('app_user_id', userId);
+        } catch (e) {
+            console.error("保存用户ID到本地存储失败", e);
+        }
     },
 
     setUnauthenticated: () => {
         set({ userId: null, isAuthenticated: false, loading: false });
+        try {
+            localStorage.removeItem('app_user_id');
+        } catch (e) {
+            console.error("从本地存储清除用户ID失败", e);
+        }
     }
 })); 
