@@ -93,7 +93,10 @@
         "addDate": "Ajouter une date",
         "back": "Retour",
         "previous": "Précédent",
-        "next": "Suivant"
+        "next": "Suivant",
+        "translationAvailable": "Traduction disponible",
+        "originalText": "Texte original",
+        "translatedText": "Texte traduit"
     },
     "property": {
         "title": "Titre",
@@ -230,13 +233,17 @@
         }
     },
     "properties": {
+        "loading": "Chargement des propriétés...",
         "loadError": "Échec du chargement des propriétés",
-        "loading": "Chargement...",
         "noPropertiesFound": "Aucune propriété trouvée",
-        "noPropertiesMatch": "Aucune propriété ne correspond à vos critères de recherche. Veuillez ajuster vos filtres.",
-        "noListedProperties": "Vous n'avez pas encore listé de propriétés.",
+        "noListedProperties": "Vous n'avez pas encore répertorié de propriétés. Ajoutez votre première propriété pour commencer à héberger !",
+        "noPropertiesMatch": "Aucune propriété ne correspond à vos critères de recherche. Essayez de modifier vos filtres.",
         "location": "Emplacement",
         "price": "Prix",
+        "translating": "Traduction du contenu",
+        "translationInProgress": "Traduction en cours...",
+        "translationComplete": "Traduction terminée",
+        "translationFailed": "Échec de la traduction, affichage du texte original",
         "manageImages": "Gérer les Images",
         "edit": "Modifier",
         "manage": "Gérer",
@@ -346,6 +353,11 @@
         "dragToReorder": "Faites glisser les images pour les réorganiser. Cliquez sur 'Définir comme Principale' pour faire d'une image la photo principale.",
         "mainPhoto": "Photo Principale",
         "setAsMain": "Définir comme Principale"
+    },
+    "favorites": {
+        "added": "Ajouté à vos favoris",
+        "removed": "Retiré de vos favoris",
+        "error": "Échec de la mise à jour des favoris"
     },
     "errors": {
         "NETWORK_ERROR": "Erreur de réseau. Veuillez vérifier votre connexion Internet.",
