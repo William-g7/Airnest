@@ -1,10 +1,29 @@
 'use client'
 
 import { handleLogin as serverHandleLogin } from "@/app/auth/session";
-import toast from "react-hot-toast";
 import { useAuthStore } from "../stores/authStore";
+import { getAuthChannel } from "./AuthChannel";
+import { getNotificationService, NotificationType } from "./NotificationService";
 
 const USER_ID_KEY = 'app_user_id';
+
+// 获取通知服务单例
+const notificationService = getNotificationService();
+
+// 初始化认证通信频道
+const authChannel = getAuthChannel();
+if (typeof window !== 'undefined') {
+    authChannel.init();
+
+    // 设置认证事件监听
+    authChannel.addMessageHandler((event) => {
+        if (event.type === 'AUTH_LOGOUT' && event.reason !== 'local_action') {
+            notificationService.notifyLogoutAnotherTab();
+        } else if (event.type === 'AUTH_EXPIRED') {
+            notificationService.notifySessionExpired();
+        }
+    });
+}
 
 /**
  * 客户端会话服务
@@ -18,11 +37,22 @@ export const clientSessionService = {
 
             await serverHandleLogin(userId, accessToken, refreshToken);
 
+            // 设置本地存储
             localStorage.setItem(USER_ID_KEY, userId);
+
+            // 通过AuthChannel广播登录事件
+            authChannel.sendLoginEvent(userId);
+
+            // 显示登录成功通知
+            notificationService.notify(NotificationType.AUTH_LOGIN_SUCCESS);
 
             return true;
         } catch (error) {
             console.error("客户端会话登录处理失败:", error);
+
+            // 显示登录失败通知
+            notificationService.notify(NotificationType.AUTH_LOGIN_ERROR);
+
             return false;
         }
     },
@@ -39,53 +69,40 @@ export const clientSessionService = {
         }
     },
 
-    clearSession: () => {
+    // 清除会话数据并广播登出事件
+    clearSession: (reason = 'logout') => {
         try {
             localStorage.removeItem(USER_ID_KEY);
+
+            // 通过AuthChannel广播登出事件，标记为本地操作
+            authChannel.sendLogoutEvent(reason + '_local_action');
+
+            // 显示登出成功通知
+            if (reason === 'logout') {
+                notificationService.notify(NotificationType.AUTH_LOGOUT_SUCCESS);
+            }
         } catch (error) {
             console.error("清除本地会话失败:", error);
         }
     },
 
-    // 设置跨标签页状态监听，用于在一个标签页登出时同步其他标签页的状态
-    setupStorageListener: () => {
-        if (typeof window === 'undefined') return;
-        window.removeEventListener('storage', clientSessionService._handleStorageChange);
-        window.addEventListener('storage', clientSessionService._handleStorageChange);
+    // 通知会话过期
+    notifySessionExpired: () => {
+        try {
+            localStorage.removeItem(USER_ID_KEY);
+
+            // 通过AuthChannel广播会话过期事件
+            authChannel.sendSessionExpiredEvent();
+
+            // 显示会话过期通知
+            notificationService.notifySessionExpired();
+        } catch (error) {
+            console.error("清除过期会话失败:", error);
+        }
     },
 
-    // 处理localStorage变化事件，监听用户ID的变化
-    _handleStorageChange: (event: StorageEvent) => {
-        if (event.key === USER_ID_KEY) {
-            console.log(`Storage change detected: ${event.key}`, {
-                oldValue: event.oldValue,
-                newValue: event.newValue
-            });
-
-            if (event.oldValue && !event.newValue) {
-                console.log('Detected logout in another tab');
-
-                useAuthStore.getState().checkAuth();
-
-                let locale = 'en';
-                if (typeof window !== 'undefined') {
-                    const localeMatch = window.location.pathname.match(/^\/([a-z]{2})/);
-                    if (localeMatch && localeMatch[1]) {
-                        locale = localeMatch[1];
-                    }
-                }
-
-                const logoutMessages: Record<string, string> = {
-                    'zh': '您已在另一个窗口退出登录',
-                    'en': 'You have been logged out in another window',
-                    'fr': 'Vous avez été déconnecté dans une autre fenêtre'
-                };
-
-                toast(logoutMessages[locale] || logoutMessages.en, {
-                    duration: 3000,
-                    icon: '🔑'
-                });
-            }
-        }
+    // 显示认证需要通知
+    notifyAuthRequired: (message?: string) => {
+        notificationService.notifyAuthRequired(message);
     }
 }; 
