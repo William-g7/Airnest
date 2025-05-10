@@ -55,7 +55,6 @@ export default function LoginModal() {
                 setAuthenticated(userId);
 
                 loginModal.onClose();
-                toast.success(t('loginSuccess'));
 
                 setTimeout(() => {
                     router.push('/');
