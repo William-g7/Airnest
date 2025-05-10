@@ -1,33 +1,100 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useTranslations } from 'next-intl';
 import apiService from "../../services/apiService";
 import PropertyListItem from "./PropertyListItem";
 import { PropertyType } from "@/app/constants/propertyType";
 import { useSearchStore } from "@/app/stores/searchStore";
 import { useSearchParams } from "next/navigation";
+import { useTranslate } from '@/app/hooks/useTranslate';
+import { useLocaleStore } from '@/app/stores/localeStore';
+
+interface TranslationContext {
+    titles: Record<string, string>;
+    cities: Record<string, string>;
+    countries: Record<string, string>;
+}
 
 interface PropertyListProps {
     isMyProperties?: boolean;
     isWishlist?: boolean;
 }
 
-const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties, isWishlist }) => {
+const PropertyList = ({ isMyProperties, isWishlist }: PropertyListProps) => {
     const t = useTranslations('properties');
     const [properties, setProperties] = useState<PropertyType[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
     const [lastSearchParams, setLastSearchParams] = useState("");
 
-    // 获取搜索筛选条件
+    const [translationsLoading, setTranslationsLoading] = useState(false);
+    const [translationContext, setTranslationContext] = useState<TranslationContext>({
+        titles: {},
+        cities: {},
+        countries: {}
+    });
+
+    const isTranslatingRef = useRef(false);
+
+    const { translateMultiple } = useTranslate();
+    const { locale } = useLocaleStore();
+
     const { location, checkIn, checkOut, guests, category } = useSearchStore();
     const searchParams = useSearchParams();
 
-    // 序列化searchParams，用于比较变化
     const serializedParams = searchParams.toString();
 
-    // 使用useCallback包装getProperties函数，避免不必要的重新创建
+    const batchTranslateProperties = useCallback(async (propertyData: PropertyType[]) => {
+        if (locale === 'en' || propertyData.length === 0 || isTranslatingRef.current) {
+            return;
+        }
+
+        isTranslatingRef.current = true;
+        setTranslationsLoading(true);
+
+        try {
+            const titleTexts = propertyData.map(p => p.title).filter(Boolean);
+            const cityTexts = propertyData.map(p => p.city).filter(Boolean);
+            const countryTexts = propertyData.map(p => p.country).filter(Boolean);
+
+            if (titleTexts.length === 0 && cityTexts.length === 0 && countryTexts.length === 0) {
+                setTranslationsLoading(false);
+                isTranslatingRef.current = false;
+                return;
+            }
+
+            const [translatedTitles, translatedCities, translatedCountries] = await Promise.all([
+                translateMultiple(titleTexts),
+                translateMultiple(cityTexts),
+                translateMultiple(countryTexts)
+            ]);
+
+            if (isTranslatingRef.current) {
+                setTranslationContext({
+                    titles: translatedTitles,
+                    cities: translatedCities,
+                    countries: translatedCountries
+                });
+            }
+        } catch (error) {
+            console.error("Error translating properties:", error);
+
+            if (isTranslatingRef.current) {
+                setTranslationContext({
+                    titles: {},
+                    cities: {},
+                    countries: {}
+                });
+            }
+        } finally {
+            if (isTranslatingRef.current) {
+                setTranslationsLoading(false);
+                isTranslatingRef.current = false;
+            }
+        }
+    }, [locale, translateMultiple]);
+
     const getProperties = useCallback(async () => {
         try {
             setIsLoading(true);
@@ -38,11 +105,8 @@ const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties, isWishlist 
             } else if (isWishlist) {
                 endpoint = '/api/properties/wishlist/';
             } else {
-                // 只有在显示普通房源列表时才应用筛选条件
-                // 优先使用URL参数构建查询
                 const params = new URLSearchParams();
 
-                // 直接从URL读取参数
                 const locationParam = searchParams.get('location');
                 const checkInParam = searchParams.get('check_in');
                 const checkOutParam = searchParams.get('check_out');
@@ -55,7 +119,6 @@ const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties, isWishlist 
                 if (guestsParam && parseInt(guestsParam) > 1) params.append('guests', guestsParam);
                 if (categoryParam) params.append('category', categoryParam);
 
-                // 如果URL没有参数，使用状态中的值
                 if (params.toString() === '' && (location || checkIn || checkOut || guests > 1 || category)) {
                     if (location) params.append('location', location);
                     if (checkIn) params.append('check_in', checkIn);
@@ -75,16 +138,18 @@ const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties, isWishlist 
             const data = (isMyProperties || isWishlist)
                 ? await apiService.getwithtoken(endpoint)
                 : await apiService.get(endpoint);
+
             setProperties(data);
+
+            batchTranslateProperties(data);
         } catch (error) {
             setError(t('loadError'));
             console.error("Error fetching properties:", error);
         } finally {
             setIsLoading(false);
         }
-    }, [isMyProperties, isWishlist, searchParams, location, checkIn, checkOut, guests, category, t]);
+    }, [isMyProperties, isWishlist, searchParams, location, checkIn, checkOut, guests, category, t, batchTranslateProperties]);
 
-    // 只有当URL参数真正变化时才重新获取数据
     useEffect(() => {
         if (serializedParams !== lastSearchParams) {
             console.log(`Search params changed from "${lastSearchParams}" to "${serializedParams}"`);
@@ -93,9 +158,18 @@ const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties, isWishlist 
         }
     }, [serializedParams, lastSearchParams, getProperties]);
 
-    // 组件挂载时获取一次数据
+    useEffect(() => {
+        if (properties.length > 0 && !isTranslatingRef.current) {
+            batchTranslateProperties(properties);
+        }
+    }, [locale, properties]);
+
     useEffect(() => {
         getProperties();
+
+        return () => {
+            isTranslatingRef.current = false;
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -108,7 +182,6 @@ const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties, isWishlist 
     }
 
     if (properties.length === 0) {
-        // 检查是否有任何筛选条件（从URL或状态）
         const hasFilters = searchParams.get('location') ||
             searchParams.get('check_in') ||
             searchParams.get('check_out') ||
@@ -139,10 +212,17 @@ const PropertyList: React.FC<PropertyListProps> = ({ isMyProperties, isWishlist 
 
     return (
         <>
+            {translationsLoading && <div className="text-sm text-gray-500 mb-4">{t('translating')}...</div>}
+
             {properties.map((property) => (
                 <PropertyListItem
                     key={property.id}
                     property={property}
+                    translations={{
+                        title: translationContext.titles[property.title] || '',
+                        city: translationContext.cities[property.city] || '',
+                        country: translationContext.countries[property.country] || ''
+                    }}
                 />
             ))}
         </>
