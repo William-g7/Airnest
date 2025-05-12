@@ -1,6 +1,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl';
+import { useCurrency } from '@/app/providers/CurrencyProvider';
 
 interface PropertyDetailsFormProps {
     details: PropertyDetailsType;
@@ -76,6 +77,9 @@ const PropertyDetailsForm = ({ details, setDetails }: PropertyDetailsFormProps) 
                         className="w-full p-4 pl-8 border border-gray-300 rounded-lg focus:outline-none focus:border-black"
                     />
                 </div>
+                <p className="text-sm text-gray-500 mt-2">
+                    {t('allPricesInUSD')}
+                </p>
             </div>
         </div>
     );

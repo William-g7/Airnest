@@ -7,6 +7,7 @@ import apiService from "@/app/services/apiService";
 import { ReservationType } from "@/app/constants/reservationType";
 import { useTranslations } from 'next-intl';
 import { formatLocalizedDate, calculateNights } from "@/app/utils/dateUtils";
+import CurrencyDisplay from "@/app/components/common/CurrencyDisplay";
 
 const MyReservationsPage = () => {
     const t = useTranslations('myreservations');
@@ -156,7 +157,12 @@ const MyReservationsPage = () => {
                                             <div className="flex items-center">
                                                 <div>
                                                     <span className="font-medium"><strong>{t('totalPrice')}: </strong></span>
-                                                    <span>${parseFloat(reservation.total_price.toString()).toFixed(2)}</span>
+                                                    <span>
+                                                        <CurrencyDisplay
+                                                            amount={parseFloat(reservation.total_price.toString())}
+                                                            showOriginal={true}
+                                                        />
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>

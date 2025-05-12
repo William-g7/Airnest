@@ -224,7 +224,9 @@
         "createFailed": "房源创建失败，请重试。",
         "updateFailed": "房源更新失败，请重试。",
         "currentImages": "当前图片",
-        "addNewImages": "添加新图片"
+        "addNewImages": "添加新图片",
+        "allPricesInUSD": "所有价格均以美元保存，将根据用户所在地区以当地货币显示。",
+        "inputInUSD": "请以美元输入价格"
     },
     "categories": {
         "omg": "惊喜推荐",
@@ -272,6 +274,11 @@
         "errorMessage": "我们无法加载房源列表，请稍后再试",
         "refreshPage": "刷新页面",
         "backToHome": "返回首页"
+    },
+    "currency": {
+        "displayedIn": "价格以{currency}显示",
+        "convertedFrom": "由美元转换而来",
+        "storedInUSD": "价格均以美元存储"
     },
     "auth": {
         "login": "登录",

@@ -10,6 +10,7 @@ import { useTranslations } from 'next-intl';
 import { formatDateForAPI, calculateNights } from '@/app/utils/dateUtils';
 import { useAuth } from '@/app/hooks/useAuth';
 import toast from 'react-hot-toast';
+import CurrencyDisplay from '../common/CurrencyDisplay';
 
 const ReservationSideBar = ({ property }: { property: PropertyType }) => {
     const t = useTranslations('property');
@@ -117,7 +118,9 @@ const ReservationSideBar = ({ property }: { property: PropertyType }) => {
     return (
         <aside className="mt-6 p-6 border border-gray-200 rounded-xl shadow-md">
             <div className="flex items-baseline mb-6">
-                <span className="text-2xl font-bold">${property.price_per_night}</span>
+                <span className="text-2xl font-bold">
+                    <CurrencyDisplay amount={property.price_per_night} />
+                </span>
                 <span className="text-lg text-gray-500 ml-2">{t('perNight')}</span>
             </div>
 
@@ -148,27 +151,27 @@ const ReservationSideBar = ({ property }: { property: PropertyType }) => {
                     <div className="mt-4 space-y-4">
                         <div className="flex justify-between">
                             <span className="underline">
-                                ${property.price_per_night} x {getNights()} {t('nights')}
+                                <CurrencyDisplay amount={property.price_per_night} /> x {getNights()} {t('nights')}
                             </span>
-                            <span>${totals.subtotal}</span>
+                            <span><CurrencyDisplay amount={totals.subtotal} /></span>
                         </div>
                         <div className="flex justify-between">
                             <span className="underline">{t('cleaningFee')}</span>
-                            <span>${totals.cleaningFee.toFixed(2)}</span>
+                            <span><CurrencyDisplay amount={totals.cleaningFee} /></span>
                         </div>
                         <div className="flex justify-between">
                             <span className="underline">{t('serviceFee')}</span>
-                            <span>${totals.serviceFee.toFixed(2)}</span>
+                            <span><CurrencyDisplay amount={totals.serviceFee} /></span>
                         </div>
                         <div className="flex justify-between">
                             <span className="underline">{t('taxes')}</span>
-                            <span>${totals.taxes.toFixed(2)}</span>
+                            <span><CurrencyDisplay amount={totals.taxes} /></span>
                         </div>
                     </div>
 
                     <div className="mt-4 pt-4 border-t border-gray-300 flex justify-between font-bold">
                         <span>{t('total')}</span>
-                        <span>${totals.total.toFixed(2)}</span>
+                        <span><CurrencyDisplay amount={totals.total} showOriginal={true} /></span>
                     </div>
                 </>
             )}

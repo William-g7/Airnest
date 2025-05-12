@@ -12,6 +12,7 @@ import { useFavoritesStore } from "@/app/stores/favoritesStore";
 import { debounce } from "@/app/utils/debounce";
 import toast from 'react-hot-toast';
 import { useLocaleStore } from '@/app/stores/localeStore';
+import CurrencyDisplay from '../common/CurrencyDisplay';
 
 interface PropertyListItemProps {
     property: PropertyType;
@@ -108,7 +109,9 @@ const PropertyListItem = ({ property, translations }: PropertyListItemProps) => 
                 </div>
 
                 <div className="mt-2">
-                    <p className="text-sm text-gray-500"><strong>{t('price')}:</strong> ${property.price_per_night}</p>
+                    <p className="text-sm text-gray-500">
+                        <strong>{t('price')}:</strong> <CurrencyDisplay amount={property.price_per_night} />
+                    </p>
                 </div>
             </div>
         </div>

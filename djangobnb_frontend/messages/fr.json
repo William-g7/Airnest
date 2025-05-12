@@ -203,7 +203,9 @@
         "uploadImagesLimit": "Vous pouvez télécharger jusqu'à {maxImages} images (max {maxSizeMB}Mo chacune)",
         "arrangePictures": "Organiser les photos du logement",
         "dragPicturesHint": "Faites glisser les photos pour les réorganiser. Cliquez sur 'Définir comme Principale' pour sélectionner l'image mise en avant.",
-        "saving": "Enregistrement..."
+        "saving": "Enregistrement...",
+        "allPricesInUSD": "Tous les prix sont stockés en USD. Ils seront affichés aux utilisateurs dans leur devise locale.",
+        "inputInUSD": "Entrez le prix en USD"
     },
     "categories": {
         "omg": "OMG!",
@@ -252,6 +254,11 @@
         "errorMessage": "Nous n'avons pas pu charger la liste des propriétés. Veuillez réessayer plus tard.",
         "refreshPage": "Actualiser la Page",
         "backToHome": "Retour à l'Accueil"
+    },
+    "currency": {
+        "displayedIn": "Prix affichés en {currency}",
+        "convertedFrom": "Convertis à partir de USD",
+        "storedInUSD": "Les prix sont stockés en USD"
     },
     "auth": {
         "login": "Se connecter",

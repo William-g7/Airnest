@@ -225,7 +225,9 @@
         "removeImagesFirst": "Remove some images before uploading new ones",
         "tooManyImages": "Too many images. Maximum allowed is {maxImages}",
         "invalidFileType": "Invalid file type. Only images are allowed",
-        "fileTooLarge": "File too large. Maximum size is {maxSizeMB}MB"
+        "fileTooLarge": "File too large. Maximum size is {maxSizeMB}MB",
+        "allPricesInUSD": "All prices are stored in USD. They will be displayed to users in their local currency.",
+        "inputInUSD": "Enter price in USD"
     },
     "categories": {
         "omg": "OMG!",
@@ -274,6 +276,11 @@
         "errorMessage": "We couldn't load the property listings. Please try again later.",
         "refreshPage": "Refresh Page",
         "backToHome": "Back to Home"
+    },
+    "currency": {
+        "displayedIn": "Prices displayed in {currency}",
+        "convertedFrom": "Converted from USD",
+        "storedInUSD": "Prices are stored in USD"
     },
     "auth": {
         "login": "Login",
