@@ -16,7 +16,7 @@ const ResetLogo = () => {
 
     return (
         <div className="flex-shrink-0 cursor-pointer" onClick={handleLogoClick}>
-            <Image src="/logo.png" alt="logo" width={100} height={38} />
+            <Image src="/logo.png" alt="Airnest" width={100} height={38} />
         </div>
     );
 };

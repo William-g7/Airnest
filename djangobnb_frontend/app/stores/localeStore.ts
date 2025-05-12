@@ -26,7 +26,7 @@ export const useLocaleStore = create<LocaleState>()(
             }),
         }),
         {
-            name: 'djangobnb-locale',
+            name: 'airnest-locale',
         }
     )
 );

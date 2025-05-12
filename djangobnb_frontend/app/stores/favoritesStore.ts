@@ -22,7 +22,7 @@ type PersistedState = {
 const serializeSet = (set: Set<string>) => Array.from(set);
 
 const persistConfig: PersistOptions<FavoritesState, PersistedState> = {
-    name: 'djangobnb-favorites',
+    name: 'airnest-favorites',
     storage: createJSONStorage(() => localStorage),
 
     // 只持久化需要的状态

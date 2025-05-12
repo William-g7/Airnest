@@ -35,7 +35,7 @@ export function LocaleInitializer() {
             if (currentLocaleInStore !== pathLocale) {
                 setLocale(pathLocale);
                 if (typeof window !== 'undefined') {
-                    window.localStorage.setItem('djangobnb-locale', JSON.stringify({
+                    window.localStorage.setItem('airnest-locale', JSON.stringify({
                         state: {
                             locale: pathLocale,
                             intlLocale: pathLocale === 'zh' ? 'zh-CN' : pathLocale === 'fr' ? 'fr-FR' : 'en-US'

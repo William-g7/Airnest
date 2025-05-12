@@ -1,8 +1,10 @@
 {
     "app": {
-        "name": "DjangoBnB",
+        "name": "Airnest",
         "tagline": "Trouvez votre séjour parfait",
-        "description": "Réservez des hébergements uniques dans le monde entier"
+        "description": "Réservez des hébergements uniques dans le monde entier",
+        "slogan": "Votre Maison au-dessus du Sol",
+        "subSlogan": "Restez léger, restez libre, mais sentez-vous toujours chez vous"
     },
     "navigation": {
         "home": "Accueil",
@@ -148,7 +150,7 @@
         "reservationSuccess": "Réservation effectuée avec succès"
     },
     "addProperty": {
-        "djangobnbYourHome": "Partager votre maison",
+        "djangobnbYourHome": "Partagez votre nid",
         "title": "Ajouter un logement",
         "categoryDescription": "Laquelle de ces options décrit le mieux votre logement ?",
         "placeTypeDescription": "Quel type de logement les voyageurs auront-ils ?",
