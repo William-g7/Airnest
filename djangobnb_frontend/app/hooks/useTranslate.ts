@@ -1,100 +1,122 @@
-import { useState, useEffect } from 'react';
-import { useTranslationStore } from '@/app/stores/translationStore';
-import { useLocaleStore } from '@/app/stores/localeStore';
+import { useEffect, useState } from 'react';
+import { useLocaleStore } from '../stores/localeStore';
+import { useTranslationStore } from '../stores/translationStore';
+
+// 分组翻译请求接口
+export interface GroupedTranslationRequest {
+    [key: string]: string[];
+}
+
+// 分组翻译响应接口
+export interface GroupedTranslationResponse {
+    [key: string]: Record<string, string>;
+}
+
+// 实时翻译结果接口
+export interface LiveTranslationResult {
+    translation: string;
+    isLoading: boolean;
+    error: string | null;
+}
 
 export function useTranslate() {
-    const { translateText } = useTranslationStore();
     const { locale } = useLocaleStore();
+    const translationStore = useTranslationStore();
 
-    //翻译单个文本
-    const translate = async (text: string, targetLocale?: string) => {
+    // 翻译单条文本
+    const translate = async (text: string, targetLocale?: string): Promise<string> => {
         if (!text) return '';
-        return await translateText(text, targetLocale || locale);
+        const currentLocale = targetLocale || locale;
+        return await translationStore.translateText(text, currentLocale);
     };
 
-
-    // 批量翻译多个文本
-    const translateMultiple = async (texts: string[], targetLocale?: string): Promise<Record<string, string>> => {
+    // 批量翻译多条文本
+    const translateMultiple = async (
+        texts: string[],
+        targetLocale?: string
+    ): Promise<Record<string, string>> => {
         if (!texts || texts.length === 0) return {};
         const currentLocale = targetLocale || locale;
-
-        if (currentLocale === 'en') {
-            return texts.reduce((result, text) => {
-                result[text] = text;
-                return result;
-            }, {} as Record<string, string>);
-        }
-
-        try {
-            // 使用单个翻译API进行批量处理，避免404错误
-            const results: Record<string, string> = {};
-
-            // 并行处理所有翻译请求
-            const promises = texts.map(async (text) => {
-                if (!text) return;
-                try {
-                    const response = await translateText(text, currentLocale);
-                    results[text] = response;
-                } catch (err) {
-                    // 后端翻译出错降级兜底，使用原文
-                    console.error(`Error translating text "${text}":`, err);
-                    results[text] = text;
-                }
-            });
-
-            await Promise.all(promises);
-            return results;
-        } catch (error) {
-            console.error('Batch translation error:', error);
-            return texts.reduce((result, text) => {
-                result[text] = text;
-                return result;
-            }, {} as Record<string, string>);
-        }
+        return await translationStore.translateMultiple(texts, currentLocale);
     };
 
-    //在组件中实时显示翻译的Hook
-    const useLiveTranslation = (text: string, targetLocale?: string) => {
-        const [translation, setTranslation] = useState(text);
-        const [isLoading, setIsLoading] = useState(false);
+    /**
+     * 分组翻译
+     * 将不同类别的文本分组翻译，并按类别组织翻译结果
+     */
+    const translateGrouped = async (
+        data: GroupedTranslationRequest,
+        targetLocale?: string
+    ): Promise<GroupedTranslationResponse> => {
         const currentLocale = targetLocale || locale;
+        return await translationStore.translateGrouped(data, currentLocale);
+    };
+
+    /**
+     * 实时翻译钩子 - 提供实时翻译状态
+     * 用于UI中显示翻译状态（加载中、已完成等）
+     */
+    const useLiveTranslation = (text: string, targetLocale?: string): LiveTranslationResult => {
+        const [result, setResult] = useState<LiveTranslationResult>({
+            translation: text,
+            isLoading: false,
+            error: null
+        });
 
         useEffect(() => {
-            // 防止组件卸载后，翻译还在进行
-            let isMounted = true;
+            const currentLocale = targetLocale || locale;
 
-            if (currentLocale === 'en' || !text) {
-                setTranslation(text);
+            // 如果没有文本，不需要翻译
+            if (!text) {
+                setResult({
+                    translation: text,
+                    isLoading: false,
+                    error: null
+                });
                 return;
             }
 
-            setIsLoading(true);
+            let isMounted = true;
 
-            translateText(text, currentLocale)
-                .then(result => {
+            const doTranslate = async () => {
+                try {
+                    setResult(prev => ({ ...prev, isLoading: true, error: null }));
+
+                    const translatedText = await translationStore.translateText(text, currentLocale);
+
                     if (isMounted) {
-                        setTranslation(result);
-                        setIsLoading(false);
+                        setResult({
+                            translation: translatedText,
+                            isLoading: false,
+                            error: null
+                        });
                     }
-                })
-                .catch(() => {
+                } catch (error) {
                     if (isMounted) {
-                        setTranslation(text);
-                        setIsLoading(false);
+                        setResult({
+                            translation: text,
+                            isLoading: false,
+                            error: error instanceof Error ? error.message : String(error)
+                        });
                     }
-                });
+                }
+            };
+
+            doTranslate();
 
             return () => {
                 isMounted = false;
             };
-        }, [text, currentLocale]);
+        }, [text, locale, targetLocale]);
 
-        return { translation, isLoading, originalText: text };
+        return result;
     };
 
     return {
         translate,
+        translateMultiple,
+        translateGrouped,
         useLiveTranslation,
-        translateMultiple
+        currentLocale: locale
     };
-} 
+}
