@@ -17,7 +17,7 @@ const LogoutButton: React.FC = () => {
 
     const onLogoutClick = () => {
         try {
-            localStorage.removeItem('djangobnb-favorites');
+            localStorage.removeItem('airnest-favorites');
         } catch (error) {
             console.error('Failed to clear favorites from localStorage:', error);
         }
