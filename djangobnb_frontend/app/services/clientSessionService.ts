@@ -3,7 +3,7 @@
 import { handleLogin as serverHandleLogin } from "@/app/auth/session";
 import { useAuthStore } from "../stores/authStore";
 import { getAuthChannel } from "./AuthChannel";
-import { getNotificationService, NotificationType } from "./NotificationService";
+import { getNotificationService, NotificationType } from "./notificationService";
 
 const USER_ID_KEY = 'app_user_id';
 
