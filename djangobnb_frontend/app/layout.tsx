@@ -17,9 +17,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DjangoBnb - Your Home Away from Home",
-  description: "Find and book unique accommodations worldwide. Choose from apartments, houses, and unique stays.",
-  keywords: ["vacation rentals", "holiday homes", "apartment rentals", "house rentals"],
+  title: "Airnest — Your Home Above the Ground",
+  description: "Stay light, stay free, yet always feel at home. Find and book unique accommodations worldwide.",
+  keywords: ["vacation rentals", "holiday homes", "apartment rentals", "house rentals", "airnest"],
 };
 
 export default function RootLayout({
