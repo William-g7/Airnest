@@ -3,14 +3,14 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
-from .translation import simple_translate_text, simple_translate_batch
+from .translation import translate_text, translate_batch
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/properties/', include('property.urls')),
     path('api/auth/', include('useraccount.urls')),
     path('api/chat/', include('chat.urls')),
-    path('api/simple-translate/', simple_translate_text, name='simple-translate-text'),
-    path('api/simple-translate/batch/', simple_translate_batch, name='simple-translate-batch'),
+    path('api/translate/', translate_text, name='translate-text'),
+    path('api/translate/batch/', translate_batch, name='translate-batch'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
