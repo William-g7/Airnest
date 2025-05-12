@@ -4,7 +4,7 @@ import { useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/app/stores/authStore';
 import { useLoginModal } from './hooks/useLoginModal';
-import { getNotificationService, NotificationType } from '@/app/services/NotificationService';
+import { getNotificationService } from '@/app/services/notificationService';
 
 /**
  * 使用全局变量进行toast防抖
