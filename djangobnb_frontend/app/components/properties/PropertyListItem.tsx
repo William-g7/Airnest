@@ -3,7 +3,7 @@
 import { PropertyType } from "@/app/constants/propertyType";
 import Image from "next/image";
 import WishlistButton from "./WishlistButton";
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import { useLoginModal } from "../hooks/useLoginModal";
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
@@ -11,7 +11,7 @@ import { useAuth } from "@/app/hooks/useAuth";
 import { useFavoritesStore } from "@/app/stores/favoritesStore";
 import { debounce } from "@/app/utils/debounce";
 import toast from 'react-hot-toast';
-import { useTranslate } from '@/app/hooks/useTranslate';
+import { useLocaleStore } from '@/app/stores/localeStore';
 
 interface PropertyListItemProps {
     property: PropertyType;
@@ -27,18 +27,24 @@ const PropertyListItem = ({ property, translations }: PropertyListItemProps) => 
     const tFavorites = useTranslations('favorites');
     const router = useRouter();
     const loginModal = useLoginModal();
+    const itemRef = useRef<HTMLDivElement>(null);
+    const { locale } = useLocaleStore();
 
     const { isAuthenticated } = useAuth();
-    const { isFavorite, toggleFavorite } = useFavoritesStore()
-    const { useLiveTranslation } = useTranslate();
+    const { isFavorite, toggleFavorite } = useFavoritesStore();
 
-    const titleLiveTranslation = useLiveTranslation(property.title);
-    const cityLiveTranslation = useLiveTranslation(property.city);
-    const countryLiveTranslation = useLiveTranslation(property.country);
+    // 使用传入的翻译，或者如果没有提供翻译，则使用原始文本
+    const translatedTitle = locale !== 'en' && translations?.title
+        ? translations.title
+        : property.title;
 
-    const translatedTitle = translations?.title || titleLiveTranslation.translation;
-    const translatedCity = translations?.city || cityLiveTranslation.translation;
-    const translatedCountry = translations?.country || countryLiveTranslation.translation;
+    const translatedCity = locale !== 'en' && translations?.city
+        ? translations.city
+        : property.city;
+
+    const translatedCountry = locale !== 'en' && translations?.country
+        ? translations.country
+        : property.country;
 
     const debouncedToggleWishlist = useCallback(
         (e: React.MouseEvent) => {
@@ -75,7 +81,7 @@ const PropertyListItem = ({ property, translations }: PropertyListItemProps) => 
     );
 
     return (
-        <div className="relative group">
+        <div className="relative group" ref={itemRef}>
             <WishlistButton
                 propertyId={property.id}
                 isFavorited={isFavorite(property.id)}

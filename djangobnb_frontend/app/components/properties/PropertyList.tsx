@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useTranslations } from 'next-intl';
 import apiService from "../../services/apiService";
 import PropertyListItem from "./PropertyListItem";
@@ -28,72 +28,19 @@ const PropertyList = ({ isMyProperties, isWishlist }: PropertyListProps) => {
     const [error, setError] = useState("");
     const [lastSearchParams, setLastSearchParams] = useState("");
 
-    const [translationsLoading, setTranslationsLoading] = useState(false);
+    const [isTranslating, setIsTranslating] = useState(false);
     const [translationContext, setTranslationContext] = useState<TranslationContext>({
         titles: {},
         cities: {},
         countries: {}
     });
 
-    const isTranslatingRef = useRef(false);
-
-    const { translateMultiple } = useTranslate();
+    const { translateGrouped } = useTranslate();
     const { locale } = useLocaleStore();
 
     const { location, checkIn, checkOut, guests, category } = useSearchStore();
     const searchParams = useSearchParams();
-
     const serializedParams = searchParams.toString();
-
-    const batchTranslateProperties = useCallback(async (propertyData: PropertyType[]) => {
-        if (locale === 'en' || propertyData.length === 0 || isTranslatingRef.current) {
-            return;
-        }
-
-        isTranslatingRef.current = true;
-        setTranslationsLoading(true);
-
-        try {
-            const titleTexts = propertyData.map(p => p.title).filter(Boolean);
-            const cityTexts = propertyData.map(p => p.city).filter(Boolean);
-            const countryTexts = propertyData.map(p => p.country).filter(Boolean);
-
-            if (titleTexts.length === 0 && cityTexts.length === 0 && countryTexts.length === 0) {
-                setTranslationsLoading(false);
-                isTranslatingRef.current = false;
-                return;
-            }
-
-            const [translatedTitles, translatedCities, translatedCountries] = await Promise.all([
-                translateMultiple(titleTexts),
-                translateMultiple(cityTexts),
-                translateMultiple(countryTexts)
-            ]);
-
-            if (isTranslatingRef.current) {
-                setTranslationContext({
-                    titles: translatedTitles,
-                    cities: translatedCities,
-                    countries: translatedCountries
-                });
-            }
-        } catch (error) {
-            console.error("Error translating properties:", error);
-
-            if (isTranslatingRef.current) {
-                setTranslationContext({
-                    titles: {},
-                    cities: {},
-                    countries: {}
-                });
-            }
-        } finally {
-            if (isTranslatingRef.current) {
-                setTranslationsLoading(false);
-                isTranslatingRef.current = false;
-            }
-        }
-    }, [locale, translateMultiple]);
 
     const getProperties = useCallback(async () => {
         try {
@@ -140,16 +87,21 @@ const PropertyList = ({ isMyProperties, isWishlist }: PropertyListProps) => {
                 : await apiService.get(endpoint);
 
             setProperties(data);
-
-            batchTranslateProperties(data);
         } catch (error) {
             setError(t('loadError'));
             console.error("Error fetching properties:", error);
         } finally {
             setIsLoading(false);
         }
-    }, [isMyProperties, isWishlist, searchParams, location, checkIn, checkOut, guests, category, t, batchTranslateProperties]);
+    }, [isMyProperties, isWishlist, searchParams, location, checkIn, checkOut, guests, category, t]);
 
+    // 初始加载房源数据
+    useEffect(() => {
+        getProperties();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // 搜索参数变化时重新加载
     useEffect(() => {
         if (serializedParams !== lastSearchParams) {
             console.log(`Search params changed from "${lastSearchParams}" to "${serializedParams}"`);
@@ -158,73 +110,106 @@ const PropertyList = ({ isMyProperties, isWishlist }: PropertyListProps) => {
         }
     }, [serializedParams, lastSearchParams, getProperties]);
 
+    // 当语言变化或房源加载完成时触发翻译
     useEffect(() => {
-        if (properties.length > 0 && !isTranslatingRef.current) {
-            batchTranslateProperties(properties);
+        // 重置翻译上下文
+        setTranslationContext({
+            titles: {},
+            cities: {},
+            countries: {}
+        });
+
+        // 如果语言不是英语且房源已加载，则执行翻译
+        if (locale !== 'en' && properties.length > 0 && !isLoading) {
+            translateAllProperties();
         }
-    }, [locale, properties]);
+    }, [locale, properties, isLoading]);
 
-    useEffect(() => {
-        getProperties();
+    const translateAllProperties = async () => {
+        if (locale === 'en' || properties.length === 0 || isTranslating) {
+            return;
+        }
 
-        return () => {
-            isTranslatingRef.current = false;
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+        setIsTranslating(true);
+        console.log(`开始翻译${properties.length}个房源`);
 
-    if (isLoading) {
-        return <div>{t('loading')}</div>;
-    }
+        try {
+            const titles: string[] = [];
+            const cities: string[] = [];
+            const countries: string[] = [];
 
-    if (error) {
-        return <div className="text-red-500">{error}</div>;
-    }
+            properties.forEach(property => {
+                if (property.title) titles.push(property.title);
+                if (property.city) cities.push(property.city);
+                if (property.country) countries.push(property.country);
+            });
 
-    if (properties.length === 0) {
-        const hasFilters = searchParams.get('location') ||
-            searchParams.get('check_in') ||
-            searchParams.get('check_out') ||
-            searchParams.get('guests') ||
-            searchParams.get('category') ||
-            location ||
-            checkIn ||
-            checkOut ||
-            guests > 1 ||
-            category;
+            const translationsResult = await translateGrouped({
+                titles,
+                cities,
+                countries
+            }, locale);
 
-        return (
-            <div className="text-center py-10">
-                <h3 className="text-lg font-semibold">{t('noPropertiesFound')}</h3>
-                {isMyProperties && (
-                    <p className="text-gray-500 mt-2">
-                        {t('noListedProperties')}
-                    </p>
-                )}
-                {!isMyProperties && !isWishlist && hasFilters && (
-                    <p className="text-gray-500 mt-2">
-                        {t('noPropertiesMatch')}
-                    </p>
-                )}
-            </div>
-        );
-    }
+            setTranslationContext({
+                titles: translationsResult.titles || {},
+                cities: translationsResult.cities || {},
+                countries: translationsResult.countries || {}
+            });
+
+            console.log(`Trnaslation success, translated ${properties.length} properties`);
+        } catch (error) {
+            console.error("Translation error:", error);
+        } finally {
+            setIsTranslating(false);
+        }
+    };
 
     return (
         <>
-            {translationsLoading && <div className="text-sm text-gray-500 mb-4">{t('translating')}...</div>}
+            {isLoading ? (
+                <div>{t('loading')}</div>
+            ) : error ? (
+                <div className="text-red-500">{error}</div>
+            ) : properties.length === 0 ? (
+                <div className="text-center py-10">
+                    <h3 className="text-lg font-semibold">{t('noPropertiesFound')}</h3>
+                    {isMyProperties && (
+                        <p className="text-gray-500 mt-2">
+                            {t('noListedProperties')}
+                        </p>
+                    )}
+                    {!isMyProperties && !isWishlist && (searchParams.get('location') ||
+                        searchParams.get('check_in') ||
+                        searchParams.get('check_out') ||
+                        searchParams.get('guests') ||
+                        searchParams.get('category') ||
+                        location ||
+                        checkIn ||
+                        checkOut ||
+                        guests > 1 ||
+                        category) && (
+                            <p className="text-gray-500 mt-2">
+                                {t('noPropertiesMatch')}
+                            </p>
+                        )}
+                </div>
+            ) : (
+                <>
+                    {isTranslating && <div className="text-sm text-gray-500 mb-4">{t('translationInProgress')}</div>}
 
-            {properties.map((property) => (
-                <PropertyListItem
-                    key={property.id}
-                    property={property}
-                    translations={{
-                        title: translationContext.titles[property.title] || '',
-                        city: translationContext.cities[property.city] || '',
-                        country: translationContext.countries[property.country] || ''
-                    }}
-                />
-            ))}
+                    {properties.map((property) => (
+                        <PropertyListItem
+                            key={property.id}
+                            property={property}
+                            translations={{
+                                title: translationContext.titles[property.title] || '',
+                                city: translationContext.cities[property.city] || '',
+                                country: translationContext.countries[property.country] || ''
+                            }}
+                        />
+                    ))}
+                </>
+            )}
         </>
     );
 };

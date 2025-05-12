@@ -1,4 +1,4 @@
-import { handleLogin } from '@/app/auth/session';
+import { handleLogin, getRefreshToken } from '@/app/auth/session';
 
 interface RefreshResponse {
     access: string;
@@ -48,6 +48,8 @@ export const tokenService = {
                 if (userId) {
                     if (data.refresh) {
                         await handleLogin(userId, data.access, data.refresh);
+                    } else {
+                        await handleLogin(userId, data.access, await getRefreshToken() || '');
                     }
                 }
 
