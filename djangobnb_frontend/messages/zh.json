@@ -1,8 +1,10 @@
 {
     "app": {
-        "name": "DjangoBnB",
-        "tagline": "探索您的理想住所",
-        "description": "预订全球独特住宿体验"
+        "name": "Airnest",
+        "tagline": "天高路远，自在有巢",
+        "description": "预订全球独特住宿体验",
+        "slogan": "让世界的每个角落成为你的栖息地",
+        "subSlogan": "轻松自由，始终宾至如归"
     },
     "navigation": {
         "home": "首页",

@@ -1,8 +1,10 @@
 {
     "app": {
-        "name": "DjangoBnB",
+        "name": "Airnest",
         "tagline": "Find your perfect stay",
-        "description": "Book unique accommodations worldwide"
+        "description": "Book unique accommodations worldwide",
+        "slogan": "Your Home Above the Ground",
+        "subSlogan": "Stay light, stay free, yet always feel at home"
     },
     "navigation": {
         "home": "Home",
@@ -170,7 +172,7 @@
         "reservationSuccess": "Reservation made successfully"
     },
     "addProperty": {
-        "djangobnbYourHome": "Share your home",
+        "djangobnbYourHome": "Share your nest",
         "title": "Add a property",
         "editTitle": "Edit property",
         "categoryDescription": "Which of these best describes your place?",
