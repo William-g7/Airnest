@@ -39,17 +39,18 @@ const ReservationSideBar = dynamic(
 const PropertyDetail = ({ property }: { property: PropertyType }) => {
     const t = useTranslations('property');
     const tFavorites = useTranslations('favorites');
+    const categoriesT = useTranslations('categories');
     const [isFavorited, setIsFavorited] = useState(false);
     const loginModal = useLoginModal();
     const addPropertyModal = useAddPropertyModal();
     const authStore = useAuthStore();
     const isLandlord = authStore.userId && property.landlord && authStore.userId === property.landlord.id.toString();
     const { useLiveTranslation } = useTranslate();
-
     const { translation: translatedTitle, isLoading: titleLoading } = useLiveTranslation(property.title);
     const { translation: translatedDescription, isLoading: descLoading } = useLiveTranslation(property.description);
     const { translation: translatedCity, isLoading: cityLoading } = useLiveTranslation(property.city);
     const { translation: translatedCountry, isLoading: countryLoading } = useLiveTranslation(property.country);
+
 
     useEffect(() => {
         const checkIfFavorited = async () => {
@@ -97,6 +98,17 @@ const PropertyDetail = ({ property }: { property: PropertyType }) => {
         addPropertyModal.onOpenForEdit(property);
     };
 
+    const getTranslatedCategory = () => {
+        if (!property.category) return '';
+
+        try {
+            return categoriesT(property.category.toLowerCase()) || property.category;
+        } catch (error) {
+            console.error('Error translating category:', error);
+            return property.category;
+        }
+    };
+
     return (
         <div className="relative">
             <WishlistButton
@@ -136,10 +148,10 @@ const PropertyDetail = ({ property }: { property: PropertyType }) => {
 
                     <div className="text-lg text-gray-600 mb-6">
                         {property.place_type === 'entire' && (
-                            <p>🏠 {t('entirePlace', { category: property.category.toLowerCase() })}</p>
+                            <p>🏠 {t('entirePlace', { category: getTranslatedCategory() })}</p>
                         )}
                         {property.place_type === 'room' && (
-                            <p>🛏️ {t('privateRoom', { category: property.category.toLowerCase() })}</p>
+                            <p>🛏️ {t('privateRoom', { category: getTranslatedCategory() })}</p>
                         )}
                         {property.place_type === 'shared' && (
                             <p>🛏️ {t('sharedRoom')}</p>
