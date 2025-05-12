@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 import { locales } from '../../i18n/routing';
 import { LocaleInitializer } from '../components/LocaleInitializer';
 import ToasterProvider from '../providers/ToasterProvider';
+import CurrencyProvider from '../providers/CurrencyProvider';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
@@ -94,7 +95,9 @@ export default async function LocaleLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
             <LocaleInitializer />
             <ToasterProvider />
-            {children}
+            <CurrencyProvider>
+                {children}
+            </CurrencyProvider>
         </NextIntlClientProvider>
     );
 } 
