@@ -36,6 +36,9 @@ djangobnb_frontend/node_modules/
 djangobnb_frontend/.next/
 djangobnb_frontend/.env*
 
+# Backend
+djangobnb_backend/backend/djangobnb_backend/.env*
+
 # IDE
 .vscode/
 .idea/
