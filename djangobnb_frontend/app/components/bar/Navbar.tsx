@@ -10,8 +10,8 @@ const Navbar = async () => {
     const userId = await getUserId();
 
     return (
-        <nav className="w-full fixed top-0 left-0 py-5 right-0 z-20 bg-white">
-            <div className="max-w-[1500px] mx-auto px-4 sm:px-6">
+        <nav className="w-full h-full flex items-center transition-all duration-300">
+            <div className="max-w-[1500px] w-full mx-auto px-4 sm:px-6">
                 <div className="flex justify-between items-center">
                     <ResetLogo />
 
