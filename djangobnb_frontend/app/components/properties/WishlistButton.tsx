@@ -1,22 +1,28 @@
 'use client'
 
 interface WishlistButtonProps {
-    propertyId: string;
     isFavorited: boolean;
     onToggle: (e: React.MouseEvent) => void;
+    isInline?: boolean;
 }
 
-const WishlistButton: React.FC<WishlistButtonProps> = ({ propertyId, isFavorited, onToggle }) => {
+const WishlistButton = ({ isFavorited, onToggle, isInline = false }: WishlistButtonProps) => {
     return (
         <button
             onClick={onToggle}
-            className="absolute top-3 right-3 z-[9] p-2 bg-white rounded-full shadow-md hover:scale-110 transition opacity-90 hover:opacity-100"
+            className={`
+                ${isInline
+                    ? "p-1.5 hover:scale-105"
+                    : "absolute top-3 right-3 z-10 p-2 hover:scale-110"
+                } 
+                bg-white rounded-full shadow-md transition opacity-90 hover:opacity-100
+            `}
         >
             <svg
                 viewBox="0 0 24 24"
                 fill={isFavorited ? "#FF385C" : "none"}
                 stroke="currentColor"
-                className="w-6 h-6"
+                className={`${isInline ? "w-5 h-5" : "w-6 h-6"}`}
             >
                 <path
                     strokeLinecap="round"
