@@ -5,6 +5,7 @@ import PropertyList from "../components/properties/PropertyList";
 import { useTranslations } from 'next-intl';
 import { useSearchParamsSync } from "../hooks/useSearchParamsSync";
 import PropertyListErrorBoundary from "../components/properties/PropertyListErrorBoundary";
+import AnimatedText from "../components/common/AnimatedText";
 
 export default function Home() {
     const t = useTranslations('app');
@@ -12,12 +13,18 @@ export default function Home() {
 
     return (
         <main className="max-w-[1500px] mx-auto px-6">
-            <h1 className="text-3xl font-bold text-center mb-6">{t('tagline')}</h1>
-            <p className="text-center mb-8 text-gray-600">{t('description')}</p>
+            <div className="pt-12 pb-4">
+                <AnimatedText
+                    tagline={t('tagline')}
+                    description={t('description')}
+                    resetOnScrollTop={true}
+                    maxAnimations={2}
+                />
+            </div>
 
             <Categories />
 
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+            <div className="mt-6">
                 <PropertyListErrorBoundary>
                     <PropertyList />
                 </PropertyListErrorBoundary>
