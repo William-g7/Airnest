@@ -8,6 +8,7 @@ import LogoutButton from "./LogoutButton";
 import MenuLink from "./MenuLink";
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from "@/app/stores/authStore";
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface UserNavProps {
     userId: string | null;
@@ -52,7 +53,7 @@ const UserNav: React.FC<UserNavProps> = ({ userId: initialUserId }) => {
     return (
         <div className="relative">
             <div
-                className="p-2 relative inline-block border rounded-full cursor-pointer"
+                className="p-2 relative inline-block border rounded-full cursor-pointer transition-all duration-300 hover:bg-gray-100 hover:scale-105 active:scale-95 hover:shadow-sm"
                 onClick={handleMenuClick}
             >
                 <button className="flex items-center">
@@ -66,58 +67,62 @@ const UserNav: React.FC<UserNavProps> = ({ userId: initialUserId }) => {
                 </button>
             </div>
 
-            <div
-                className={`
-                    absolute right-0 mt-3 w-[220px] bg-white border rounded-xl shadow-lg 
-                    transition-all duration-300 ease-in-out transform z-50
-                    ${isOpen
-                        ? 'opacity-100 translate-y-0'
-                        : 'opacity-0 translate-y-[-10px] pointer-events-none'
-                    }
-                `}
-            >
-                {showUserMenu ? (
-                    <>
-                        <div className="py-2">
-                            <MenuLink label={t('messages')} onClick={() => { setIsOpen(false); router.push('/inbox') }} />
-                        </div>
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10, scale: 0.5 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -10, scale: 0.9 }}
+                        transition={{
+                            duration: 0.1,
+                            ease: [0.23, 1, 0.32, 1]
+                        }}
+                        className="absolute right-0 mt-2 w-[180px] bg-white border rounded-xl shadow-lg z-50 overflow-hidden"
+                    >
+                        {showUserMenu ? (
+                            <>
+                                <div className="py-0.5">
+                                    <MenuLink label={t('messages')} onClick={() => { setIsOpen(false); router.push('/inbox') }} />
+                                </div>
 
-                        <hr className="my-2" />
+                                <hr className="my-0.5" />
 
-                        <div className="py-2">
-                            <MenuLink label={t('myAccount')} onClick={() => {
-                                setIsOpen(false);
-                                if (userId) {
-                                    router.push({
-                                        pathname: '/myprofile/[id]',
-                                        params: { id: userId }
-                                    } as any);
-                                }
-                            }} />
-                            <MenuLink label={t('myProperties')} onClick={() => {
-                                setIsOpen(false);
-                                router.push('/myproperties');
-                            }} />
-                            <MenuLink label={t('myReservations')} onClick={() => {
-                                setIsOpen(false);
-                                router.push('/myreservations');
-                            }} />
-                            <MenuLink label={t('myWishlists')} onClick={() => { setIsOpen(false); router.push('/mywishlists') }} />
-                        </div>
+                                <div className="py-0.5">
+                                    <MenuLink label={t('myAccount')} onClick={() => {
+                                        setIsOpen(false);
+                                        if (userId) {
+                                            router.push({
+                                                pathname: '/myprofile/[id]',
+                                                params: { id: userId }
+                                            } as any);
+                                        }
+                                    }} />
+                                    <MenuLink label={t('myProperties')} onClick={() => {
+                                        setIsOpen(false);
+                                        router.push('/myproperties');
+                                    }} />
+                                    <MenuLink label={t('myReservations')} onClick={() => {
+                                        setIsOpen(false);
+                                        router.push('/myreservations');
+                                    }} />
+                                    <MenuLink label={t('myWishlists')} onClick={() => { setIsOpen(false); router.push('/mywishlists') }} />
+                                </div>
 
-                        <hr className="my-2" />
+                                <hr className="my-0.5" />
 
-                        <div className="py-2">
-                            <LogoutButton />
-                        </div>
-                    </>
-                ) : (
-                    <div className="py-1">
-                        <MenuLink label={t('login')} onClick={() => { setIsOpen(false); loginModal.onOpen() }} />
-                        <MenuLink label={t('register')} onClick={() => { setIsOpen(false); signupModal.onOpen() }} />
-                    </div>
+                                <div className="py-0.5">
+                                    <LogoutButton />
+                                </div>
+                            </>
+                        ) : (
+                            <div className="py-0.5">
+                                <MenuLink label={t('login')} onClick={() => { setIsOpen(false); loginModal.onOpen() }} />
+                                <MenuLink label={t('register')} onClick={() => { setIsOpen(false); signupModal.onOpen() }} />
+                            </div>
+                        )}
+                    </motion.div>
                 )}
-            </div>
+            </AnimatePresence>
         </div>
     )
 }

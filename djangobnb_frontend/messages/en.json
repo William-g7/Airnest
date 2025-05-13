@@ -120,7 +120,8 @@
         "next": "Next",
         "translationAvailable": "Translation available",
         "originalText": "Original text",
-        "translatedText": "Translated text"
+        "translatedText": "Translated text",
+        "backToTop": "Back to top"
     },
     "property": {
         "title": "Title",
@@ -275,7 +276,15 @@
         "manage": "Manage",
         "errorMessage": "We couldn't load the property listings. Please try again later.",
         "refreshPage": "Refresh Page",
-        "backToHome": "Back to Home"
+        "backToHome": "Back to Home",
+        "perNight": "per night",
+        "guest": "guest",
+        "guests": "guests",
+        "tryAgainLater": "Please try again later.",
+        "searchTips": "Search Tips",
+        "tryDifferentDates": "Try different dates or a more flexible timeframe",
+        "removeFilters": "Remove some filters or categories",
+        "searchOtherLocation": "Search for another location"
     },
     "currency": {
         "displayedIn": "Prices displayed in {currency}",

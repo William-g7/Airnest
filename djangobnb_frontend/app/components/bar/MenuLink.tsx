@@ -5,13 +5,13 @@ interface MenuLinkProps {
     onClick: () => void;
 }
 
-const MenuLink: React.FC<MenuLinkProps> = ({ label, onClick }) => {
+const MenuLink = ({ label, onClick }: MenuLinkProps) => {
     return (
         <div
-            className="px-4 py-2 hover:bg-gray-100 block cursor-pointer"
+            className="px-3 py-1.5 hover:bg-gray-100 hover:text-airbnb block cursor-pointer transition-colors duration-200 relative"
             onClick={onClick}
         >
-            {label}
+            <span className="relative z-10">{label}</span>
         </div>
     )
 }

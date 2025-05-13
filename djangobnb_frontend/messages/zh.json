@@ -120,7 +120,8 @@
         "next": "下一步",
         "translationAvailable": "翻译可用",
         "originalText": "原文",
-        "translatedText": "译文"
+        "translatedText": "译文",
+        "backToTop": "返回顶部"
     },
     "property": {
         "title": "标题",
@@ -271,9 +272,18 @@
         "translationFailed": "翻译失败，显示原文",
         "manageImages": "管理图片",
         "edit": "编辑",
+        "manage": "管理",
         "errorMessage": "我们无法加载房源列表，请稍后再试",
         "refreshPage": "刷新页面",
-        "backToHome": "返回首页"
+        "backToHome": "返回首页",
+        "perNight": "每晚",
+        "guest": "位房客",
+        "guests": "位房客",
+        "tryAgainLater": "请稍后再试。",
+        "searchTips": "搜索建议",
+        "tryDifferentDates": "尝试不同的日期或更灵活的时间范围",
+        "removeFilters": "减少一些筛选条件或类别",
+        "searchOtherLocation": "搜索其他地点"
     },
     "currency": {
         "displayedIn": "价格以{currency}显示",

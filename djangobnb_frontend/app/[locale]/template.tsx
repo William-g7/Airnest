@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import Navbar from "../components/bar/Navbar";
+import NavbarWrapper from "../components/bar/NavbarWrapper";
 import { Suspense, lazy, ReactNode } from 'react';
 
 const geistSans = Geist({
@@ -17,6 +18,7 @@ const geistMono = Geist_Mono({
 const LoginModal = lazy(() => import('../components/modals/LoginModal'));
 const SignupModal = lazy(() => import('../components/modals/SignupModal'));
 const AddPropertyModal = lazy(() => import('../components/modals/AddPropertyModal'));
+const ScrollToTop = lazy(() => import('../components/common/ScrollToTop'));
 
 export default function Template({
     children,
@@ -25,12 +27,17 @@ export default function Template({
 }) {
     return (
         <div className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-            <Navbar />
-            <div className="pt-32">{children}</div>
+            <NavbarWrapper>
+                <Navbar />
+            </NavbarWrapper>
+            <div className="pt-[80px]">{children}</div>
             <Suspense fallback={<div>Loading...</div>}>
                 <LoginModal />
                 <SignupModal />
                 <AddPropertyModal />
+            </Suspense>
+            <Suspense fallback={null}>
+                <ScrollToTop />
             </Suspense>
         </div>
     );
