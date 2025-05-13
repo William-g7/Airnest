@@ -98,7 +98,8 @@
         "next": "Suivant",
         "translationAvailable": "Traduction disponible",
         "originalText": "Texte original",
-        "translatedText": "Texte traduit"
+        "translatedText": "Texte traduit",
+        "backToTop": "Retour en haut"
     },
     "property": {
         "title": "Titre",
@@ -240,7 +241,7 @@
         "loading": "Chargement des propriétés...",
         "loadError": "Échec du chargement des propriétés",
         "noPropertiesFound": "Aucune propriété trouvée",
-        "noListedProperties": "Vous n'avez pas encore répertorié de propriétés. Ajoutez votre première propriété pour commencer à héberger !",
+        "noListedProperties": "Vous n'avez pas encore listé de propriétés. Ajoutez votre première propriété pour commencer à héberger!",
         "noPropertiesMatch": "Aucune propriété ne correspond à vos critères de recherche. Essayez de modifier vos filtres.",
         "location": "Emplacement",
         "price": "Prix",
@@ -248,12 +249,20 @@
         "translationInProgress": "Traduction en cours...",
         "translationComplete": "Traduction terminée",
         "translationFailed": "Échec de la traduction, affichage du texte original",
-        "manageImages": "Gérer les Images",
-        "edit": "Modifier",
+        "perNight": "par nuit",
+        "guest": "voyageur",
+        "guests": "voyageurs",
+        "tryAgainLater": "Veuillez réessayer plus tard.",
+        "searchTips": "Conseils de recherche",
+        "tryDifferentDates": "Essayez des dates différentes ou une période plus flexible",
+        "removeFilters": "Supprimez certains filtres ou catégories",
+        "searchOtherLocation": "Recherchez un autre lieu",
         "manage": "Gérer",
-        "errorMessage": "Nous n'avons pas pu charger la liste des propriétés. Veuillez réessayer plus tard.",
-        "refreshPage": "Actualiser la Page",
-        "backToHome": "Retour à l'Accueil"
+        "edit": "Modifier",
+        "manageImages": "Gérer les images",
+        "errorMessage": "Nous n'avons pas pu charger les annonces. Veuillez réessayer plus tard.",
+        "refreshPage": "Actualiser la page",
+        "backToHome": "Retour à l'accueil"
     },
     "currency": {
         "displayedIn": "Prix affichés en {currency}",
