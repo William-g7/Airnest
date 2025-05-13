@@ -2,6 +2,7 @@ import { getAccessToken } from "../auth/session";
 import { tokenService } from "./tokenService";
 import { useAuthStore } from "../stores/authStore";
 import { ErrorType } from '../utils/errorHandler';
+import { getCsrfToken, initCsrfToken } from './csrfService';
 
 interface RequestOptions {
     forceRefresh?: boolean;
@@ -150,8 +151,10 @@ async function makeRequest<T>(
     customHeaders?: Record<string, string>
 ): Promise<T> {
     const requestUrl = `${process.env.NEXT_PUBLIC_API_URL}${url}`;
+    const csrfToken = getCsrfToken();
     const headers: Record<string, string> = {
         'Authorization': `Bearer ${token}`,
+        'X-CSRFToken': csrfToken,
         ...customHeaders
     };
 
@@ -320,11 +323,15 @@ const apiService = {
 
     postwithouttoken: async function (url: string, data: any, options: { suppressToast?: boolean } = {}): Promise<any> {
         try {
+            await initCsrfToken();
+            const csrfToken = getCsrfToken();
+
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
                 },
                 body: JSON.stringify(data),
                 credentials: 'include',

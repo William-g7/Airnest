@@ -240,3 +240,14 @@ LOGGING = {
         },
     },
 }
+
+CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'False') == 'True'  # 生产环境设为True
+CSRF_COOKIE_HTTPONLY = False  
+CSRF_COOKIE_SAMESITE = 'Lax'  
+CSRF_USE_SESSIONS = False
+CSRF_COOKIE_NAME = 'csrftoken'
+
+SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False') == 'True'  # 生产环境设为True
+SESSION_COOKIE_HTTPONLY = True  
+SESSION_COOKIE_SAMESITE = 'Lax' 
+SESSION_COOKIE_AGE = 1209600 

@@ -5,6 +5,7 @@ import AuthProvider from "./providers/AuthProvider";
 import ErrorBoundaryProvider from "./providers/ErrorBoundaryProvider";
 import { Toaster } from "react-hot-toast";
 import AuthStatusDetector from "./components/AuthStatusDetector";
+import { ClientSideCsrfInitializer } from './components/security/CsrfInitializer';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,6 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <ClientSideCsrfInitializer />
         <Toaster position="top-center" />
         <AuthProvider>
           <ErrorBoundaryProvider>
