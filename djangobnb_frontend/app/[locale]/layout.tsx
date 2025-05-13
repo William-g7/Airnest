@@ -8,13 +8,11 @@ import CurrencyProvider from '../providers/CurrencyProvider';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
-const inter = Inter({ subsets: ['latin'] });
 
 type Props = {
     children: ReactNode;
     params: { locale: string };
 };
-
 
 export async function generateMetadata({
     params: { locale }
@@ -72,6 +70,7 @@ export async function generateMetadata({
         }
     };
 }
+
 export function generateStaticParams() {
     return locales.map((locale) => ({ locale }));
 }
