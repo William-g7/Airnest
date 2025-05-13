@@ -3,6 +3,7 @@
 import DatePicker from '@/app/components/properties/DatePicker';
 import { useTranslations } from 'next-intl';
 import { formatDateForAPI } from '@/app/utils/dateUtils';
+import { motion } from 'framer-motion';
 
 interface SearchModalProps {
     location: string;
@@ -49,13 +50,19 @@ const SearchModal = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 full-search-modal lg:hidden">
-            <div className="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-auto p-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center p-4 pt-20 full-search-modal lg:hidden">
+            <motion.div
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+                className="bg-white rounded-xl w-full max-w-md max-h-[80vh] overflow-auto p-6 shadow-xl"
+            >
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold">{t('search')}</h2>
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-full hover:bg-gray-100"
+                        className="p-2 rounded-full hover:bg-gray-100 transition-colors"
                         aria-label={t('closeModal')}
                     >
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -64,7 +71,7 @@ const SearchModal = ({
                     </button>
                 </div>
 
-                {/* 位置搜索 */}
+                {/* Location search */}
                 <div className="mb-6">
                     <h3 className="font-semibold mb-2">{t('whereTo')}</h3>
                     <input
@@ -73,10 +80,11 @@ const SearchModal = ({
                         onChange={handleLocationChange}
                         placeholder={t('searchDestinations')}
                         className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-airbnb"
+                        autoFocus
                     />
                 </div>
 
-                {/* 日期选择 */}
+                {/* Date selection */}
                 <div className="mb-6">
                     <h3 className="font-semibold mb-2">{t('when')}</h3>
                     <DatePicker
@@ -87,7 +95,7 @@ const SearchModal = ({
                     />
                 </div>
 
-                {/* 客人数量 */}
+                {/* Guests number */}
                 <div className="mb-8">
                     <h3 className="font-semibold mb-2">{t('whosComing')}</h3>
                     <div className="flex items-center justify-between py-2">
@@ -110,14 +118,14 @@ const SearchModal = ({
                     </div>
                 </div>
 
-                {/* 搜索按钮 */}
+                {/* Search button */}
                 <button
                     className="w-full py-3 bg-airbnb hover:bg-airbnb_dark transition text-white rounded-lg font-medium"
                     onClick={onSearch}
                 >
                     {t('search')}
                 </button>
-            </div>
+            </motion.div>
         </div>
     );
 };
