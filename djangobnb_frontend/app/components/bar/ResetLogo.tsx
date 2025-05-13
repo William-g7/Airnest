@@ -6,7 +6,6 @@ import { useSearchStore } from "@/app/stores/searchStore";
 
 const ResetLogo = () => {
     const router = useRouter();
-    const pathname = usePathname();
     const { resetFilters } = useSearchStore();
 
     const handleLogoClick = () => {
@@ -15,7 +14,11 @@ const ResetLogo = () => {
     };
 
     return (
-        <div className="flex-shrink-0 cursor-pointer" onClick={handleLogoClick}>
+        <div
+            className="flex-shrink-0 cursor-pointer transition-transform duration-300"
+            onClick={handleLogoClick}
+            style={{ transform: `scale(var(--logo-scale, 1))` }}
+        >
             <Image src="/logo.png" alt="Airnest" width={100} height={38} />
         </div>
     );
