@@ -312,7 +312,20 @@
     "logoutSuccess": "Logged out successfully",
     "signupSuccess": "Account created successfully",
     "authError": "Authentication Error",
-    "authErrorMessage": "There was a problem with the authentication process. Please try again."
+    "authErrorMessage": "There was a problem with the authentication process. Please try again.",
+    "passwordTooShort": "Password too short, at least 8 characters needed",
+    "passwordWeak": "Password strength: Weak",
+    "passwordFair": "Password strength: Fair",
+    "passwordGood": "Password strength: Good",
+    "passwordStrong": "Password strength: Strong",
+    "passwordVeryStrong": "Password strength: Very Strong",
+    "passwordNotStrongEnough": "Password not strong enough. Please create a stronger password",
+    "registrationSuccessful": "Registration successful",
+    "checkEmailToVerify": "Please check your email to verify your account",
+    "didntReceiveEmail": "Didn't receive the email?",
+    "resendVerificationEmail": "Resend verification email",
+    "close": "Close",
+    "failedToResendEmail": "Failed to resend verification email"
   },
   "myproperties": {
     "title": "My Properties",

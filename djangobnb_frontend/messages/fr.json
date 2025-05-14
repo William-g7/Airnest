@@ -290,7 +290,20 @@
     "loginSuccess": "Connexion réussie",
     "logoutSuccess": "Déconnexion réussie",
     "authError": "Erreur d'Authentification",
-    "authErrorMessage": "Un problème est survenu lors du processus d'authentification. Veuillez réessayer."
+    "authErrorMessage": "Un problème est survenu lors du processus d'authentification. Veuillez réessayer.",
+    "passwordTooShort": "Mot de passe trop court, au moins 8 caractères nécessaires",
+    "passwordWeak": "Force du mot de passe : Faible",
+    "passwordFair": "Force du mot de passe : Moyenne",
+    "passwordGood": "Force du mot de passe : Bonne",
+    "passwordStrong": "Force du mot de passe : Forte",
+    "passwordVeryStrong": "Force du mot de passe : Très forte",
+    "passwordNotStrongEnough": "Mot de passe pas assez fort. Veuillez créer un mot de passe plus robuste",
+    "registrationSuccessful": "Inscription réussie",
+    "checkEmailToVerify": "Veuillez vérifier votre email pour valider votre compte",
+    "didntReceiveEmail": "Vous n'avez pas reçu l'email ?",
+    "resendVerificationEmail": "Renvoyer l'email de vérification",
+    "close": "Fermer",
+    "failedToResendEmail": "Échec de l'envoi de l'email de vérification"
   },
   "myproperties": {
     "title": "Mes propriétés",
