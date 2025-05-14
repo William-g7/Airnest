@@ -37,10 +37,6 @@ interface CacheItem {
   lastUpdated: number;
 }
 
-interface TranslationCache {
-  [text: string]: CacheItem;
-}
-
 interface GroupedTranslationResponse {
   [key: string]: Record<string, string>;
 }
