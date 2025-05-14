@@ -8,6 +8,7 @@ import AuthStatusDetector from './components/AuthStatusDetector';
 import { ClientSideCsrfInitializer } from './components/security/CsrfInitializer';
 import { NonceProvider } from './providers/NonceProvider';
 import WebVitalsMonitor from './components/WebVitals';
+import GoogleAnalytics from './components/GoogleAnalytics';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -36,6 +37,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <NonceProvider>
+          <GoogleAnalytics />
           <ClientSideCsrfInitializer />
           <Toaster position="top-center" />
           <AuthProvider>
