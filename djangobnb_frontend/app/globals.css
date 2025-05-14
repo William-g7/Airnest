@@ -3,196 +3,195 @@
 @tailwind utilities;
 
 :root {
-    --airbnb-color: #ff385c;
-    --airbnb-dark-color: #d40027;
+  --airbnb-color: #ff385c;
+  --airbnb-dark-color: #d40027;
 }
 
 .airbnb-color {
-    color: var(--airbnb-color);
+  color: var(--airbnb-color);
 }
 
 @supports (backdrop-filter: blur(8px)) {
-    .scrolled .navbar-blur {
-        backdrop-filter: blur(8px);
-    }
+  .scrolled .navbar-blur {
+    backdrop-filter: blur(8px);
+  }
 }
 
 @supports not (backdrop-filter: blur(8px)) {
-    .scrolled .navbar-fallback {
-        background-color: rgba(255, 255, 255, 0.95);
-    }
+  .scrolled .navbar-fallback {
+    background-color: rgba(255, 255, 255, 0.95);
+  }
 }
 
 .navbar-container * {
-    transition: all 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .swiper {
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
 }
 
 .swiper-button-next,
 .swiper-button-prev {
-    color: white !important;
-    background: rgba(0, 0, 0, 0.1);
-    padding: 24px;
-    border-radius: 50%;
+  color: white !important;
+  background: rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  border-radius: 50%;
 }
 
 .swiper-button-next:after,
 .swiper-button-prev:after {
-    font-size: 20px !important;
+  font-size: 20px !important;
 }
 
 .swiper-pagination-bullet {
-    background: white !important;
+  background: white !important;
 }
 
 .swiper-pagination-bullet-active {
-    background: white !important;
+  background: white !important;
 }
 
-
 .react-datepicker {
-    font-family: inherit !important;
-    border-radius: 1rem !important;
-    border: 1px solid #e5e7eb !important;
+  font-family: inherit !important;
+  border-radius: 1rem !important;
+  border: 1px solid #e5e7eb !important;
 }
 
 .react-datepicker__header {
-    background-color: white !important;
-    border-bottom: 1px solid #e5e7eb !important;
-    border-top-right-radius: 1rem !important;
-    border-top-left-radius: 1rem !important;
+  background-color: white !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  border-top-right-radius: 1rem !important;
+  border-top-left-radius: 1rem !important;
 }
 
 .react-datepicker__day--selected {
-    background-color: var(--airbnb-color) !important;
-    color: white !important;
+  background-color: var(--airbnb-color) !important;
+  color: white !important;
 }
 
 .react-datepicker__day--disabled {
-    color: #ccc !important;
+  color: #ccc !important;
 }
 
 .react-datepicker__day--booked {
-    color: #848884 !important;
-    cursor: not-allowed !important;
+  color: #848884 !important;
+  cursor: not-allowed !important;
 }
 
 .react-datepicker__day--booked:hover {
-    background-color: #ffcdd2 !important;
+  background-color: #ffcdd2 !important;
 }
 
 .react-datepicker__day--partially-booked {
-    background-color: #fff9c4 !important;
-    color: #333 !important;
-    border: 1px dashed #ffd54f !important;
+  background-color: #fff9c4 !important;
+  color: #333 !important;
+  border: 1px dashed #ffd54f !important;
 }
 
 .react-datepicker__day--partially-booked:hover {
-    background-color: #ffe082 !important;
+  background-color: #ffe082 !important;
 }
 
 .react-datepicker__input-container input {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .date-tooltip {
-    position: relative;
+  position: relative;
 }
 
 .date-tooltip:hover::after {
-    content: var(--date-tooltip-booked);
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 4px 8px;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: white;
-    border-radius: 4px;
-    font-size: 12px;
-    white-space: nowrap;
-    z-index: 1000;
+  content: var(--date-tooltip-booked);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
 }
 
 .date-tooltip:hover::before {
-    content: '';
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 4px solid transparent;
-    border-top-color: rgba(0, 0, 0, 0.8);
-    margin-bottom: -4px;
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.8);
+  margin-bottom: -4px;
 }
 
 .date-tooltip-partial {
-    position: relative;
+  position: relative;
 }
 
 .date-tooltip-partial:hover::after {
-    content: var(--date-tooltip-partial);
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 4px 8px;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: white;
-    border-radius: 4px;
-    font-size: 12px;
-    white-space: nowrap;
-    z-index: 1000;
+  content: var(--date-tooltip-partial);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
 }
 
 .date-tooltip-partial:hover::before {
-    content: '';
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 4px solid transparent;
-    border-top-color: rgba(0, 0, 0, 0.8);
-    margin-bottom: -4px;
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.8);
+  margin-bottom: -4px;
 }
 
 @keyframes pulse-light {
-    0% {
-        box-shadow: 0 0 0 0 rgba(255, 56, 92, 0.4);
-    }
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 56, 92, 0.4);
+  }
 
-    70% {
-        box-shadow: 0 0 0 5px rgba(255, 56, 92, 0);
-    }
+  70% {
+    box-shadow: 0 0 0 5px rgba(255, 56, 92, 0);
+  }
 
-    100% {
-        box-shadow: 0 0 0 0 rgba(255, 56, 92, 0);
-    }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 56, 92, 0);
+  }
 }
 
 .interactive-btn:active {
-    transform: scale(0.95);
+  transform: scale(0.95);
 }
 
 .interactive-btn:hover {
-    animation: pulse-light 1.5s infinite;
+  animation: pulse-light 1.5s infinite;
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .fade-in {
-    animation: fadeIn 0.3s ease-out forwards;
+  animation: fadeIn 0.3s ease-out forwards;
 }

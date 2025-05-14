@@ -3,48 +3,48 @@ import { useEffect, useRef } from 'react';
 import { useSearchStore } from '../stores/searchStore';
 
 export function useSearchParamsSync() {
-    const searchParams = useSearchParams();
-    const router = useRouter();
-    const pathname = usePathname();
-    const { location, checkIn, checkOut, guests, category, setFilters } = useSearchStore();
-    const initialSyncDone = useRef(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const { location, checkIn, checkOut, guests, category, setFilters } = useSearchStore();
+  const initialSyncDone = useRef(false);
 
-    // 从URL参数更新状态
-    useEffect(() => {
-        const locationParam = searchParams.get('location') || '';
-        const checkInParam = searchParams.get('check_in') || null;
-        const checkOutParam = searchParams.get('check_out') || null;
-        const guestsParam = searchParams.get('guests');
-        const categoryParam = searchParams.get('category') || '';
+  // 从URL参数更新状态
+  useEffect(() => {
+    const locationParam = searchParams.get('location') || '';
+    const checkInParam = searchParams.get('check_in') || null;
+    const checkOutParam = searchParams.get('check_out') || null;
+    const guestsParam = searchParams.get('guests');
+    const categoryParam = searchParams.get('category') || '';
 
-        if (locationParam || checkInParam || checkOutParam || guestsParam || categoryParam) {
-            setFilters({
-                location: locationParam,
-                checkIn: checkInParam,
-                checkOut: checkOutParam,
-                guests: guestsParam ? parseInt(guestsParam) : 1,
-                category: categoryParam,
-            });
-        }
+    if (locationParam || checkInParam || checkOutParam || guestsParam || categoryParam) {
+      setFilters({
+        location: locationParam,
+        checkIn: checkInParam,
+        checkOut: checkOutParam,
+        guests: guestsParam ? parseInt(guestsParam) : 1,
+        category: categoryParam,
+      });
+    }
 
-        initialSyncDone.current = true;
-    }, [searchParams, setFilters]);
+    initialSyncDone.current = true;
+  }, [searchParams, setFilters]);
 
-    // 从状态更新URL参数
-    useEffect(() => {
-        if (!initialSyncDone.current) return;
+  // 从状态更新URL参数
+  useEffect(() => {
+    if (!initialSyncDone.current) return;
 
-        const params = new URLSearchParams();
+    const params = new URLSearchParams();
 
-        if (location) params.set('location', location);
-        if (checkIn) params.set('check_in', checkIn);
-        if (checkOut) params.set('check_out', checkOut);
-        if (guests > 1) params.set('guests', guests.toString());
-        if (category) params.set('category', category);
+    if (location) params.set('location', location);
+    if (checkIn) params.set('check_in', checkIn);
+    if (checkOut) params.set('check_out', checkOut);
+    if (guests > 1) params.set('guests', guests.toString());
+    if (category) params.set('category', category);
 
-        const newQuery = params.toString();
-        const newUrl = newQuery ? `${pathname}?${newQuery}` : pathname;
+    const newQuery = params.toString();
+    const newUrl = newQuery ? `${pathname}?${newQuery}` : pathname;
 
-        router.replace(newUrl, { scroll: false });
-    }, [location, checkIn, checkOut, guests, category, router, pathname, initialSyncDone]);
+    router.replace(newUrl, { scroll: false });
+  }, [location, checkIn, checkOut, guests, category, router, pathname, initialSyncDone]);
 }

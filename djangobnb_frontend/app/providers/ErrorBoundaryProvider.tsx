@@ -4,15 +4,11 @@ import React from 'react';
 import ErrorBoundaryWithTranslation from '../components/ErrorBoundary';
 
 interface ErrorBoundaryProviderProps {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }
 
 const ErrorBoundaryProvider: React.FC<ErrorBoundaryProviderProps> = ({ children }) => {
-    return (
-        <ErrorBoundaryWithTranslation>
-            {children}
-        </ErrorBoundaryWithTranslation>
-    );
+  return <ErrorBoundaryWithTranslation>{children}</ErrorBoundaryWithTranslation>;
 };
 
-export default ErrorBoundaryProvider; 
+export default ErrorBoundaryProvider;
