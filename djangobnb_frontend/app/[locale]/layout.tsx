@@ -1,5 +1,4 @@
 import { NextIntlClientProvider } from 'next-intl';
-import { Inter } from 'next/font/google';
 import { ReactNode } from 'react';
 import { locales } from '../../i18n/routing';
 import { LocaleInitializer } from '../components/LocaleInitializer';
@@ -8,26 +7,18 @@ import CurrencyProvider from '../providers/CurrencyProvider';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
-
-type Props = {
-    children: ReactNode;
-    params: { locale: string };
-};
-
-export async function generateMetadata({
-    params: { locale }
-}: {
-    params: { locale: string }
-}): Promise<Metadata> {
+export async function generateMetadata(
+    props: { params: { locale: string } }
+): Promise<Metadata> {
+    const params = await props.params;
+    const locale = params.locale;
     const t = await getTranslations({ locale, namespace: 'app' });
 
     const siteTitle = `${t('name')} — ${t('slogan')}`;
     const siteDescription = `${t('subSlogan')}. ${t('description')}`;
 
-    console.log('Locale:', locale);
-    console.log('Translated slogan:', t('slogan'));
-
     return {
+        metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://airnest.com'),
         title: siteTitle,
         description: siteDescription,
         keywords: ["vacation rentals", "holiday homes", "apartment rentals", "house rentals", "airnest"],
@@ -84,10 +75,12 @@ async function getMessages(locale: string) {
     }
 }
 
-export default async function LocaleLayout({
-    children,
-    params: { locale }
-}: Props) {
+export default async function LocaleLayout(
+    props: { children: ReactNode; params: { locale: string } }
+) {
+    const params = await props.params;
+    const locale = params.locale;
+    const { children } = props;
     const messages = await getMessages(locale);
 
     return (
