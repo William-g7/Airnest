@@ -11,8 +11,8 @@ type Props = {
   };
 };
 
-const PropertyDetailPage = async ({ params }: Props) => {
-  // Ensure params is properly resolved before using it
+const PropertyDetailPage = async (props: Props) => {
+  const params = await props.params;
   const id = params.id;
   const property = await apiService.get(`/api/properties/${id}`);
   const t = await getTranslations('property');
@@ -24,17 +24,15 @@ const PropertyDetailPage = async ({ params }: Props) => {
   );
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  // Ensure params is properly resolved before using it
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   const id = params.id;
 
-  // 先获取数据
   const [property, t] = await Promise.all([
     apiService.get(`/api/properties/${id}`),
     getTranslations('property'),
   ]);
 
-  // 构建元数据
   const metadata: Metadata = {
     title: `${property.title} - DjangoBnB`,
     description: property.description.substring(0, 160),
@@ -65,7 +63,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
   };
 
-  // 构建结构化数据
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'LodgingBusiness',
