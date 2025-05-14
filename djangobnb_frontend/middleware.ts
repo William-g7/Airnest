@@ -31,26 +31,28 @@ export default async function middleware(request: NextRequest) {
   const isDev = process.env.NODE_ENV === 'development';
 
   const reportUri = '/api/csp-report';
+  
+  const googleAnalyticsDomains = 'www.googletagmanager.com www.google-analytics.com analytics.google.com *.analytics.google.com';
 
   const cspHeader = isDev
     ? `
       default-src 'self';
-      script-src 'self' 'unsafe-eval' 'unsafe-inline';
+      script-src 'self' 'unsafe-eval' 'unsafe-inline' ${googleAnalyticsDomains};
       style-src 'self' 'unsafe-inline';
-      img-src 'self' data: blob: ${process.env.NEXT_PUBLIC_API_URL};
+      img-src 'self' data: blob: ${process.env.NEXT_PUBLIC_API_URL} ${googleAnalyticsDomains};
       font-src 'self' data:;
-      connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_WS_HOST} ws://localhost:*;
+      connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_WS_HOST} ws://localhost:* ${googleAnalyticsDomains};
       frame-src 'self';
       worker-src 'self' blob:;
       report-uri ${reportUri};
     `
     : `
       default-src 'self';
-      script-src 'self' 'nonce-${nonce}' 'strict-dynamic';
+      script-src 'self' 'unsafe-inline' ${googleAnalyticsDomains};
       style-src 'self' 'nonce-${nonce}' 'unsafe-inline';
-      img-src 'self' data: blob: ${process.env.NEXT_PUBLIC_API_URL};
+      img-src 'self' data: blob: ${process.env.NEXT_PUBLIC_API_URL} ${googleAnalyticsDomains};
       font-src 'self' data:;
-      connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_WS_HOST};
+      connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_WS_HOST} ${googleAnalyticsDomains};
       frame-src 'self';
       base-uri 'self';
       form-action 'self';
@@ -65,7 +67,7 @@ export default async function middleware(request: NextRequest) {
   response.headers.set('Content-Security-Policy', cleanCspHeader);
 
   // 创建干净的 CSP Report-Only 头值，去除换行符和多余空格
-  const reportOnlyCsp = `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_WS_HOST}; report-uri ${reportUri}`;
+  const reportOnlyCsp = `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' ${googleAnalyticsDomains}; style-src 'self' 'unsafe-inline'; connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_WS_HOST} ${googleAnalyticsDomains}; report-uri ${reportUri}`;
 
   response.headers.set('Content-Security-Policy-Report-Only', reportOnlyCsp);
 
