@@ -17,7 +17,7 @@ export enum ErrorType {
   DEFAULT = 'DEFAULT',
 }
 
-export const getErrorMessage = (error: any, t?: (key: string) => string): string => {
+export const getErrorMessage = (error: unknown, t?: (key: string) => string): string => {
   if (!t) {
     if (typeof error === 'string') {
       return error;
@@ -77,13 +77,13 @@ export const getErrorMessage = (error: any, t?: (key: string) => string): string
 };
 
 // 显示错误提示
-export const showErrorToast = (error: any, t?: (key: string) => string): void => {
+export const showErrorToast = (error: unknown, t?: (key: string) => string): void => {
   const message = getErrorMessage(error, t);
   toast.error(message);
 };
 
 // 处理不需要显示toast的错误
-export const handleApiError = (error: any, t?: (key: string) => string): ApiError => {
+export const handleApiError = (error: unknown, t?: (key: string) => string): ApiError => {
   console.error('API Error:', error);
 
   let errorType = ErrorType.DEFAULT;
