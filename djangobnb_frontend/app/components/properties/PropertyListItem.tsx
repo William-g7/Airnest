@@ -15,6 +15,8 @@ import { useLocaleStore } from '@/app/stores/localeStore';
 import CurrencyDisplay from '../common/CurrencyDisplay';
 import { motion } from 'framer-motion';
 import { getReviewHighlights } from './PropertyHilights';
+import { useIntersectionObserver } from '@/app/hooks/useIntersectionObserver';
+
 interface PropertyListItemProps {
   property: PropertyType;
   translations?: {
@@ -32,16 +34,18 @@ const PropertyListItem = ({ property, translations }: PropertyListItemProps) => 
   const itemRef = useRef<HTMLDivElement>(null);
   const { locale } = useLocaleStore();
   
-  // 添加屏幕宽度状态
+  const isInViewport = useIntersectionObserver(itemRef, {
+    rootMargin: '200px',
+    threshold: 0.1
+  });
+  
   const [screenWidth, setScreenWidth] = useState<number>(1024);
 
-  // 监听屏幕尺寸变化
   useEffect(() => {
     const handleResize = () => {
       setScreenWidth(window.innerWidth);
     };
 
-    // 初始化
     if (typeof window !== 'undefined') {
       setScreenWidth(window.innerWidth);
       window.addEventListener('resize', handleResize);
@@ -54,25 +58,21 @@ const PropertyListItem = ({ property, translations }: PropertyListItemProps) => 
     };
   }, []);
   
-  // 根据屏幕大小选择最合适的图片
   const getOptimalPropertyImage = useMemo(() => {
     if (!property.images || property.images.length === 0) {
       return '/placeholder.jpg';
     }
     
     const mainImage = property.images[0];
-    
-    // 在大屏幕上，使用中等尺寸图片
+
     if (screenWidth >= 1024) {
       return mainImage.mediumURL || mainImage.imageURL;
     }
     
-    // 在中等屏幕上，优先使用中等尺寸
     if (screenWidth >= 768) {
       return mainImage.mediumURL || mainImage.imageURL;
     }
     
-    // 在小屏幕上，使用缩略图但确保质量
     return mainImage.mediumURL || mainImage.thumbnailURL || mainImage.imageURL;
   }, [property.images, screenWidth]);
 
@@ -145,6 +145,8 @@ const PropertyListItem = ({ property, translations }: PropertyListItemProps) => 
             fill
             className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110"
             quality={screenWidth >= 1024 ? 85 : 80}
+            loading={isInViewport ? "eager" : "lazy"}
+            priority={isInViewport}
           />
           {/* Pricetag */}
           <div className="absolute bottom-3 left-3 bg-white bg-opacity-90 py-1 px-2 rounded-lg shadow-sm">
