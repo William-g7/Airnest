@@ -161,7 +161,7 @@ def property_detail(request,pk):
                 property = form.save()
                 
                 # 处理新上传的图片
-                new_images = request.FILES.getlist('images')
+                new_images = request.FILES.getlist('new_images')
                 
                 if new_images:
                     # 获取当前最大的order值
