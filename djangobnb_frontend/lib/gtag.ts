@@ -38,4 +38,4 @@ export const sendWebVitals = ({ name, delta, id }: { name: string; delta: number
       non_interaction: true,
     });
   }
-}; 
+};

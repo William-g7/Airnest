@@ -14,7 +14,7 @@ const sendToAnalytics = (metric: Metric) => {
     sendToGA({
       name: metric.name,
       delta: typeof metric.delta === 'number' ? metric.delta : 0,
-      id: metric.id
+      id: metric.id,
     });
   } catch (error) {
     console.error('Web Vitals: 处理指标数据时出错', error);
@@ -23,11 +23,11 @@ const sendToAnalytics = (metric: Metric) => {
 
 export function reportWebVitals(onPerfEntry: ReportHandler = sendToAnalytics) {
   if (typeof window !== 'undefined') {
-    onCLS(onPerfEntry); 
-    onLCP(onPerfEntry); 
-    onINP(onPerfEntry); 
+    onCLS(onPerfEntry);
+    onLCP(onPerfEntry);
+    onINP(onPerfEntry);
 
-    onFCP(onPerfEntry); 
-    onTTFB(onPerfEntry); 
+    onFCP(onPerfEntry);
+    onTTFB(onPerfEntry);
   }
 }
