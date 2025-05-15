@@ -6,10 +6,15 @@ class PropertyImageSerializer(serializers.ModelSerializer):
     imageURL = serializers.SerializerMethodField()
     thumbnailURL = serializers.SerializerMethodField()
     mediumURL = serializers.SerializerMethodField()
+    largeURL = serializers.SerializerMethodField()
+    xlargeURL = serializers.SerializerMethodField()
+    mainJpgURL = serializers.SerializerMethodField()
+    originalURL = serializers.SerializerMethodField()
 
     class Meta:
         model = PropertyImage
-        fields = ['id', 'imageURL', 'thumbnailURL', 'mediumURL', 'order', 'is_main']
+        fields = ['id', 'imageURL', 'thumbnailURL', 'mediumURL', 'largeURL', 'xlargeURL', 
+                 'mainJpgURL', 'originalURL', 'order', 'is_main']
 
     def get_imageURL(self, obj):
         return obj.imageURL()
@@ -19,6 +24,18 @@ class PropertyImageSerializer(serializers.ModelSerializer):
         
     def get_mediumURL(self, obj):
         return obj.mediumURL()
+        
+    def get_largeURL(self, obj):
+        return obj.largeURL()
+        
+    def get_xlargeURL(self, obj):
+        return obj.xlargeURL()
+        
+    def get_mainJpgURL(self, obj):
+        return obj.mainJpgURL()
+        
+    def get_originalURL(self, obj):
+        return obj.originalURL()
 
 class PropertySerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField()

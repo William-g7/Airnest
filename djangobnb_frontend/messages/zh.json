@@ -160,6 +160,7 @@
     "editProperty": "编辑房源",
     "manageImages": "管理图片",
     "deletePicture": "删除图片",
+    "deletePictureTitle": "删除图片",
     "noImages": "暂无图片",
     "dragDropImages": "拖放图片调整顺序，第一张图片将成为主图",
     "mainImage": "主图",
@@ -168,8 +169,10 @@
     "imageDeleted": "图片删除成功",
     "updateFailed": "更新失败，请重试",
     "deleteFailed": "删除失败，请重试",
-    "updateError": "更新时出现错误，请重试",
-    "deleteImageConfirm": "确定要删除这张图片吗？",
+    "updateError": "更新时发生错误。请重试。",
+    "deleteImageConfirm": "您确定要删除这张图片吗？",
+    "delete": "删除",
+    "cancel": "取消",
     "reservationSuccess": "预订成功"
   },
   "addProperty": {
@@ -311,7 +314,20 @@
     "logoutSuccess": "已安全退出",
     "signupSuccess": "账号创建成功",
     "authError": "认证错误",
-    "authErrorMessage": "认证过程中出现问题，请重试"
+    "authErrorMessage": "认证过程中出现问题，请重试",
+    "passwordTooShort": "密码太短，至少需要8个字符",
+    "passwordWeak": "密码强度：弱",
+    "passwordFair": "密码强度：一般",
+    "passwordGood": "密码强度：良好",
+    "passwordStrong": "密码强度：强",
+    "passwordVeryStrong": "密码强度：非常强",
+    "passwordNotStrongEnough": "密码强度不足，请创建一个更强的密码",
+    "registrationSuccessful": "注册成功",
+    "checkEmailToVerify": "请检查您的电子邮箱以验证您的账号",
+    "didntReceiveEmail": "没有收到邮件？",
+    "resendVerificationEmail": "重新发送验证邮件",
+    "close": "关闭",
+    "failedToResendEmail": "重新发送验证邮件失败"
   },
   "myproperties": {
     "title": "我的房源",

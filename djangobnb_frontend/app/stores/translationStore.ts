@@ -28,15 +28,6 @@ class TranslationDatabase extends Dexie {
 // 创建数据库实例
 const db = new TranslationDatabase();
 
-interface TranslatedTexts {
-  [locale: string]: string;
-}
-
-interface CacheItem {
-  translations: TranslatedTexts;
-  lastUpdated: number;
-}
-
 interface GroupedTranslationResponse {
   [key: string]: Record<string, string>;
 }

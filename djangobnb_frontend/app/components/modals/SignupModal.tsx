@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { useSignupModal } from '../hooks/useSignupModal';
 import { useLoginModal } from '../hooks/useLoginModal';
@@ -25,12 +25,62 @@ export default function SignupModal() {
   const [error, setError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [passwordStrength, setPasswordStrength] = useState(0);
+  const [passwordFeedback, setPasswordFeedback] = useState('');
 
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     password2: '',
   });
+
+  const checkPasswordStrength = (password: string) => {
+    let strength = 0;
+    let feedback = '';
+
+    if (password.length === 0) {
+      setPasswordStrength(0);
+      setPasswordFeedback('');
+      return;
+    }
+    if (password.length >= 8) {
+      strength += 1;
+    } else {
+      feedback = t('passwordTooShort');
+    }
+
+    if (/\d/.test(password)) {
+      strength += 1;
+    }
+    if (/[a-z]/.test(password)) {
+      strength += 1;
+    }
+    if (/[A-Z]/.test(password)) {
+      strength += 1;
+    }
+    if (/[^A-Za-z0-9]/.test(password)) {
+      strength += 1;
+    }
+
+    if (strength === 1) {
+      feedback = feedback || (t('passwordWeak'));
+    } else if (strength === 2) {
+      feedback = t('passwordFair');
+    } else if (strength === 3) {
+      feedback = t('passwordGood');
+    } else if (strength === 4) {
+      feedback = t('passwordStrong');
+    } else if (strength === 5) {
+      feedback = t('passwordVeryStrong');
+    }
+
+    setPasswordStrength(strength);
+    setPasswordFeedback(feedback);
+  };
+
+  useEffect(() => {
+    checkPasswordStrength(formData.password);
+  }, [formData.password]);
 
   const clearErrors = () => {
     setError('');
@@ -42,6 +92,11 @@ export default function SignupModal() {
     try {
       setIsLoading(true);
       clearErrors();
+
+      if (passwordStrength < 3) {
+        setPasswordError(t('passwordNotStrongEnough'));
+        return;
+      }
 
       if (formData.password !== formData.password2) {
         setPasswordError(t('passwordsNotMatch'));
@@ -85,6 +140,15 @@ export default function SignupModal() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const getPasswordStrengthColor = () => {
+    if (passwordStrength === 0) return 'bg-gray-200';
+    if (passwordStrength === 1) return 'bg-red-500';
+    if (passwordStrength === 2) return 'bg-orange-500';
+    if (passwordStrength === 3) return 'bg-yellow-500';
+    if (passwordStrength === 4) return 'bg-green-500';
+    return 'bg-green-600';
   };
 
   const content = (
@@ -132,6 +196,19 @@ export default function SignupModal() {
               }`}
               disabled={isLoading}
             />
+            
+            {/* 密码强度指示器 */}
+            {formData.password && (
+              <div className="mt-2">
+                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full ${getPasswordStrengthColor()}`} 
+                    style={{ width: `${(passwordStrength / 5) * 100}%` }}
+                  ></div>
+                </div>
+                <p className="text-xs mt-1 text-gray-600">{passwordFeedback}</p>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col">

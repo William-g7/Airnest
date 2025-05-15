@@ -42,6 +42,8 @@ export default defineConfig([
       'prettier/prettier': 'warn',
       'react/react-in-jsx-scope': 'off',
       'react/jsx-filename-extension': [1, { extensions: ['.ts', '.tsx'] }],
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': ['error'],
     },
   },
 ]);

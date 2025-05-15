@@ -160,6 +160,7 @@
     "editProperty": "Edit property",
     "manageImages": "Manage images",
     "deletePicture": "Delete image",
+    "deletePictureTitle": "Delete Image",
     "noImages": "No images available",
     "dragDropImages": "Drag and drop images to reorder. The first image will be the main image.",
     "mainImage": "Main Image",
@@ -170,6 +171,8 @@
     "deleteFailed": "Delete failed. Please try again.",
     "updateError": "An error occurred while updating. Please try again.",
     "deleteImageConfirm": "Are you sure you want to delete this image?",
+    "delete": "Delete",
+    "cancel": "Cancel",
     "reservationSuccess": "Reservation made successfully"
   },
   "addProperty": {
@@ -312,7 +315,20 @@
     "logoutSuccess": "Logged out successfully",
     "signupSuccess": "Account created successfully",
     "authError": "Authentication Error",
-    "authErrorMessage": "There was a problem with the authentication process. Please try again."
+    "authErrorMessage": "There was a problem with the authentication process. Please try again.",
+    "passwordTooShort": "Password too short, at least 8 characters needed",
+    "passwordWeak": "Password strength: Weak",
+    "passwordFair": "Password strength: Fair",
+    "passwordGood": "Password strength: Good",
+    "passwordStrong": "Password strength: Strong",
+    "passwordVeryStrong": "Password strength: Very Strong",
+    "passwordNotStrongEnough": "Password not strong enough. Please create a stronger password",
+    "registrationSuccessful": "Registration successful",
+    "checkEmailToVerify": "Please check your email to verify your account",
+    "didntReceiveEmail": "Didn't receive the email?",
+    "resendVerificationEmail": "Resend verification email",
+    "close": "Close",
+    "failedToResendEmail": "Failed to resend verification email"
   },
   "myproperties": {
     "title": "My Properties",

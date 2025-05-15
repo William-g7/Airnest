@@ -117,6 +117,8 @@ INSTALLED_APPS = [
     'chat',
     'property',
     'useraccount',
+    
+    'django_cleanup.apps.CleanupConfig',
 ]
 
 MIDDLEWARE = [
