@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import apiService from '../../services/apiService';
 import PropertyListItem from './PropertyListItem';
@@ -10,6 +10,7 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslate } from '@/app/hooks/useTranslate';
 import { useLocaleStore } from '@/app/stores/localeStore';
 import { motion } from 'framer-motion';
+import { useIntersectionObserver } from '@/app/hooks/useIntersectionObserver';
 
 const PropertySkeleton = ({ index }: { index: number }) => (
   <motion.div
@@ -44,9 +45,13 @@ interface PropertyListProps {
 const PropertyList = ({ isMyProperties, isWishlist }: PropertyListProps) => {
   const t = useTranslations('properties');
   const [properties, setProperties] = useState<PropertyType[]>([]);
+  const [visibleProperties, setVisibleProperties] = useState<PropertyType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [lastSearchParams, setLastSearchParams] = useState('');
+  const [initialBatchSize, setInitialBatchSize] = useState(10);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const isLoadMoreVisible = useIntersectionObserver(loadMoreRef, { rootMargin: '300px' });
 
   const [isTranslating, setIsTranslating] = useState(false);
   const [translationContext, setTranslationContext] = useState<TranslationContext>({
@@ -61,6 +66,47 @@ const PropertyList = ({ isMyProperties, isWishlist }: PropertyListProps) => {
   const { location, checkIn, checkOut, guests, category } = useSearchStore();
   const searchParams = useSearchParams();
   const serializedParams = searchParams.toString();
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 640) {
+        setInitialBatchSize(4);
+      } else if (width < 768) {
+        setInitialBatchSize(6);
+      } else if (width < 1024) {
+        setInitialBatchSize(9);
+      } else if (width < 1280) {
+        setInitialBatchSize(12);
+      } else {
+        setInitialBatchSize(15);
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      handleResize();
+      window.addEventListener('resize', handleResize);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('resize', handleResize);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (properties.length > 0) {
+      setVisibleProperties(properties.slice(0, initialBatchSize));
+    }
+  }, [properties, initialBatchSize]);
+
+  useEffect(() => {
+    if (isLoadMoreVisible && visibleProperties.length < properties.length && !isLoading) {
+      const nextBatch = properties.slice(0, visibleProperties.length + initialBatchSize);
+      setVisibleProperties(nextBatch);
+    }
+  }, [isLoadMoreVisible, visibleProperties.length, properties, initialBatchSize, isLoading]);
 
   const getProperties = useCallback(async () => {
     try {
@@ -111,13 +157,14 @@ const PropertyList = ({ isMyProperties, isWishlist }: PropertyListProps) => {
           : await apiService.get(endpoint);
 
       setProperties(data);
+      setVisibleProperties(data.slice(0, initialBatchSize));
     } catch (error) {
       setError(t('loadError'));
       console.error('Error fetching properties:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [isMyProperties, isWishlist, searchParams, location, checkIn, checkOut, guests, category, t]);
+  }, [isMyProperties, isWishlist, searchParams, location, checkIn, checkOut, guests, category, t, initialBatchSize]);
 
   useEffect(() => {
     getProperties();
@@ -186,14 +233,12 @@ const PropertyList = ({ isMyProperties, isWishlist }: PropertyListProps) => {
     }
   };
 
-  const skeletonCount = 8;
-
   return (
     <>
       {/* If it is loading, show the skeleton */}
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6 w-full">
-          {[...Array(skeletonCount)].map((_, index) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 w-full">
+          {[...Array(initialBatchSize)].map((_, index) => (
             <PropertySkeleton key={index} index={index} />
           ))}
         </div>
@@ -273,25 +318,43 @@ const PropertyList = ({ isMyProperties, isWishlist }: PropertyListProps) => {
       ) : (
         <>
           {/* If there are properties, show the properties */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 w-full">
             {isTranslating && (
               <div className="col-span-full mb-4 p-2 bg-blue-50 text-blue-700 text-sm rounded-lg">
                 {t('translationInProgress')}
               </div>
             )}
 
-            {properties.map((property, index) => (
+            {visibleProperties.map((property, index) => (
               <PropertyListItem
                 key={property.id}
                 property={property}
                 translations={{
-                  title: translationContext.titles[property.title] || '',
-                  city: translationContext.cities[property.city] || '',
-                  country: translationContext.countries[property.country] || '',
+                  title: translationContext.titles[property.title || ''] || '',
+                  city: translationContext.cities[property.city || ''] || '',
+                  country: translationContext.countries[property.country || ''] || '',
                 }}
               />
             ))}
           </div>
+          
+          {/* Load more indicator */}
+          {visibleProperties.length < properties.length && (
+            <div 
+              ref={loadMoreRef} 
+              className="w-full py-8 flex justify-center"
+            >
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="loading flex items-center justify-center"
+              >
+                <div className="w-3 h-3 bg-gray-400 rounded-full mx-1 animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-3 h-3 bg-gray-400 rounded-full mx-1 animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-3 h-3 bg-gray-400 rounded-full mx-1 animate-bounce" style={{ animationDelay: '300ms' }}></div>
+              </motion.div>
+            </div>
+          )}
         </>
       )}
     </>
