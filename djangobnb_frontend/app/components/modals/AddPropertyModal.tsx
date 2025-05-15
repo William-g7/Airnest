@@ -204,8 +204,22 @@ export default function AddPropertyModal() {
 
       if (addPropertyModal.isEditMode && addPropertyModal.propertyToEdit) {
         for (const [index, image] of images.entries()) {
-          const file = await fetch(image).then(r => r.blob());
-          formData.append('new_images', file, `image${index}.jpg`);
+          if (image.startsWith('data:')) {
+            const byteString = atob(image.split(',')[1]);
+            const mimeType = image.split(',')[0].split(':')[1].split(';')[0];
+            const arrayBuffer = new ArrayBuffer(byteString.length);
+            const intArray = new Uint8Array(arrayBuffer);
+            
+            for (let i = 0; i < byteString.length; i++) {
+              intArray[i] = byteString.charCodeAt(i);
+            }
+            
+            const blob = new Blob([arrayBuffer], { type: mimeType });
+            formData.append('new_images', blob, `image${index}.jpg`);
+          } else {
+            const file = await fetch(image).then(r => r.blob());
+            formData.append('new_images', file, `image${index}.jpg`);
+          }
         }
 
         const response = await apiService.patch(
@@ -222,8 +236,24 @@ export default function AddPropertyModal() {
         }
       } else {
         for (const [index, image] of images.entries()) {
-          const file = await fetch(image).then(r => r.blob());
-          formData.append('images', file, `image${index}.jpg`);
+          if (image.startsWith('data:')) {
+            // 直接从data URL创建Blob
+            const byteString = atob(image.split(',')[1]);
+            const mimeType = image.split(',')[0].split(':')[1].split(';')[0];
+            const arrayBuffer = new ArrayBuffer(byteString.length);
+            const intArray = new Uint8Array(arrayBuffer);
+            
+            for (let i = 0; i < byteString.length; i++) {
+              intArray[i] = byteString.charCodeAt(i);
+            }
+            
+            const blob = new Blob([arrayBuffer], { type: mimeType });
+            formData.append('images', blob, `image${index}.jpg`);
+          } else {
+            // 对于非data URL，仍然使用fetch
+            const file = await fetch(image).then(r => r.blob());
+            formData.append('images', file, `image${index}.jpg`);
+          }
         }
 
         const response = await apiService.post('/api/properties/create/', formData);
