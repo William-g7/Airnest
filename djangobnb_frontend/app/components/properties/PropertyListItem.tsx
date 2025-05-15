@@ -3,7 +3,7 @@
 import { PropertyType } from '@/app/constants/propertyType';
 import Image from 'next/image';
 import WishlistButton from './WishlistButton';
-import { useCallback, useRef, useMemo } from 'react';
+import { useCallback, useRef, useMemo, useState, useEffect } from 'react';
 import { useLoginModal } from '../hooks/useLoginModal';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
@@ -31,6 +31,50 @@ const PropertyListItem = ({ property, translations }: PropertyListItemProps) => 
   const loginModal = useLoginModal();
   const itemRef = useRef<HTMLDivElement>(null);
   const { locale } = useLocaleStore();
+  
+  // 添加屏幕宽度状态
+  const [screenWidth, setScreenWidth] = useState<number>(1024);
+
+  // 监听屏幕尺寸变化
+  useEffect(() => {
+    const handleResize = () => {
+      setScreenWidth(window.innerWidth);
+    };
+
+    // 初始化
+    if (typeof window !== 'undefined') {
+      setScreenWidth(window.innerWidth);
+      window.addEventListener('resize', handleResize);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('resize', handleResize);
+      }
+    };
+  }, []);
+  
+  // 根据屏幕大小选择最合适的图片
+  const getOptimalPropertyImage = useMemo(() => {
+    if (!property.images || property.images.length === 0) {
+      return '/placeholder.jpg';
+    }
+    
+    const mainImage = property.images[0];
+    
+    // 在大屏幕上，使用中等尺寸图片
+    if (screenWidth >= 1024) {
+      return mainImage.mediumURL || mainImage.imageURL;
+    }
+    
+    // 在中等屏幕上，优先使用中等尺寸
+    if (screenWidth >= 768) {
+      return mainImage.mediumURL || mainImage.imageURL;
+    }
+    
+    // 在小屏幕上，使用缩略图但确保质量
+    return mainImage.mediumURL || mainImage.thumbnailURL || mainImage.imageURL;
+  }, [property.images, screenWidth]);
 
   const { isAuthenticated } = useAuth();
   const { isFavorite, toggleFavorite } = useFavoritesStore();
@@ -95,15 +139,12 @@ const PropertyListItem = ({ property, translations }: PropertyListItemProps) => 
         <div className="relative overflow-hidden aspect-square rounded-t-xl">
           {/* Image */}
           <Image
-            src={
-              property.images?.[0]?.thumbnailURL ||
-              property.images?.[0]?.imageURL ||
-              '/placeholder.jpg'
-            }
+            src={getOptimalPropertyImage}
             alt={property.title}
-            sizes="(max-width: 768px) 768px, (max-width: 1200px) 768px, 768px"
+            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
             fill
             className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110"
+            quality={screenWidth >= 1024 ? 85 : 80}
           />
           {/* Pricetag */}
           <div className="absolute bottom-3 left-3 bg-white bg-opacity-90 py-1 px-2 rounded-lg shadow-sm">
@@ -139,7 +180,6 @@ const PropertyListItem = ({ property, translations }: PropertyListItemProps) => 
             {/* Wishlist Button */}
             <div onClick={e => e.stopPropagation()} className="ml-2">
               <WishlistButton
-                propertyId={property.id}
                 isFavorited={isFavorite(property.id)}
                 onToggle={debouncedToggleWishlist}
                 isInline={true}
