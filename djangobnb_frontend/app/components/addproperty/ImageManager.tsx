@@ -46,6 +46,42 @@ interface ImageManagerProps {
   onImagesChange?: (images: ImageData[]) => void;
 }
 
+interface DeleteConfirmModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  message: string;
+}
+
+const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, title, message }: DeleteConfirmModalProps) => {
+  const t = useTranslations('property');
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <h3 className="text-lg font-semibold mb-2">{title}</h3>
+        <p className="text-gray-600 mb-6">{message}</p>
+        <div className="flex justify-end space-x-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+          >
+            {t('cancel')}
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+          >
+            {t('delete')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // 单个可拖拽图片项
 const SortableImageItem = ({
   imageURL,
@@ -114,6 +150,10 @@ const ImageManager = ({ propertyId, initialImages, onImagesChange }: ImageManage
     delete: false,
   });
   const [error, setError] = useState<string | null>(null);
+  
+  // 删除确认状态
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<boolean>(false);
+  const [imageToDelete, setImageToDelete] = useState<number | null>(null);
 
   // 再次将后端传来的图片数据按照order排序
   useEffect(() => {
@@ -195,18 +235,23 @@ const ImageManager = ({ propertyId, initialImages, onImagesChange }: ImageManage
     }
   };
 
-  const handleDeleteImage = async (imageId: number) => {
-    if (!confirm(t('deleteImageConfirm'))) {
-      return;
-    }
+  const handleDeleteImageRequest = (imageId: number) => {
+    setImageToDelete(imageId);
+    setDeleteConfirmOpen(true);
+  };
 
+  const handleDeleteImage = async () => {
+    if (!imageToDelete) return;
+    
     try {
       setLoading(prev => ({ ...prev, delete: true }));
       setError(null);
+      
+      setDeleteConfirmOpen(false);
 
-      await apiService.deletePropertyImage(propertyId, imageId);
+      await apiService.deletePropertyImage(propertyId, imageToDelete);
 
-      const updatedImages = images.filter(img => img.id !== imageId);
+      const updatedImages = images.filter(img => img.id !== imageToDelete);
 
       if (updatedImages.length > 0) {
         updatedImages[0].is_main = true;
@@ -228,7 +273,13 @@ const ImageManager = ({ propertyId, initialImages, onImagesChange }: ImageManage
       toast.error(t('deleteFailed'));
     } finally {
       setLoading(prev => ({ ...prev, delete: false }));
+      setImageToDelete(null);
     }
+  };
+
+  const closeDeleteConfirm = () => {
+    setDeleteConfirmOpen(false);
+    setImageToDelete(null);
   };
 
   if (images.length === 0) {
@@ -254,7 +305,7 @@ const ImageManager = ({ propertyId, initialImages, onImagesChange }: ImageManage
                 imageURL={img.imageURL}
                 thumbnailURL={img.thumbnailURL}
                 isMain={img.is_main}
-                onDelete={() => handleDeleteImage(img.id)}
+                onDelete={() => handleDeleteImageRequest(img.id)}
               />
             ))}
           </div>
@@ -268,6 +319,14 @@ const ImageManager = ({ propertyId, initialImages, onImagesChange }: ImageManage
       )}
 
       <p className="text-sm text-gray-500">{t('dragDropImages')}</p>
+      
+      <DeleteConfirmModal
+        isOpen={deleteConfirmOpen}
+        onClose={closeDeleteConfirm}
+        onConfirm={handleDeleteImage}
+        title={t('deletePictureTitle')}
+        message={t('deleteImageConfirm')}
+      />
     </div>
   );
 };
