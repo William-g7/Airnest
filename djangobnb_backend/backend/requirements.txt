@@ -10,3 +10,4 @@ channels==4.0.0
 daphne==4.0.0
 pytz==2024.1
 requests==2.31.0
+django-cleanup==8.0.0
