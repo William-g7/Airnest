@@ -16,7 +16,6 @@ interface ImageCarouselProps {
 }
 
 const ImageCarousel = ({ images, title }: ImageCarouselProps) => {
-  // 添加屏幕宽度状态来实现响应式加载
   const [screenWidth, setScreenWidth] = useState<number>(1024); // 默认值
   const [fullscreenMode, setFullscreenMode] = useState<boolean>(false);
   const [currentFullscreenIndex, setCurrentFullscreenIndex] = useState<number>(0);
@@ -27,7 +26,6 @@ const ImageCarousel = ({ images, title }: ImageCarouselProps) => {
       setScreenWidth(window.innerWidth);
     };
 
-    // 初始化
     if (typeof window !== 'undefined') {
       setScreenWidth(window.innerWidth);
       window.addEventListener('resize', handleResize);
@@ -54,12 +52,9 @@ const ImageCarousel = ({ images, title }: ImageCarouselProps) => {
     };
   }, [fullscreenMode]);
 
-  // 根据屏幕尺寸选择合适的图片URL
   const getOptimalImageUrl = (image: PropertyImage, index: number) => {
-    // 默认占位图片
     const defaultImage = '/placeholder.jpg';
     
-    // 如果没有图片
     if (!image) return defaultImage;
 
     // 如果是首图且有JPG格式，优先使用高质量JPG
@@ -86,7 +81,6 @@ const ImageCarousel = ({ images, title }: ImageCarouselProps) => {
     return image.mediumURL || image.imageURL || defaultImage;
   };
   
-  // 获取大图URL
   const getFullscreenImageUrl = (image: PropertyImage) => {
     if (!image) return '/placeholder.jpg';
     return image.originalURL || image.xlargeURL || image.largeURL || image.imageURL || '/placeholder.jpg';
