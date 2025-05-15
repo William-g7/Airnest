@@ -160,6 +160,7 @@
     "editProperty": "编辑房源",
     "manageImages": "管理图片",
     "deletePicture": "删除图片",
+    "deletePictureTitle": "删除图片",
     "noImages": "暂无图片",
     "dragDropImages": "拖放图片调整顺序，第一张图片将成为主图",
     "mainImage": "主图",
@@ -168,8 +169,10 @@
     "imageDeleted": "图片删除成功",
     "updateFailed": "更新失败，请重试",
     "deleteFailed": "删除失败，请重试",
-    "updateError": "更新时出现错误，请重试",
-    "deleteImageConfirm": "确定要删除这张图片吗？",
+    "updateError": "更新时发生错误。请重试。",
+    "deleteImageConfirm": "您确定要删除这张图片吗？",
+    "delete": "删除",
+    "cancel": "取消",
     "reservationSuccess": "预订成功"
   },
   "addProperty": {
