@@ -4,6 +4,8 @@ from . import api
 
 urlpatterns = [
     path('', api.property_list, name='api_properties_list'),
+    path('with-reviews/', api.properties_with_reviews, name='api_properties_with_reviews'),
+    path('<uuid:pk>/with-reviews/', api.property_with_reviews, name='api_property_with_reviews'),
     path('create/', api.create_property, name='api_properties_create'),
     path('<uuid:pk>/', api.property_detail, name='api_properties_detail'),
     path('my/', api.my_properties, name='api_properties_my'),
@@ -15,4 +17,10 @@ urlpatterns = [
     path('timezones/', api.get_timezone_list, name='api_properties_timezones'),
     path('<uuid:property_id>/images/update-order/', api.update_property_images_order, name='api_properties_update_images_order'),
     path('<uuid:property_id>/images/<int:image_id>/', api.delete_property_image, name='api_properties_delete_image'),
+    
+    # 评论相关API
+    path('review-tags/', api.get_review_tags, name='api_review_tags'),
+    path('<uuid:pk>/reviews/', api.property_reviews, name='api_property_reviews'),
+    path('<uuid:pk>/review-stats/', api.property_review_stats, name='api_property_review_stats'),
+    path('reviews/<uuid:review_id>/', api.manage_review, name='api_manage_review'),
 ]
