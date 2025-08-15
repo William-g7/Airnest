@@ -4,25 +4,43 @@ import json
 import os
 import logging
 from django.conf import settings
-import requests
-import uuid
 import time
+from google.cloud import translate_v3
+from google.oauth2 import service_account
 
 logger = logging.getLogger(__name__)
 
+# 语言映射：项目语言代码 -> Google Translate 语言代码
 LANGUAGE_MAP = {
-    'zh': 'zh-Hans',  # 简体中文
-    'fr': 'fr',       # 法语
-    'en': 'en',       # 英语
+    'zh': 'zh-cn',  # 简体中文
+    'fr': 'fr',     # 法语
+    'en': 'en',     # 英语
 }
 
-AZURE_TRANSLATOR_KEY = os.environ.get('AZURE_TRANSLATOR_KEY', getattr(settings, 'AZURE_TRANSLATOR_KEY', ''))
-AZURE_TRANSLATOR_ENDPOINT = os.environ.get('AZURE_TRANSLATOR_ENDPOINT', getattr(settings, 'AZURE_TRANSLATOR_ENDPOINT', 'https://api.cognitive.microsofttranslator.com'))
-AZURE_TRANSLATOR_LOCATION = os.environ.get('AZURE_TRANSLATOR_LOCATION', getattr(settings, 'AZURE_TRANSLATOR_LOCATION', 'eastasia')) 
+# Google Translate 配置
+GOOGLE_CREDENTIALS_PATH = os.path.join(settings.BASE_DIR, 'google-credentials.json')
+GOOGLE_PROJECT_ID = 'airnest-459809'
 
-def translate_with_azure(text, target_language, source_language='en'):
+def get_translate_client():
     """
-    使用 Azure Translator API 进行翻译
+    获取Google Translate v3客户端
+    """
+    try:
+        if os.path.exists(GOOGLE_CREDENTIALS_PATH):
+            credentials = service_account.Credentials.from_service_account_file(
+                GOOGLE_CREDENTIALS_PATH
+            )
+            return translate_v3.TranslationServiceClient(credentials=credentials)
+        else:
+            logger.error(f"Google凭证文件未找到: {GOOGLE_CREDENTIALS_PATH}")
+            return None
+    except Exception as e:
+        logger.error(f"创建Google Translate v3客户端失败: {str(e)}")
+        return None
+
+def translate_with_google(text, target_language, source_language='en'):
+    """
+    使用 Google Translate v3 API 进行翻译
     
     参数:
     - text: 要翻译的文本
@@ -34,82 +52,52 @@ def translate_with_azure(text, target_language, source_language='en'):
     """
     start_time = time.time()
     
-    if not AZURE_TRANSLATOR_KEY:
-        logger.error("Azure Translator API密钥未配置")
-        return text
-    
     try:
-        logger.info(f"尝试使用Azure API翻译文本(前50字符): '{text[:50]}...'")
+        logger.info(f"尝试使用Google Translate v3 API翻译文本(前50字符): '{text[:50]}...'")
         
-        path = '/translate'
-        constructed_url = AZURE_TRANSLATOR_ENDPOINT + path
+        # 获取翻译客户端
+        client = get_translate_client()
+        if not client:
+            logger.error("无法创建Google Translate v3客户端")
+            return text
         
-        params = {
-            'api-version': '3.0',
-            'to': [target_language]
-        }
+        # 构建项目路径
+        parent = f"projects/{GOOGLE_PROJECT_ID}/locations/global"
         
-        if source_language and source_language != 'auto':
-            params['from'] = source_language
-        
-        headers = {
-            'Ocp-Apim-Subscription-Key': AZURE_TRANSLATOR_KEY,
-            'Ocp-Apim-Subscription-Region': AZURE_TRANSLATOR_LOCATION,
-            'Content-type': 'application/json',
-            'X-ClientTraceId': str(uuid.uuid4())
-        }
-        
-        body = [{
-            'text': text
-        }]
-        
+        # 执行翻译
         api_start_time = time.time()
-        response = requests.post(constructed_url, params=params, headers=headers, json=body, timeout=30)
+        request = translate_v3.TranslateTextRequest({
+            "parent": parent,
+            "contents": [text],
+            "mime_type": "text/plain",
+            "source_language_code": source_language if source_language != 'auto' else None,
+            "target_language_code": target_language,
+        })
+        
+        response = client.translate_text(request=request)
         api_duration = time.time() - api_start_time
         
-        logger.info(f"Azure API请求完成，耗时: {api_duration:.2f}秒")
-
-        ## Azure API返回的JSON格式
-        #[
-        #   {
-        #     "translations": [
-        #       {
-        #         "text": "J'aimerais vraiment conduire votre voiture autour du pâté de maisons plusieurs fois!",
-        #         "to": "fr"
-        #       },
-        #       {
-        #         "text": "Ngingathanda ngempela ukushayela imoto yakho endaweni evimbelayo izikhathi ezimbalwa!",
-        #         "to": "zu"
-        #       }
-        #     ]
-        #   }
-        # ]
-        if response.status_code == 200:
-            response_json = response.json()
-            if response_json and len(response_json) > 0:
-                translations = response_json[0].get('translations', [])
-                if translations and len(translations) > 0:
-                    translated_text = translations[0].get('text', '')
-                    if translated_text:
-                        logger.info(f"翻译成功: '{text[:30]}...' -> '{translated_text[:30]}...', 耗时: {time.time() - start_time:.2f}秒")
-                        return translated_text
+        logger.info(f"Google Translate v3 API请求完成，耗时: {api_duration:.2f}秒")
         
-        # 如果响应不是200或没有找到翻译结果
-        logger.warning(f"Azure API返回了非预期的响应: {response.status_code}, {response.text}")
-        return text
-        
+        if response.translations:
+            translated_text = response.translations[0].translated_text
+            total_time = time.time() - start_time
+            logger.info(f"翻译成功: '{text[:30]}...' -> '{translated_text[:30]}...', 耗时: {total_time:.2f}秒")
+            return translated_text
+        else:
+            logger.warning(f"Google Translate v3 API返回了无效的响应: {response}")
+            return text
+            
     except Exception as e:
-        # 详细记录失败原因和失败的文本
         total_time = time.time() - start_time
-        logger.error(f"Azure翻译失败，耗时: {total_time:.2f}秒")
-        logger.error(f"翻译失败的文本(完整文本): '{text}'")
+        logger.error(f"Google Translate v3翻译失败，耗时: {total_time:.2f}秒")
+        logger.error(f"翻译失败的文本: '{text}'")
         logger.error(f"翻译错误详情: {str(e)}")
-        
         return text
 
-def translate_batch_with_azure(texts, target_language, source_language='en'):
+def translate_batch_with_google(texts, target_language, source_language='en'):
     """
-    使用Azure Translator API批量翻译文本
+    使用Google Translate v3 API批量翻译文本
     
     参数:
     - texts: 要翻译的文本列表
@@ -121,10 +109,6 @@ def translate_batch_with_azure(texts, target_language, source_language='en'):
     """
     start_time = time.time()
     
-    if not AZURE_TRANSLATOR_KEY:
-        logger.error("Azure Translator API密钥未配置")
-        return {text: text for text in texts}
-    
     # 空文本处理
     texts = [text for text in texts if text and text.strip()]
     if not texts:
@@ -133,65 +117,52 @@ def translate_batch_with_azure(texts, target_language, source_language='en'):
     results = {}
     
     try:
-        logger.info(f"开始使用Azure API批量翻译 {len(texts)} 个文本，目标语言: {target_language}")
+        logger.info(f"开始使用Google Translate v3 API批量翻译 {len(texts)} 个文本，目标语言: {target_language}")
         
-        path = '/translate'
-        constructed_url = AZURE_TRANSLATOR_ENDPOINT + path
+        # 获取翻译客户端
+        client = get_translate_client()
+        if not client:
+            logger.error("无法创建Google Translate v3客户端")
+            return {text: text for text in texts}
         
-        params = {
-            'api-version': '3.0',
-            'to': [target_language]
-        }
+        # 构建项目路径
+        parent = f"projects/{GOOGLE_PROJECT_ID}/locations/global"
         
-        if source_language and source_language != 'auto':
-            params['from'] = source_language
-        
-        headers = {
-            'Ocp-Apim-Subscription-Key': AZURE_TRANSLATOR_KEY,
-            'Ocp-Apim-Subscription-Region': AZURE_TRANSLATOR_LOCATION,
-            'Content-type': 'application/json',
-            'X-ClientTraceId': str(uuid.uuid4())
-        }
-        
-        # Azure API限制每批100个文本，所以需要分批处理
+        # Google Translate v3 API支持批量翻译，每批最多100个文本
         batch_size = 100
         for i in range(0, len(texts), batch_size):
             batch_texts = texts[i:i+batch_size]
             
-            # 构建请求体
-            body = [{'text': text} for text in batch_texts]
-            
             batch_start_time = time.time()
             logger.info(f"发送批次 {i//batch_size + 1}/{(len(texts)-1)//batch_size + 1}，包含 {len(batch_texts)} 个文本")
             
-            response = requests.post(constructed_url, params=params, headers=headers, json=body, timeout=60)
+            # 执行批量翻译
+            request = translate_v3.TranslateTextRequest({
+                "parent": parent,
+                "contents": batch_texts,
+                "mime_type": "text/plain",
+                "source_language_code": source_language if source_language != 'auto' else None,
+                "target_language_code": target_language,
+            })
             
+            response = client.translate_text(request=request)
             batch_duration = time.time() - batch_start_time
             logger.info(f"批次API请求完成，耗时: {batch_duration:.2f}秒")
             
-            if response.status_code == 200:
-                response_json = response.json()
-                
-                # 处理每个文本的翻译结果
-                for j, translation_result in enumerate(response_json):
-                    original_text = batch_texts[j]
-                    translations = translation_result.get('translations', [])
-                    
-                    if translations and len(translations) > 0:
-                        translated_text = translations[0].get('text', '')
-                        if translated_text:
-                            results[original_text] = translated_text
-                        else:
-                            results[original_text] = original_text
-                            logger.warning(f"文本未被成功翻译: '{original_text}'")
+            # 处理批量翻译结果
+            if response.translations:
+                for j, translation in enumerate(response.translations):
+                    if j < len(batch_texts):
+                        original_text = batch_texts[j]
+                        translated_text = translation.translated_text
+                        results[original_text] = translated_text
                     else:
-                        results[original_text] = original_text
-                        logger.warning(f"文本未被成功翻译: '{original_text}'")
+                        logger.warning(f"翻译结果数量与原文数量不匹配")
             else:
-                # 处理错误情况，为该批次的所有文本使用原文
-                logger.error(f"批次翻译请求失败，状态码: {response.status_code}, 响应: {response.text}")
+                # 如果没有翻译结果，返回原文
                 for text in batch_texts:
                     results[text] = text
+                    logger.warning(f"文本未被成功翻译: '{text}'")
     
     except Exception as e:
         logger.error(f"批量翻译处理失败: {str(e)}")
@@ -206,7 +177,6 @@ def translate_batch_with_azure(texts, target_language, source_language='en'):
     logger.info(f"批量翻译全部完成，总耗时: {total_time:.2f}秒，成功: {success_count}/{len(texts)}，失败: {len(texts) - success_count}/{len(texts)}")
     
     return results
-
 
 @csrf_exempt
 def translate_text(request):
@@ -227,18 +197,20 @@ def translate_text(request):
         text = data.get('text', '')
         target_language = data.get('target_language', 'en')
         
+        # 映射语言代码
         mapped_language = LANGUAGE_MAP.get(target_language)
         
         if not mapped_language:
             logger.warning(f"不支持的语言代码: {target_language}")
             return JsonResponse({'translated_text': text, 'error': f"Unsupported language: {target_language}"})
         
+        # 如果目标语言是英文，直接返回原文
         if not text or mapped_language == 'en':
             return JsonResponse({'translated_text': text})
         
         translated_text = text
         try:
-            translated_text = translate_with_azure(text, mapped_language)
+            translated_text = translate_with_google(text, mapped_language)
         except Exception as e:
             logger.error(f"翻译错误: {str(e)}")
 
@@ -278,6 +250,7 @@ def translate_batch(request):
         texts = data.get('texts', [])
         target_language = data.get('target_language', 'en')
         
+        # 映射语言代码
         mapped_language = LANGUAGE_MAP.get(target_language)
         
         if not mapped_language:
@@ -285,12 +258,13 @@ def translate_batch(request):
             return JsonResponse({'translations': {text: text for text in texts}, 
                                'error': f"Unsupported language: {target_language}"})
         
+        # 如果目标语言是英文，直接返回原文
         if not texts or mapped_language == 'en':
             return JsonResponse({'translations': {text: text for text in texts}})
         
         logger.info(f"收到批量翻译请求，共{len(texts)}个文本")
         
-        translations = translate_batch_with_azure(texts, mapped_language)
+        translations = translate_batch_with_google(texts, mapped_language)
         
         logger.info(f"批量翻译完成，共{len(texts)}个文本")
         
