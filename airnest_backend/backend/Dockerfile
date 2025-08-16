@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-WORKDIR /usr/src/djangobnb_backend
+WORKDIR /usr/src/airnest_backend
 
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
