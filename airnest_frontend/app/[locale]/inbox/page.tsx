@@ -15,7 +15,7 @@ export type ConversationType = {
   users: UserType[];
 };
 
-const InboxPage = async ({ params }: { params: { locale: string } }) => {
+const InboxPage = async ({ params }: { params: Promise<{ locale: string }> }) => {
   const userId = await getUserId();
   const t = await getTranslations('inbox');
 

@@ -5,16 +5,16 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
 type Props = {
-  params: {
+  params: Promise<{
     id: string;
     locale: string;
-  };
+  }>;
 };
 
 const PropertyDetailPage = async (props: Props) => {
   const params = await props.params;
   const id = params.id;
-  const property = await apiService.get(`/api/properties/${id}`);
+  const property = await apiService.get(`/api/properties/${id}/with-reviews/`);
   const t = await getTranslations('property');
 
   return (
@@ -29,16 +29,16 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const id = params.id;
 
   const [property, t] = await Promise.all([
-    apiService.get(`/api/properties/${id}`),
+    apiService.get(`/api/properties/${id}/with-reviews/`),
     getTranslations('property'),
   ]);
 
   const metadata: Metadata = {
-    title: `${property.title} - DjangoBnB`,
-    description: property.description.substring(0, 160),
+    title: `${property.title} - Airnest`,
+    description: property.description ? property.description.substring(0, 160) : '',
     openGraph: {
       title: property.title,
-      description: property.description,
+      description: property.description || '',
       images: property.images.map((img: ImageType) => ({
         url: img.imageURL,
         width: 1200,
@@ -50,7 +50,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     twitter: {
       card: 'summary_large_image',
       title: property.title,
-      description: property.description,
+      description: property.description || '',
       images: [property.images[0]?.imageURL],
     },
     alternates: {
@@ -107,7 +107,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       '@type': 'ReserveAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: `https://djangobnb.com/properties/${id}`,
+        urlTemplate: `https://airnest.me/properties/${id}`,
         actionPlatform: ['http://schema.org/DesktopWebPlatform'],
       },
     },

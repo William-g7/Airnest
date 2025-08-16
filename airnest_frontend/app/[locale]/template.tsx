@@ -17,6 +17,8 @@ const geistMono = Geist_Mono({
 
 const LoginModal = lazy(() => import('../components/modals/LoginModal'));
 const SignupModal = lazy(() => import('../components/modals/SignupModal'));
+const ForgotPasswordModal = lazy(() => import('../components/modals/ForgotPasswordModal'));
+const ChangePasswordModal = lazy(() => import('../components/modals/ChangePasswordModal'));
 const AddPropertyModal = lazy(() => import('../components/modals/AddPropertyModal'));
 const ScrollToTop = lazy(() => import('../components/common/ScrollToTop'));
 
@@ -30,6 +32,8 @@ export default function Template({ children }: { children: ReactNode }) {
       <Suspense fallback={<div>Loading...</div>}>
         <LoginModal />
         <SignupModal />
+        <ForgotPasswordModal />
+        <ChangePasswordModal />
         <AddPropertyModal />
       </Suspense>
       <Suspense fallback={null}>

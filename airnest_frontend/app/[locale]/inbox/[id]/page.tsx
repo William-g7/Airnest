@@ -15,16 +15,16 @@ export type MessageType = {
 };
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
     locale: string;
-  };
+  }>;
 }
 
 const ConversationPage = async ({ params }: PageProps) => {
   const userId = await getUserId();
   const token = await getAccessToken();
-  const conversationId = await params.id;
+  const { id: conversationId } = await params;
   const t = await getTranslations('inbox');
 
   if (!userId || !token) {

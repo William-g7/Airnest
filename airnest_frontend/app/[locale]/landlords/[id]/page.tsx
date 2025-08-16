@@ -14,8 +14,9 @@ interface Landlord {
   date_joined: string;
 }
 
-const LandlordDetailsPage = async ({ params }: { params: { id: string; locale: string } }) => {
-  const landlord: Landlord = await apiService.get(`/api/auth/landlords/${params.id}/`);
+const LandlordDetailsPage = async ({ params }: { params: Promise<{ id: string; locale: string }> }) => {
+  const { id } = await params;
+  const landlord: Landlord = await apiService.get(`/api/auth/landlords/${id}/`);
   const t = await getTranslations('landlord');
 
   const hostingYears = new Date().getFullYear() - new Date(landlord.date_joined).getFullYear() + 1;

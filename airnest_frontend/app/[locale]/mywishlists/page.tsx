@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import PropertyList from '@/app/components/properties/PropertyList';
+import PropertyListContainer from '@/app/components/properties/PropertyListContainer';
 import apiService from '@/app/services/apiService';
 import { PropertyType } from '@/app/constants/propertyType';
 import { useTranslations } from 'next-intl';
+import PropertyListSkeleton from '@/app/components/properties/PropertyListSkeleton';
 
 const MyWishlistsPage = () => {
   const t = useTranslations('mywishlists');
@@ -32,7 +33,7 @@ const MyWishlistsPage = () => {
     return (
       <main className="max-w-[1500px] mx-auto px-6 pb-6">
         <h1 className="text-3xl font-semibold my-8">{t('title')}</h1>
-        <div className="text-center">{t('loading')}</div>
+        <PropertyListSkeleton count={8} />
       </main>
     );
   }
@@ -55,7 +56,7 @@ const MyWishlistsPage = () => {
           <p className="text-gray-500 mt-2">{t('propertiesWillAppearHere')}</p>
         </div>
       ) : (
-        <PropertyList isWishlist={true} />
+        <PropertyListContainer initialProperties={properties} isWishlist={true} />
       )}
     </main>
   );

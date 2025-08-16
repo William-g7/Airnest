@@ -1,6 +1,6 @@
 'use client';
 
-import PropertyList from '@/app/components/properties/PropertyList';
+import PropertyListContainer from '@/app/components/properties/PropertyListContainer';
 import { useAddPropertyModal } from '@/app/components/hooks/useAddPropertyModal';
 import { useLoginModal } from '@/app/components/hooks/useLoginModal';
 import { useAuthStore } from '@/app/stores/authStore';
@@ -32,7 +32,7 @@ const MyPropertiesPage = () => {
         </button>
       </div>
 
-      <PropertyList isMyProperties={true} />
+      <PropertyListContainer initialProperties={[]} isMyProperties={true} />
     </main>
   );
 };
