@@ -17,7 +17,6 @@ export function ClientSideCsrfInitializer() {
     const initCsrf = async () => {
       try {
         await initCsrfToken();
-        console.log('CSRF token initialized');
       } catch (error) {
         console.error('Failed to initialize CSRF token:', error);
       }
@@ -30,8 +29,7 @@ export function ClientSideCsrfInitializer() {
   return nonce ? (
     <ScriptWithNonce nonce={nonce} id="csrf-init">
       {`
-                // 可能的内联JavaScript初始化代码
-                console.log('CSRF protection initialized with nonce');
+                // CSRF保护初始化完成
             `}
     </ScriptWithNonce>
   ) : null;
