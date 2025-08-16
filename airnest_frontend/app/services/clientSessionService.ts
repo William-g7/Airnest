@@ -1,7 +1,6 @@
 'use client';
 
 import { handleLogin as serverHandleLogin } from '@/app/auth/session';
-import { useAuthStore } from '../stores/authStore';
 import { getAuthChannel } from './AuthChannel';
 import { getNotificationService, NotificationType } from './notificationService';
 
@@ -33,7 +32,9 @@ export const clientSessionService = {
   // 处理用户登录，设置服务器端Cookie和本地存储
   handleLogin: async (userId: string, accessToken: string, refreshToken: string) => {
     try {
-      console.log('客户端会话管理器 - 处理登录，用户ID:', userId);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('客户端会话管理器 - 处理登录，用户ID:', userId);
+      }
 
       await serverHandleLogin(userId, accessToken, refreshToken);
 
@@ -61,7 +62,10 @@ export const clientSessionService = {
   getUserId: () => {
     try {
       const userId = localStorage.getItem(USER_ID_KEY);
-      console.log('客户端会话管理器 - 获取用户ID:', userId);
+      // 只在开发环境中显示调试日志
+      if (process.env.NODE_ENV === 'development') {
+        console.log('客户端会话管理器 - 获取用户ID:', userId);
+      }
       return userId;
     } catch (error) {
       console.error('获取本地存储用户ID失败:', error);
