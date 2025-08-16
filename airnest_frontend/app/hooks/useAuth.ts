@@ -10,18 +10,23 @@ import { useState, useEffect } from 'react';
 export const useAuth = () => {
   const { userId, isAuthenticated, loading, checkAuth } = useAuthStore();
   const [hasChecked, setHasChecked] = useState(false);
+  const [isChecking, setIsChecking] = useState(false);
 
   // 确保只在初始挂载时检查一次认证状态
   useEffect(() => {
-    if (!hasChecked) {
-      checkAuth().then(() => setHasChecked(true));
+    if (!hasChecked && !isChecking) {
+      setIsChecking(true);
+      checkAuth().then(() => {
+        setHasChecked(true);
+        setIsChecking(false);
+      });
     }
-  }, [checkAuth, hasChecked]);
+  }, [checkAuth, hasChecked, isChecking]);
 
   return {
     userId,
     isAuthenticated,
-    isLoading: loading && !hasChecked,
+    isLoading: loading || isChecking || !hasChecked,
     refreshAuth: checkAuth,
   };
 };
