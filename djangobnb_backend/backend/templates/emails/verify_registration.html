@@ -1,0 +1,56 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Verify Your {{ site_name }} Account{% endblock %}
+
+{% block header_subtitle %}Welcome to the {{ site_name }} community!{% endblock %}
+
+{% block content %}
+    <div class="greeting">
+        Hello {{ user_name }}! 👋
+    </div>
+    
+    <div class="message">
+        <p>Welcome to <strong>{{ site_name }}</strong>! We're excited to have you join our community of travelers and hosts.</p>
+        
+        <p>To get started and unlock all the amazing features we have to offer, please verify your email address by clicking the button below:</p>
+    </div>
+    
+    <div style="text-align: center;">
+        <a href="{{ verification_url }}" class="cta-button">
+            ✅ Verify My Email Address
+        </a>
+    </div>
+    
+    <div class="info-box">
+        <div class="info-box-title">What happens next?</div>
+        <div class="info-box-content">
+            Once you verify your email, you'll be able to:
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>Book amazing accommodations worldwide</li>
+                <li>List your own property and become a host</li>
+                <li>Connect with our global community</li>
+                <li>Access exclusive deals and offers</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="security-notice">
+        <div class="security-notice-title">🔒 Security Information</div>
+        <div class="security-notice-content">
+            <p><strong>Verification Link:</strong> This link will expire in {{ expires_hours }} hours for your security.</p>
+            <p><strong>Didn't sign up?</strong> If you didn't create a {{ site_name }} account, you can safely ignore this email.</p>
+        </div>
+    </div>
+    
+    <div class="message" style="font-size: 14px; color: #666666; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef;">
+        <p><strong>Having trouble with the button?</strong> Copy and paste this link into your browser:</p>
+        <p style="word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 12px;">
+            {{ verification_url }}
+        </p>
+    </div>
+    
+    <div class="message" style="margin-top: 30px; text-align: center;">
+        <p>Need help? We're here for you!</p>
+        <p>Contact our support team at <a href="mailto:{{ support_email }}" style="color: #FF5A5F; text-decoration: none;">{{ support_email }}</a></p>
+    </div>
+{% endblock %}

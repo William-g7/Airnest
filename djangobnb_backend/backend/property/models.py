@@ -43,8 +43,57 @@ class Property(models.Model):
     landlord = models.ForeignKey(User, related_name='properties', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        # 稳定排序：最新创建的在前，同时间创建的按ID排序确保一致性
+        ordering = ['-created_at', 'id']
+
     def __str__(self):
         return self.title
+    
+    @property
+    def average_rating(self):
+        """计算平均评分"""
+        reviews = self.reviews.filter(is_hidden=False)
+        if not reviews.exists():
+            return 0
+        return round(sum(review.rating for review in reviews) / reviews.count(), 1)
+    
+    @property
+    def total_reviews(self):
+        """获取评论总数"""
+        return self.reviews.filter(is_hidden=False).count()
+    
+    @property
+    def positive_review_rate(self):
+        """计算好评率（4-5星评论的比例）"""
+        reviews = self.reviews.filter(is_hidden=False)
+        if not reviews.exists():
+            return 0
+        positive_count = reviews.filter(rating__gte=4).count()
+        return round((positive_count / reviews.count()) * 100)
+    
+    def get_most_popular_tags(self, locale='en', limit=2):
+        """获取该房源最受欢迎的标签"""
+        from django.db.models import Count
+        
+        # 获取该房源下所有评论的标签，按频次排序
+        tag_counts = ReviewTag.objects.filter(
+            reviewtagassignment__review__property_ref=self,
+            reviewtagassignment__review__is_hidden=False,
+            is_active=True
+        ).annotate(
+            usage_count=Count('reviewtagassignment')
+        ).order_by('-usage_count')[:limit]
+        
+        return [
+            {
+                'key': tag.tag_key,
+                'name': tag.get_localized_name(locale),
+                'count': tag.usage_count,
+                'color': tag.color
+            }
+            for tag in tag_counts
+        ]
 
 def property_image_path(instance, filename):
     """生成房源图片的存储路径
@@ -327,3 +376,112 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
     if instance.image_original and instance.image_original.name:
         if hasattr(instance.image_original, 'path') and os.path.isfile(instance.image_original.path):
             os.remove(instance.image_original.path)
+
+
+class ReviewTag(models.Model):
+    """预定义的评论标签"""
+    
+    # 标签的唯一标识符
+    tag_key = models.CharField(max_length=50, unique=True)
+    
+    # 多语言标签内容
+    name_en = models.CharField(max_length=100)
+    name_zh = models.CharField(max_length=100)
+    name_fr = models.CharField(max_length=100)
+    
+    # 标签颜色和图标（可选）
+    color = models.CharField(max_length=7, default='#10B981')  # 默认绿色
+    icon = models.CharField(max_length=50, blank=True)
+    
+    # 标签分类（便于管理）
+    category = models.CharField(max_length=50, choices=[
+        ('location', '位置'),
+        ('cleanliness', '清洁度'),
+        ('service', '服务'),
+        ('amenities', '设施'),
+        ('value', '性价比'),
+        ('communication', '沟通'),
+    ], default='service')
+    
+    # 是否激活
+    is_active = models.BooleanField(default=True)
+    
+    # 排序
+    order = models.IntegerField(default=0)
+    
+    class Meta:
+        ordering = ['category', 'order']
+    
+    def __str__(self):
+        return f"{self.tag_key} - {self.name_en}"
+    
+    def get_localized_name(self, locale='en'):
+        """根据语言环境返回对应的标签名称"""
+        locale_map = {
+            'en': self.name_en,
+            'zh': self.name_zh,
+            'fr': self.name_fr,
+        }
+        return locale_map.get(locale, self.name_en)
+
+
+class PropertyReview(models.Model):
+    """房源评论模型"""
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    
+    # 关联关系
+    property_ref = models.ForeignKey(Property, related_name='reviews', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='reviews', on_delete=models.CASCADE)
+    reservation = models.ForeignKey(Reservation, related_name='review', on_delete=models.SET_NULL, null=True, blank=True)
+    
+    # 评分 (1-5星)
+    rating = models.IntegerField(choices=[
+        (1, '1星'),
+        (2, '2星'),
+        (3, '3星'),
+        (4, '4星'),
+        (5, '5星'),
+    ])
+    
+    # 评论内容
+    title = models.CharField(max_length=200, blank=True)
+    content = models.TextField()
+    
+    # 选择的标签（通过中间表关联）
+    tags = models.ManyToManyField(ReviewTag, through='ReviewTagAssignment', blank=True)
+    
+    # 元数据
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # 管理字段
+    is_verified = models.BooleanField(default=False)  # 是否为已验证的评论（已完成住宿）
+    is_hidden = models.BooleanField(default=False)    # 是否隐藏（举报后）
+    
+    class Meta:
+        ordering = ['-created_at']
+        # 确保同一用户对同一房源只能评论一次
+        unique_together = ['property_ref', 'user']
+    
+    def __str__(self):
+        return f"{self.user.name} - {self.property_ref.title} ({self.rating}星)"
+    
+    @property
+    def is_positive(self):
+        """判断是否为好评（4-5星）"""
+        return self.rating >= 4
+
+
+class ReviewTagAssignment(models.Model):
+    """评论和标签的关联模型"""
+    
+    review = models.ForeignKey(PropertyReview, on_delete=models.CASCADE)
+    tag = models.ForeignKey(ReviewTag, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ['review', 'tag']
+    
+    def __str__(self):
+        return f"{self.review.id} - {self.tag.tag_key}"

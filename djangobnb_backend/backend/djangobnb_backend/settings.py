@@ -15,7 +15,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG',default=False)
 
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS').split(' ')
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost 127.0.0.1 [::1] testserver').split(' ')
 
 AUTH_USER_MODEL = 'useraccount.User'
 
@@ -39,6 +39,8 @@ REST_AUTH = {
     'JWT_AUTH_SECURE': False,
     'JWT_AUTH_RETURN_EXPIRATION': True,
     'JWT_AUTH_COOKIE_USE_CSRF': True,
+    'USER_DETAILS_SERIALIZER': 'useraccount.serializers.UserSerializer',
+    'LOGIN_SERIALIZER': 'useraccount.serializers.CustomLoginSerializer',
 }
 
 REST_FRAMEWORK = {
@@ -110,6 +112,7 @@ INSTALLED_APPS = [
 
     'allauth',
     'allauth.account',
+    'allauth.socialaccount',
 
     'dj_rest_auth',
     'dj_rest_auth.registration',
@@ -137,7 +140,7 @@ ROOT_URLCONF = 'djangobnb_backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -212,10 +215,26 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Azure Translator API配置
-AZURE_TRANSLATOR_KEY = os.environ.get('AZURE_TRANSLATOR_KEY', '')
-AZURE_TRANSLATOR_ENDPOINT = os.environ.get('AZURE_TRANSLATOR_ENDPOINT', 'https://api.cognitive.microsofttranslator.com')
-AZURE_TRANSLATOR_LOCATION = os.environ.get('AZURE_TRANSLATOR_LOCATION', 'southeastasia')  
+# Turnstile验证配置
+TURNSTILE_SECRET_KEY = os.environ.get('TURNSTILE_SECRET_KEY', '')  
+
+# Email configuration (SMTP2GO)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'mail.smtp2go.com'
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '2525'))  # 2525 (SMTP2GO recommended) or 587 (TLS)
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('SMTP2GO_USERNAME', '')
+EMAIL_HOST_PASSWORD = os.environ.get('SMTP2GO_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@airnest.me')
+SERVER_EMAIL = os.environ.get('SERVER_EMAIL', 'admin@airnest.me')
+
+# Email security and limits
+EMAIL_TIMEOUT = 30  # 30 seconds timeout
+EMAIL_USE_LOCALTIME = False
+
+# Frontend URL for email links
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+SUPPORT_EMAIL = os.environ.get('SUPPORT_EMAIL', 'support@airnest.me')
 
 
 LOGGING = {

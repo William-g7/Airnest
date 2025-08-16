@@ -1,0 +1,56 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Reactivate Your {{ site_name }} Account{% endblock %}
+
+{% block header_subtitle %}Welcome back to {{ site_name }}!{% endblock %}
+
+{% block content %}
+    <div class="greeting">
+        Welcome back {{ user_name }}! 🎉
+    </div>
+    
+    <div class="message">
+        <p>We're excited to see you return to <strong>{{ site_name }}</strong>!</p>
+        
+        <p>To reactivate your account and get back to discovering amazing places and experiences, please verify your email address by clicking the button below:</p>
+    </div>
+    
+    <div style="text-align: center;">
+        <a href="{{ verification_url }}" class="cta-button">
+            🔄 Reactivate My Account
+        </a>
+    </div>
+    
+    <div class="info-box">
+        <div class="info-box-title">What's waiting for you</div>
+        <div class="info-box-content">
+            Once you reactivate your account, you'll have access to:
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>Your saved properties and wishlists</li>
+                <li>Previous booking history</li>
+                <li>Personalized recommendations</li>
+                <li>New features and improvements we've added</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="security-notice">
+        <div class="security-notice-title">🔒 Account Security</div>
+        <div class="security-notice-content">
+            <p><strong>Verification required:</strong> This link will expire in {{ expires_hours }} hours for your security.</p>
+            <p><strong>Didn't request reactivation?</strong> If you didn't request to reactivate your account, you can safely ignore this email.</p>
+        </div>
+    </div>
+    
+    <div class="message" style="font-size: 14px; color: #666666; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef;">
+        <p><strong>Having trouble with the button?</strong> Copy and paste this link into your browser:</p>
+        <p style="word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 12px;">
+            {{ verification_url }}
+        </p>
+    </div>
+    
+    <div class="message" style="margin-top: 30px; text-align: center;">
+        <p>Questions about your account?</p>
+        <p>Contact our support team at <a href="mailto:{{ support_email }}" style="color: #FF5A5F; text-decoration: none;">{{ support_email }}</a></p>
+    </div>
+{% endblock %}
