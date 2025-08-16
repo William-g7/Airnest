@@ -1,19 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import ReactDatePicker, { registerLocale } from 'react-datepicker';
+import { useState } from 'react';
+import ReactDatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import '@/app/styles/datepicker.css';
 import { useTranslations } from 'next-intl';
-import { convertUTCToTimezone, formatDateForAPI, addTimezoneToDate } from '../../utils/dateUtils';
 import { getLocaleState } from '@/app/stores/localeStore';
-
-// 导入 date-fns 的语言包
-import { zhCN, enUS, fr } from 'date-fns/locale';
-
-// 注册支持的语言
-registerLocale('zh-CN', zhCN);
-registerLocale('en-US', enUS);
-registerLocale('fr-FR', fr);
+import { useDatePickerConfig } from '@/app/hooks/useDatePickerConfig';
 
 interface DatePickerProps {
   checkIn: Date | null;
@@ -36,33 +29,25 @@ const DatePicker: React.FC<DatePickerProps> = ({
   const commonT = useTranslations('common');
   const datePickerT = useTranslations('datePicker');
 
-  const [propertyTodayDate, setPropertyTodayDate] = useState<Date>(new Date());
   const [isRulesExpanded, setIsRulesExpanded] = useState(false);
 
   const { intlLocale } = getLocaleState();
-  const datePickerLocale = intlLocale || 'en-US';
 
-  useEffect(() => {
-    // 设置CSS变量为翻译文本
-    document.documentElement.style.setProperty(
-      '--date-tooltip-booked',
-      `"${datePickerT('unavailable')}"`
-    );
-    document.documentElement.style.setProperty(
-      '--date-tooltip-partial',
-      `"${datePickerT('needConfirmation2')}"`
-    );
-  }, [datePickerT]);
-
-  // 计算房源当地的"今天"日期，防止因为时差订到当地已经过去的日期
-  useEffect(() => {
-    // 获取当前UTC时间并转换为房源时区的日期
-    const now = new Date();
-    const propertyToday = convertUTCToTimezone(now.toISOString(), propertyTimezone);
-    setPropertyTodayDate(propertyToday);
-  }, [propertyTimezone]);
-
-  const timezoneLabel = propertyTimezone !== 'UTC' ? `(${propertyTimezone.replace('_', '/')})` : '';
+  // 使用公共配置hook
+  const {
+    datePickerLocale,
+    isLocaleLoaded,
+    propertyTodayDate,
+    formatDateString,
+    renderDayContents,
+    dayClassName,
+    timezoneLabel,
+  } = useDatePickerConfig({
+    locale: intlLocale || 'en',
+    propertyTimezone,
+    bookedDates,
+    partiallyBookedDates,
+  });
 
   const handleCheckInChange = (date: Date | null) => {
     if (checkOut && date && date >= checkOut) {
@@ -79,28 +64,25 @@ const DatePicker: React.FC<DatePickerProps> = ({
     onChange([checkIn, date]);
   };
 
-  // 注意传给date picker组件的是带有当地时区的Date对象
-  const formatDateString = (dateStr: string): Date => {
-    return addTimezoneToDate(dateStr, propertyTimezone);
-  };
-
-  const renderDayContents = (day: number, date: Date) => {
-    const dateString = formatDateForAPI(date);
-    const isBooked = bookedDates.includes(dateString);
-    const isPartiallyBooked = partiallyBookedDates.includes(dateString);
-
-    if (isBooked) {
-      return <span className="date-tooltip">{day}</span>;
-    } else if (isPartiallyBooked) {
-      return <span className="date-tooltip-partial">{day}</span>;
-    } else {
-      return <span>{day}</span>;
-    }
-  };
+  // formatDateString, renderDayContents, dayClassName 现在由 useDatePickerConfig hook 提供
 
   const toggleRules = () => {
     setIsRulesExpanded(!isRulesExpanded);
   };
+
+  // 如果locale还未加载，显示加载状态
+  if (!isLocaleLoaded) {
+    return (
+      <div className="border border-gray-300 rounded-lg overflow-hidden">
+        <div className="p-4 text-center">
+          <div className="animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto mb-2"></div>
+            <div className="h-64 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="border border-gray-300 rounded-lg overflow-hidden">
@@ -235,15 +217,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
             className="w-full border-none focus:ring-0 p-0 text-gray-600"
             renderDayContents={renderDayContents}
             locale={datePickerLocale}
-            dayClassName={date => {
-              const dateString = formatDateForAPI(date);
-              if (bookedDates.includes(dateString)) {
-                return 'react-datepicker__day--booked';
-              } else if (partiallyBookedDates.includes(dateString)) {
-                return 'react-datepicker__day--partially-booked';
-              }
-              return '';
-            }}
+            dayClassName={dayClassName}
           />
         </div>
         <div className="p-4">
@@ -258,15 +232,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
             disabled={!checkIn}
             renderDayContents={renderDayContents}
             locale={datePickerLocale}
-            dayClassName={date => {
-              const dateString = formatDateForAPI(date);
-              if (bookedDates.includes(dateString)) {
-                return 'react-datepicker__day--booked';
-              } else if (partiallyBookedDates.includes(dateString)) {
-                return 'react-datepicker__day--partially-booked';
-              }
-              return '';
-            }}
+            dayClassName={dayClassName}
           />
         </div>
       </div>
