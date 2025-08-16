@@ -124,7 +124,7 @@ const Categories = () => {
                             ${category === item.value ? 'font-semibold text-gray-900' : 'text-gray-600'}
                         `}
             >
-              {t(item.value, { fallback: item.label })}
+              {t.has(item.value) ? t(item.value) : item.label}
             </span>
 
             {/* The bottom border, keep straight */}
