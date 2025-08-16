@@ -5,26 +5,19 @@ import { useLoginModal } from '@/app/components/hooks/useLoginModal';
 import { useAddPropertyModal } from '@/app/components/hooks/useAddPropertyModal';
 import apiService from '@/app/services/apiService';
 import { useAuthStore } from '@/app/stores/authStore';
+import { useAuth } from '@/app/hooks/useAuth';
 import WishlistButton from '@/app/components/properties/WishlistButton';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { PropertyType } from '@/app/constants/propertyType';
-import dynamic from 'next/dynamic';
 import ContactButton from '@/app/components/ContactButton';
 import { useTranslations } from 'next-intl';
 import CustomButton from '@/app/components/forms/CustomButton';
 import toast from 'react-hot-toast';
 import { useTranslate } from '@/app/hooks/useTranslate';
-
-const PropertyImageCarousel = dynamic(() => import('./PropertyImageCarousel'), {
-  loading: () => <div className="animate-pulse bg-gray-200 h-[60vh] rounded-lg" />,
-  ssr: true,
-});
-
-const ReservationSideBar = dynamic(() => import('./ReservationSideBar'), {
-  loading: () => <div className="animate-pulse bg-gray-200 h-96 rounded-lg" />,
-  ssr: true,
-});
+import PropertyReviews from './PropertyReviews';
+import PropertyImageCarousel from './PropertyImageCarousel';
+import ReservationSideBar from './ReservationSideBar';
 
 const PropertyDetail = ({ property }: { property: PropertyType }) => {
   const t = useTranslations('property');
@@ -34,6 +27,7 @@ const PropertyDetail = ({ property }: { property: PropertyType }) => {
   const loginModal = useLoginModal();
   const addPropertyModal = useAddPropertyModal();
   const authStore = useAuthStore();
+  const { isAuthenticated, isLoading } = useAuth();
   const isLandlord =
     authStore.userId && property.landlord && authStore.userId === property.landlord.id.toString();
   const { useLiveTranslation } = useTranslate();
@@ -50,22 +44,39 @@ const PropertyDetail = ({ property }: { property: PropertyType }) => {
 
   useEffect(() => {
     const checkIfFavorited = async () => {
+      // 等待认证状态加载完成
+      if (isLoading) {
+        return;
+      }
+
+      // 只有在用户已登录时才检查收藏状态
+      if (!isAuthenticated) {
+        setIsFavorited(false);
+        return;
+      }
+
       try {
         const response = await apiService.getwithtoken('/api/properties/wishlist/');
         const wishlist = response;
         setIsFavorited(wishlist.some((item: PropertyType) => item.id === property.id));
       } catch (error: any) {
-        if (error.message !== 'HTTP error! status: 401') {
-          console.error('Error checking wishlist status:', error);
-        }
+        // 静默处理认证错误，避免控制台报错
+        console.error('Error checking wishlist status:', error);
+        setIsFavorited(false);
       }
     };
 
     checkIfFavorited();
-  }, [property.id]);
+  }, [property.id, isAuthenticated, isLoading]);
 
   const handleToggleWishlist = async (e: React.MouseEvent) => {
     e.stopPropagation();
+
+    // 检查用户是否已登录
+    if (!isAuthenticated) {
+      loginModal.onOpen();
+      return;
+    }
 
     try {
       const response = await apiService.post(`/api/properties/${property.id}/toggle-favorite/`, {
@@ -81,7 +92,8 @@ const PropertyDetail = ({ property }: { property: PropertyType }) => {
         }
       }
     } catch (error: any) {
-      if (error.message === 'No authentication token available') {
+      if (error.message === 'No authentication token available' || 
+          error.message === 'Authentication required') {
         loginModal.onOpen();
       } else {
         console.error('Error toggling wishlist:', error);
@@ -108,7 +120,6 @@ const PropertyDetail = ({ property }: { property: PropertyType }) => {
   return (
     <div className="relative">
       <WishlistButton
-        propertyId={property.id}
         isFavorited={isFavorited}
         onToggle={handleToggleWishlist}
       />
@@ -218,6 +229,10 @@ const PropertyDetail = ({ property }: { property: PropertyType }) => {
               )}
             </p>
           </div>
+
+          <hr className="my-6" />
+
+          <PropertyReviews propertyId={property.id} />
         </div>
 
         <div className="md:col-span-5 lg:col-span-4">
