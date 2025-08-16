@@ -54,6 +54,19 @@ class ErrorBoundaryClass extends Component<
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     console.error('Error boundary:', error, errorInfo);
+    
+    // 在生产环境记录错误信息
+    if (process.env.NODE_ENV === 'production') {
+      // 可以在这里添加自定义的错误上报逻辑
+      console.error('Production error:', {
+        error: error.message,
+        stack: error.stack,
+        componentStack: errorInfo.componentStack,
+        timestamp: new Date().toISOString(),
+        userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'unknown',
+        url: typeof window !== 'undefined' ? window.location.href : 'unknown'
+      });
+    }
   }
 
   resetError = (): void => {
