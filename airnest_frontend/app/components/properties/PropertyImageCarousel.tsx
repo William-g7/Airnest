@@ -7,8 +7,10 @@ import { PropertyImage } from '@/app/constants/propertyType';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { useEffect, useState } from 'react';
-import { FaTimes, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import TimesIcon from '../icons/TimesIcon';
+import ChevronLeftIcon from '../icons/ChevronLeftIcon';
+import ChevronRightIcon from '../icons/ChevronRightIcon';
 
 interface ImageCarouselProps {
   images: PropertyImage[];
@@ -16,26 +18,32 @@ interface ImageCarouselProps {
 }
 
 const ImageCarousel = ({ images, title }: ImageCarouselProps) => {
-  const [screenWidth, setScreenWidth] = useState<number>(1024); // 默认值
   const [fullscreenMode, setFullscreenMode] = useState<boolean>(false);
   const [currentFullscreenIndex, setCurrentFullscreenIndex] = useState<number>(0);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
+  
+  // 图片加载状态 - 简化为仅跟踪加载完成的图片
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
+  
+  // Swiper 实例引用
+  const swiperRef = useRef<any>(null);
+  
+  // 获取屏幕尺寸 - 使用客户端检测，避免服务端不匹配
+  const getScreenWidth = () => {
+    return typeof window !== 'undefined' ? window.innerWidth : 1024;
+  };
 
-  // 监听屏幕尺寸变化
+  // 简化的尺寸监听 - 只在需要时获取，避免状态更新
+  const [, forceUpdate] = useState({});
   useEffect(() => {
     const handleResize = () => {
-      setScreenWidth(window.innerWidth);
+      forceUpdate({}); // 强制重新渲染以获取新的屏幕尺寸
     };
 
     if (typeof window !== 'undefined') {
-      setScreenWidth(window.innerWidth);
       window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
     }
-
-    return () => {
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('resize', handleResize);
-      }
-    };
   }, []);
 
   // 监听ESC键关闭全屏模式
@@ -52,10 +60,22 @@ const ImageCarousel = ({ images, title }: ImageCarouselProps) => {
     };
   }, [fullscreenMode]);
 
+  // 简化的滑动事件处理
+  const handleSlideChange = useCallback((swiper: any) => {
+    setCurrentSlideIndex(swiper.activeIndex);
+  }, []);
+
+  // 图片加载完成回调
+  const handleImageLoad = useCallback((index: number) => {
+    setLoadedImages(prev => new Set(prev).add(index));
+  }, []);
+
   const getOptimalImageUrl = (image: PropertyImage, index: number) => {
     const defaultImage = '/placeholder.jpg';
     
     if (!image) return defaultImage;
+
+    const screenWidth = getScreenWidth();
 
     // 如果是首图且有JPG格式，优先使用高质量JPG
     if (index === 0 && image.mainJpgURL) {
@@ -114,6 +134,7 @@ const ImageCarousel = ({ images, title }: ImageCarouselProps) => {
     );
   };
 
+
   return (
     <>
       <div className="relative mb-4 w-full h-[75vh] rounded-xl overflow-hidden">
@@ -126,28 +147,43 @@ const ImageCarousel = ({ images, title }: ImageCarouselProps) => {
             clickable: true,
           }}
           autoplay={{
-            delay: 3000,
+            delay: 4000, // 增加轮播间隔，给图片预加载更多时间
             disableOnInteraction: false,
           }}
           loop={true}
-          className="h-full w-full "
+          className="h-full w-full"
+          onSwiper={(swiper) => {
+            swiperRef.current = swiper;
+          }}
+          onSlideChange={handleSlideChange}
+          onInit={handleSlideChange} // 处理初始化
         >
           {images && images.length > 0 ? (
             images.map((image, index) => (
               <SwiperSlide key={index}>
                 <div 
-                  className="relative w-full h-full cursor-pointer"
+                  className="relative w-full h-full cursor-pointer bg-gradient-to-br from-gray-200 to-gray-300"
                   onClick={() => openFullscreenImage(index)}
                 >
                   <Image
                     src={getOptimalImageUrl(image, index)}
                     alt={`${title} - Image ${index + 1}`}
                     fill
-                    className="object-cover"
+                    className={`object-cover transition-opacity duration-500 ease-in-out ${
+                      loadedImages.has(index) ? 'opacity-100' : 'opacity-0'
+                    }`}
                     priority={index === 0}
+                    loading={index <= 2 ? 'eager' : 'lazy'}
                     sizes="(max-width: 768px) 100vw, (max-width: 1440px) 100vw, (max-width: 2560px) 100vw, 100vw"
-                    quality={index === 0 ? 95 : (screenWidth >= 1440 ? 90 : 85)}
+                    quality={index === 0 ? 95 : (getScreenWidth() >= 1440 ? 90 : 85)}
+                    onLoad={() => handleImageLoad(index)}
+                    onError={() => {
+                      // 图片加载失败，静默处理
+                      console.warn(`Failed to load image ${index + 1}`);
+                    }}
                   />
+                  
+                  {/* 悬浮提示层 */}
                   <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-10 transition-all duration-300 flex items-center justify-center">
                     <span className="text-white opacity-0 hover:opacity-100 text-sm font-medium">
                       点击查看大图
@@ -158,7 +194,7 @@ const ImageCarousel = ({ images, title }: ImageCarouselProps) => {
             ))
           ) : (
             <SwiperSlide>
-              <div className="relative w-full h-full">
+              <div className="relative w-full h-full bg-gradient-to-br from-gray-200 to-gray-300">
                 <Image src="/placeholder.jpg" alt={title} fill className="object-cover" priority />
               </div>
             </SwiperSlide>
@@ -175,7 +211,7 @@ const ImageCarousel = ({ images, title }: ImageCarouselProps) => {
               className="text-white bg-black bg-opacity-50 hover:bg-opacity-70 p-3 rounded-full transition-all"
               aria-label="关闭大图"
             >
-              <FaTimes size={24} />
+              <TimesIcon className="w-6 h-6" />
             </button>
           </div>
 
@@ -185,7 +221,7 @@ const ImageCarousel = ({ images, title }: ImageCarouselProps) => {
               className="text-white bg-black bg-opacity-50 hover:bg-opacity-70 p-3 rounded-full transition-all"
               aria-label="上一张"
             >
-              <FaChevronLeft size={24} />
+              <ChevronLeftIcon className="w-6 h-6" />
             </button>
           </div>
 
@@ -195,7 +231,7 @@ const ImageCarousel = ({ images, title }: ImageCarouselProps) => {
               className="text-white bg-black bg-opacity-50 hover:bg-opacity-70 p-3 rounded-full transition-all"
               aria-label="下一张"
             >
-              <FaChevronRight size={24} />
+              <ChevronRightIcon className="w-6 h-6" />
             </button>
           </div>
 
