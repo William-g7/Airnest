@@ -1,32 +1,49 @@
 import { create } from 'zustand';
 import { translateText, translateBatch } from '@/app/services/translationService';
 import { useLocaleStore } from './localeStore';
-import Dexie from 'dexie';
+import MemoryTranslationCache from '@/app/services/memoryCache';
 
-const CACHE_VALIDITY_PERIOD = 7 * 24 * 60 * 60 * 1000;
+// 动态导入的数据库实例
+let dbInstance: any = null;
+let dbPromise: Promise<any> | null = null;
 
-class TranslationDatabase extends Dexie {
-  translations!: Dexie.Table<
-    {
-      id: string; // 复合键: "原文_语言" (如 "Hello_fr")
-      text: string; // 原文
-      locale: string; // 目标语言
-      translation: string; // 翻译文本
-      lastUpdated: number; // 最后更新时间戳
-    },
-    string
-  >;
+// 内存缓存实例（用于英语用户或降级）
+const memoryCache = new MemoryTranslationCache();
 
-  constructor() {
-    super('TranslationDB');
-    this.version(1).stores({
-      translations: 'id, text, locale, lastUpdated',
-    });
-  }
+// 条件加载IndexedDB数据库
+async function getDatabase() {
+  // 如果已经有数据库实例，直接返回
+  if (dbInstance) return dbInstance;
+  
+  // 如果正在加载，等待加载完成
+  if (dbPromise) return await dbPromise;
+  
+  // 开始异步加载数据库
+  dbPromise = (async () => {
+    try {
+      console.log('🗄️ 动态加载IndexedDB翻译缓存...');
+      const { TranslationDatabase } = await import('@/app/services/translationDatabase');
+      dbInstance = new TranslationDatabase();
+      console.log('✅ IndexedDB翻译缓存加载成功');
+      return dbInstance;
+    } catch (error) {
+      console.error('❌ IndexedDB加载失败，降级到内存缓存:', error);
+      dbPromise = null; // 重置promise，允许重试
+      return null;
+    }
+  })();
+  
+  return await dbPromise;
 }
 
-// 创建数据库实例
-const db = new TranslationDatabase();
+// 判断是否需要持久化缓存
+function shouldUsePersistentCache(locale: string): boolean {
+  // 英语用户不需要翻译，无需持久化缓存
+  if (locale === 'en') return false;
+  
+  // 其他语言用户需要持久化缓存
+  return true;
+}
 
 interface GroupedTranslationResponse {
   [key: string]: Record<string, string>;
@@ -43,34 +60,46 @@ interface TranslationState {
   clearCache: () => Promise<void>;
 }
 
+// 智能缓存获取：根据语言选择缓存策略
 async function getCachedTranslation(text: string, locale: string): Promise<string | null> {
+  // 英语用户优先使用内存缓存
+  if (!shouldUsePersistentCache(locale)) {
+    return memoryCache.get(text, locale);
+  }
+
+  // 首先尝试内存缓存（更快）
+  const memoryResult = memoryCache.get(text, locale);
+  if (memoryResult) return memoryResult;
+
+  // 然后尝试IndexedDB（持久化）
   try {
-    const id = `${text}_${locale}`;
-    const record = await db.translations.get(id);
+    const db = await getDatabase();
+    if (!db) return null;
 
-    if (record && Date.now() - record.lastUpdated < CACHE_VALIDITY_PERIOD) {
-      return record.translation;
-    }
-
-    return null;
+    const { getCachedTranslation: getFromDB } = await import('@/app/services/translationDatabase');
+    return await getFromDB(db, text, locale);
   } catch (error) {
     console.error('Error reading from IndexedDB:', error);
     return null;
   }
 }
 
+// 智能缓存保存：根据语言选择缓存策略
 async function saveTranslation(text: string, locale: string, translation: string): Promise<void> {
-  try {
-    const id = `${text}_${locale}`;
-    await db.translations.put({
-      id,
-      text,
-      locale,
-      translation,
-      lastUpdated: Date.now(),
-    });
-  } catch (error) {
-    console.error('Error saving to IndexedDB:', error);
+  // 总是保存到内存缓存（快速访问）
+  memoryCache.set(text, locale, translation);
+
+  // 非英语用户同时保存到IndexedDB（持久化）
+  if (shouldUsePersistentCache(locale)) {
+    try {
+      const db = await getDatabase();
+      if (!db) return;
+
+      const { saveTranslation: saveToDB } = await import('@/app/services/translationDatabase');
+      await saveToDB(db, text, locale, translation);
+    } catch (error) {
+      console.error('Error saving to IndexedDB:', error);
+    }
   }
 }
 
@@ -262,8 +291,16 @@ export const useTranslationStore = create<TranslationState>()((set, get) => ({
 
   clearCache: async () => {
     try {
-      await db.translations.clear();
-      console.info('Translation cache cleared successfully');
+      // 清除内存缓存
+      memoryCache.clear();
+      console.info('Memory cache cleared successfully');
+
+      // 清除IndexedDB缓存（如果已加载）
+      if (dbInstance) {
+        const { clearTranslationCache } = await import('@/app/services/translationDatabase');
+        await clearTranslationCache(dbInstance);
+        console.info('IndexedDB cache cleared successfully');
+      }
     } catch (error) {
       console.error('Error clearing translation cache:', error);
     }
