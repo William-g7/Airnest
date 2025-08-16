@@ -56,5 +56,5 @@ Thumbs.db
 .claude/
 .cursor/
 .specstory/
-
-/myclaude/
+.cursorindexingignore
+myclaude/
