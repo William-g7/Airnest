@@ -8,6 +8,7 @@ import CustomButton from '@/app/components/forms/CustomButton';
 import { useTranslations } from 'next-intl';
 import toast from 'react-hot-toast';
 import { useErrorHandler } from '@/app/hooks/useErrorHandler';
+import { useChangePasswordModal } from '@/app/components/hooks/useChangePasswordModal';
 
 interface ProfileData {
   id: string;
@@ -25,8 +26,8 @@ export default function ProfilePage({
   const resolvedParams = use(params);
   const userId = resolvedParams.id;
   const t = useTranslations('profile');
-  const router = useRouter();
   const { handleError, ErrorType, getError } = useErrorHandler();
+  const changePasswordModal = useChangePasswordModal();
 
   const [isEditing, setIsEditing] = useState(false);
   const [loadError, setLoadError] = useState('');
@@ -57,7 +58,7 @@ export default function ProfilePage({
     };
 
     fetchProfile();
-  }, [userId, t, getError]);
+  }, [userId]);
 
   if (isLoading) {
     return <div className="text-center mt-8">{t('loading')}</div>;
@@ -116,15 +117,10 @@ export default function ProfilePage({
       });
 
       setProfile(response);
+      setName(response.name || '');
       setIsEditing(false);
       setAvatarPreview(null);
       setNewAvatar(null);
-
-      const updatedProfile = await apiService.getwithtoken(`/api/auth/profile/${userId}/`, {
-        suppressToast: true,
-      });
-      setProfile(updatedProfile);
-      setName(updatedProfile.name || '');
 
       if (avatarChanged && nameChanged) {
         toast.success(t('updateSuccess'));
@@ -245,18 +241,30 @@ export default function ProfilePage({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-6">
-                  <div>
+                <div className="flex flex-col items-center space-y-6 max-w-md mx-auto">
+                  <div className="w-full text-center">
                     <h2 className="text-sm font-medium text-gray-500">{t('name')}</h2>
                     <p className="mt-1 text-lg font-medium">{profile.name || t('notSet')}</p>
                   </div>
 
-                  <div>
+                  <div className="w-full text-center">
                     <h2 className="text-sm font-medium text-gray-500">{t('email')}</h2>
                     <p className="mt-1 text-lg font-medium">{profile.email}</p>
                   </div>
 
-                  <div>
+                  <div className="w-full text-center">
+                    <h2 className="text-sm font-medium text-gray-500">{t('password')}</h2>
+                    <div className="mt-1">
+                      <button
+                        onClick={() => changePasswordModal.onOpen()}
+                        className="px-3 py-1 text-sm text-airbnb border border-airbnb rounded-md hover:bg-airbnb hover:text-white transition-colors"
+                      >
+                        {t('changePassword')}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="w-full text-center">
                     <h2 className="text-sm font-medium text-gray-500">{t('memberSince')}</h2>
                     <p className="mt-1 text-lg font-medium">
                       {new Date(profile.date_joined).toLocaleDateString()}
