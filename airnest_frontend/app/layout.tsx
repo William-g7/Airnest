@@ -7,17 +7,19 @@ import { Toaster } from 'react-hot-toast';
 import AuthStatusDetector from './components/AuthStatusDetector';
 import { ClientSideCsrfInitializer } from './components/security/CsrfInitializer';
 import { NonceProvider } from './providers/NonceProvider';
-import WebVitalsMonitor from './components/WebVitals';
-import GoogleAnalytics from './components/GoogleAnalytics';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
+  display: 'swap', 
+  preload: false,  
 });
 
 const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+  variable: '--font-geist-mono', 
   subsets: ['latin'],
+  display: 'swap', 
+  preload: false,  
 });
 
 export const metadata: Metadata = {
@@ -37,13 +39,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <NonceProvider>
-          <GoogleAnalytics />
           <ClientSideCsrfInitializer />
           <Toaster position="top-center" />
           <AuthProvider>
             <ErrorBoundaryProvider>
               <AuthStatusDetector />
-              <WebVitalsMonitor />
               {children}
             </ErrorBoundaryProvider>
           </AuthProvider>
