@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage, PersistOptions } from 'zustand/middleware';
 import apiService from '@/app/services/apiService';
 import { PropertyType } from '../constants/propertyType';
+import { getUserId } from '@/app/auth/session';
 
 interface FavoritesState {
   favorites: Set<string>;
@@ -33,11 +34,7 @@ const persistConfig: PersistOptions<FavoritesState, PersistedState> = {
 
   // 状态恢复时的回调，未来可拓展
   onRehydrateStorage: () => state => {
-    if (state) {
-      console.log('Favorite state hydrated from localStorage');
-    } else {
-      console.log('Failed to hydrate favorites state');
-    }
+    // 静默处理状态恢复
   },
 };
 
@@ -52,17 +49,31 @@ export const useFavoritesStore = create<FavoritesState>()(
         const { initialized } = get();
         if (initialized) return;
 
+        // 检查用户是否已登录
+        const userId = await getUserId();
+        if (!userId) {
+          set({ 
+            favorites: new Set(), 
+            initialized: true, 
+            isLoading: false 
+          });
+          return;
+        }
+
         set({ isLoading: true });
 
         try {
-          const response = await apiService.getwithtoken('/api/properties/wishlist/');
+          const response = await apiService.getwithtoken('/api/properties/wishlist/', { suppressToast: true });
           const favoriteIds = response.map((property: PropertyType) => property.id);
           set({
             favorites: new Set(favoriteIds),
             initialized: true,
           });
         } catch (error) {
-          console.log('Failed to load favorites, user may not be logged in');
+          set({ 
+            favorites: new Set(), 
+            initialized: true 
+          });
         } finally {
           set({ isLoading: false });
         }

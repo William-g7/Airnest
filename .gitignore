@@ -36,6 +36,7 @@ ENV/
 # Frontend
 airnest_frontend/node_modules/
 airnest_frontend/.next/
+airnest_frontend/tsconfig.tsbuildinfo
 
 # Backend
 airnest_backend/backend/google-credentials.json
@@ -55,3 +56,5 @@ Thumbs.db
 .claude/
 .cursor/
 .specstory/
+.cursorindexingignore
+myclaude/

@@ -56,7 +56,6 @@ export class AuthChannel {
       try {
         this.channel = new BroadcastChannel(this.channelName);
         this.channel.onmessage = this.handleBroadcastMessage.bind(this);
-        console.log('AuthChannel: Using BroadcastChannel for cross-tab communication');
         return true;
       } catch (error) {
         console.warn('AuthChannel: Failed to initialize BroadcastChannel', error);

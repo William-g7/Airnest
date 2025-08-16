@@ -1,6 +1,30 @@
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useSearchStore } from '../stores/searchStore';
+
+// 防抖函数
+function useDebounce<T extends (...args: any[]) => any>(callback: T, delay: number) {
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  
+  // 清理函数
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current !== null) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+  
+  return useCallback((...args: Parameters<T>) => {
+    if (timeoutRef.current !== null) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    timeoutRef.current = setTimeout(() => {
+      callback(...args);
+    }, delay);
+  }, [callback, delay]);
+}
 
 export function useSearchParamsSync() {
   const searchParams = useSearchParams();
@@ -8,6 +32,11 @@ export function useSearchParamsSync() {
   const pathname = usePathname();
   const { location, checkIn, checkOut, guests, category, setFilters } = useSearchStore();
   const initialSyncDone = useRef(false);
+  
+  // 防抖URL更新函数
+  const debouncedUpdateUrl = useDebounce((newUrl: string) => {
+    router.replace(newUrl, { scroll: false });
+  }, 500); // 500ms 防抖延迟
 
   // 从URL参数更新状态
   useEffect(() => {
@@ -30,7 +59,7 @@ export function useSearchParamsSync() {
     initialSyncDone.current = true;
   }, [searchParams, setFilters]);
 
-  // 从状态更新URL参数
+  // 从状态更新URL参数（带防抖）
   useEffect(() => {
     if (!initialSyncDone.current) return;
 
@@ -45,6 +74,7 @@ export function useSearchParamsSync() {
     const newQuery = params.toString();
     const newUrl = newQuery ? `${pathname}?${newQuery}` : pathname;
 
-    router.replace(newUrl, { scroll: false });
-  }, [location, checkIn, checkOut, guests, category, router, pathname, initialSyncDone]);
+    // 使用防抖版本的URL更新
+    debouncedUpdateUrl(newUrl);
+  }, [location, checkIn, checkOut, guests, category, pathname, initialSyncDone, debouncedUpdateUrl]);
 }

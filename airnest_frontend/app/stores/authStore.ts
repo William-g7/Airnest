@@ -49,7 +49,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     authChannel.addMessageHandler((event: AuthEvent) => {
       const { type, isAuthenticated, userId } = event;
 
-      console.log(`Received auth event: ${type}`, event);
 
       switch (type) {
         case 'AUTH_LOGIN':
@@ -179,7 +178,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
         const token = await getAccessToken();
         if (token && tokenService.isTokenExpiringSoon(token, 10 * 60)) {
-          console.log('Token is expiring soon, attempting refresh');
           await tokenService.refreshToken();
         }
       } catch (error) {
@@ -193,7 +191,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const timerId = window.setInterval(checkAndRefreshToken, 5 * 60 * 1000);
     set({ tokenRefreshTimerId: timerId });
 
-    console.log('Token auto-refresh has been started');
   },
 
   // 停止令牌刷新定时器
@@ -202,7 +199,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (tokenRefreshTimerId !== null && typeof window !== 'undefined') {
       window.clearInterval(tokenRefreshTimerId);
       set({ tokenRefreshTimerId: null });
-      console.log('Token auto-refresh has been stopped');
     }
   },
 }));
