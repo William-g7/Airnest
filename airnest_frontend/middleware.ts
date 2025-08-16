@@ -16,6 +16,29 @@ function generateNonce() {
 }
 
 export default async function middleware(request: NextRequest) {
+  // 排除图标文件和静态资源，避免被 i18n 处理
+  const pathname = request.nextUrl.pathname;
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/api') ||
+    pathname.endsWith('.ico') ||
+    pathname.endsWith('.svg') ||
+    pathname.endsWith('.png') ||
+    pathname.endsWith('.jpg') ||
+    pathname.endsWith('.jpeg') ||
+    pathname.endsWith('.gif') ||
+    pathname.endsWith('.webp') ||
+    pathname.endsWith('.js') ||
+    pathname.endsWith('.css') ||
+    pathname === '/robots.txt' ||
+    pathname === '/sitemap.xml' ||
+    pathname === '/icon.svg' ||
+    pathname === '/favicon.ico'
+  ) {
+    // 对于静态资源，跳过 i18n 中间件，但仍然添加安全头
+    return;
+  }
+  
   const nonce = generateNonce();
 
   const response = await intlMiddleware(request);
@@ -32,29 +55,29 @@ export default async function middleware(request: NextRequest) {
 
   const reportUri = '/api/csp-report';
 
-  const googleAnalyticsDomains =
-    'www.googletagmanager.com www.google-analytics.com analytics.google.com *.analytics.google.com';
+  // Cloudflare Turnstile域名
+  const cloudflareDomains = 'challenges.cloudflare.com';
 
   const cspHeader = isDev
     ? `
       default-src 'self';
-      script-src 'self' 'unsafe-eval' 'unsafe-inline' ${googleAnalyticsDomains};
+      script-src 'self' 'unsafe-eval' 'unsafe-inline' ${cloudflareDomains};
       style-src 'self' 'unsafe-inline';
-      img-src 'self' data: blob: ${process.env.NEXT_PUBLIC_API_URL} ${googleAnalyticsDomains};
+      img-src 'self' data: blob: ${process.env.NEXT_PUBLIC_API_URL};
       font-src 'self' data:;
-      connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_WS_HOST} ws://localhost:* ${googleAnalyticsDomains};
-      frame-src 'self';
+      connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_WS_HOST} ws://localhost:* ${cloudflareDomains};
+      frame-src 'self' ${cloudflareDomains};
       worker-src 'self' blob:;
       report-uri ${reportUri};
     `
     : `
       default-src 'self';
-      script-src 'self' 'unsafe-inline' ${googleAnalyticsDomains};
+      script-src 'self' 'unsafe-inline' ${cloudflareDomains};
       style-src 'self' 'nonce-${nonce}' 'unsafe-inline';
-      img-src 'self' data: blob: ${process.env.NEXT_PUBLIC_API_URL} ${googleAnalyticsDomains};
+      img-src 'self' data: blob: ${process.env.NEXT_PUBLIC_API_URL};
       font-src 'self' data:;
-      connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_WS_HOST} ${googleAnalyticsDomains};
-      frame-src 'self';
+      connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_WS_HOST} ${cloudflareDomains};
+      frame-src 'self' ${cloudflareDomains};
       base-uri 'self';
       form-action 'self';
       frame-ancestors 'self';
@@ -68,7 +91,7 @@ export default async function middleware(request: NextRequest) {
   response.headers.set('Content-Security-Policy', cleanCspHeader);
 
   // 创建干净的 CSP Report-Only 头值，去除换行符和多余空格
-  const reportOnlyCsp = `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' ${googleAnalyticsDomains}; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: ${process.env.NEXT_PUBLIC_API_URL} ${googleAnalyticsDomains}; connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_WS_HOST} ${googleAnalyticsDomains}; report-uri ${reportUri}`;
+  const reportOnlyCsp = `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' ${cloudflareDomains}; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: ${process.env.NEXT_PUBLIC_API_URL}; font-src 'self' data:; connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_WS_HOST} ${cloudflareDomains}; frame-src 'self' ${cloudflareDomains}; report-uri ${reportUri}`;
 
   response.headers.set('Content-Security-Policy-Report-Only', reportOnlyCsp);
 
