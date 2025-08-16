@@ -19,7 +19,7 @@ import {
   rectSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { FaTrash } from 'react-icons/fa';
+import TrashIcon from '../icons/TrashIcon';
 import apiService from '../../services/apiService';
 import toast from 'react-hot-toast';
 import { useTranslations } from 'next-intl';
@@ -128,7 +128,7 @@ const SortableImageItem = ({
           title={t('deletePicture')}
           type="button"
         >
-          <FaTrash size={16} />
+          <TrashIcon className="w-4 h-4" />
         </button>
       </div>
 
