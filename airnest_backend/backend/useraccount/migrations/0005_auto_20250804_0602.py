@@ -10,13 +10,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # Copy data from old field to new field if needed and remove old field
-        migrations.RunSQL(
-            "UPDATE useraccount_user SET email_verified = is_email_verified WHERE email_verified IS NULL;",
-            reverse_sql="UPDATE useraccount_user SET is_email_verified = email_verified WHERE is_email_verified IS NULL;"
-        ),
-        migrations.RunSQL(
-            "ALTER TABLE useraccount_user DROP COLUMN IF EXISTS is_email_verified;",
-            reverse_sql="ALTER TABLE useraccount_user ADD COLUMN is_email_verified boolean NOT NULL DEFAULT false;"
-        ),
+        
     ]
