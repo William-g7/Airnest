@@ -24,7 +24,7 @@ const AddPropertyButton = () => {
       onClick={handleClick}
       className="p-2 cursor-pointer text-sm font-semibold rounded-full transition-all duration-300 hover:bg-gray-100 hover:scale-105 active:scale-95"
     >
-      {t('djangobnbYourHome')}
+      {t('shareYourNest')}
     </div>
   );
 };
