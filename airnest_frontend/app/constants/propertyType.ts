@@ -27,6 +27,17 @@ export interface PropertyType {
     username: string;
     avatar_url?: string;
   };
+
+  // 评论统计数据（可选，仅在需要时提供）
+  average_rating?: number;
+  total_reviews?: number;
+  positive_review_rate?: number;
+  most_popular_tags?: Array<{
+    key: string;
+    name: string;
+    count: number;
+    color: string;
+  }>;
 }
 
 export interface PropertyImage {
