@@ -56,7 +56,7 @@ const UserNav: React.FC<UserNavProps> = ({ userId: initialUserId }) => {
         className="p-2 relative inline-block border rounded-full cursor-pointer transition-all duration-300 hover:bg-gray-100 hover:scale-105 active:scale-95 hover:shadow-sm"
         onClick={handleMenuClick}
       >
-        <button className="flex items-center">
+        <button className="flex items-center" aria-label="User menu">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"

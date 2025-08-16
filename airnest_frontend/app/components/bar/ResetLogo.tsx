@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useSearchStore } from '@/app/stores/searchStore';
 
 const ResetLogo = () => {
@@ -19,7 +19,13 @@ const ResetLogo = () => {
       onClick={handleLogoClick}
       style={{ transform: `scale(var(--logo-scale, 1))` }}
     >
-      <Image src="/logo.png" alt="Airnest" width={100} height={38} />
+      <Image 
+        src="/logo.png" 
+        alt="Airnest" 
+        width={100} 
+        height={38}
+        style={{ width: 'auto', height: 'auto' }}
+      />
     </div>
   );
 };

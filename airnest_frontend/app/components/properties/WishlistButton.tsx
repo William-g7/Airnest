@@ -18,6 +18,7 @@ const WishlistButton = ({ isFavorited, onToggle, isInline = false }: WishlistBut
                 } 
                 bg-white rounded-full shadow-md transition opacity-90 hover:opacity-100
             `}
+      aria-label={isFavorited ? "Remove from wishlist" : "Add to wishlist"}
     >
       <svg
         viewBox="0 0 24 24"

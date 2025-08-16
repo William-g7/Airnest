@@ -24,7 +24,7 @@ const LogoutButton: React.FC = () => {
 
     handleLogout()
       .then(() => {
-        setUnauthenticated();
+        setUnauthenticated('logout');
         clearFavorites();
         toast.success(tAuth('logoutSuccess'));
         router.push('/');

@@ -1,15 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchStore } from '@/app/stores/searchStore';
 import { useSearchParamsSync } from '@/app/hooks/useSearchParamsSync';
-import DatePicker from '@/app/components/properties/DatePicker';
+import DatePickerDynamic from '@/app/components/properties/DatePickerDynamic';
 import SearchModal from '@/app/components/modals/SearchModal';
 import { useTranslations } from 'next-intl';
 import { formatLocalizedDate, formatDateForAPI } from '@/app/utils/dateUtils';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const SearchFilters = () => {
+function SearchFiltersContent() {
   const { location, checkIn, checkOut, guests, setLocation, setDates, setGuests } =
     useSearchStore();
   const t = useTranslations('search');
@@ -223,7 +223,7 @@ const SearchFilters = () => {
               {(activeFilter === 'checkIn' || activeFilter === 'checkOut') && (
                 <div className="p-4">
                   <h3 className="font-semibold mb-2 text-center">{t('when')}</h3>
-                  <DatePicker
+                  <DatePickerDynamic
                     checkIn={checkInDate}
                     checkOut={checkOutDate}
                     onChange={handleDateChange}
@@ -320,6 +320,21 @@ const SearchFilters = () => {
         )}
       </AnimatePresence>
     </>
+  );
+}
+
+const SearchFilters = () => {
+  return (
+    <Suspense fallback={
+      <div className="hidden md:flex items-center space-x-2 bg-white rounded-full shadow-md px-6 py-3">
+        <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
+        <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+        <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+        <div className="h-8 w-8 bg-gray-200 rounded-full animate-pulse"></div>
+      </div>
+    }>
+      <SearchFiltersContent />
+    </Suspense>
   );
 };
 

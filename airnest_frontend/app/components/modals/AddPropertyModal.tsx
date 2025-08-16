@@ -14,7 +14,7 @@ import ImageUpload from '../addproperty/ImageUpload';
 import PropertyDetailsForm from '../addproperty/PropertyDetailsForm';
 import apiService from '@/app/services/apiService';
 import { useTranslations } from 'next-intl';
-import ImageManager from '../addproperty/ImageManager';
+import ImageManagerLazy from '../addproperty/ImageManagerLazy';
 import toast from 'react-hot-toast';
 import { ImageData } from '../addproperty/ImageManager';
 
@@ -312,7 +312,7 @@ export default function AddPropertyModal() {
               <div className="space-y-8">
                 {addPropertyModal.propertyToEdit && existingImages.length > 0 && (
                   <div className="mb-8">
-                    <ImageManager
+                    <ImageManagerLazy
                       propertyId={addPropertyModal.propertyToEdit.id}
                       initialImages={existingImages}
                       onImagesChange={handleImagesChange}

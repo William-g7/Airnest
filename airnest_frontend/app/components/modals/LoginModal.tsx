@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { useLoginModal } from '../hooks/useLoginModal';
+import { useForgotPasswordModal } from '../hooks/useForgotPasswordModal';
 import Modal from './Modal';
 import CustomButton from '../forms/CustomButton';
 import apiService from '@/app/services/apiService';
@@ -16,6 +17,7 @@ import { clientSessionService } from '@/app/services/clientSessionService';
 export default function LoginModal() {
   const t = useTranslations('auth');
   const loginModal = useLoginModal();
+  const forgotPasswordModal = useForgotPasswordModal();
   const router = useRouter();
   const { setAuthenticated } = useAuthStore();
   const { handleError, ErrorType } = useErrorHandler();
@@ -25,14 +27,33 @@ export default function LoginModal() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [emailError, setEmailError] = useState('');
+
+  // 邮箱格式验证
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  };
+
+  const handleForgotPassword = () => {
+    loginModal.onClose();
+    forgotPasswordModal.onOpen();
+  };
 
   const onSubmit = async () => {
     try {
       setIsLoading(true);
       setError('');
+      setEmailError('');
 
       if (!formData.email || !formData.password) {
         setError(t('pleaseCompleteAllFields'));
+        return;
+      }
+
+      // 邮箱格式验证
+      if (!validateEmail(formData.email)) {
+        setEmailError(t('invalidEmailFormat'));
         return;
       }
 
@@ -46,11 +67,25 @@ export default function LoginModal() {
       );
 
       if (response.access) {
-        const userId = response.user_id || response.user_pk || (response.user && response.user.pk);
+        const userId = response.user_id || response.user_pk || (response.user && (response.user.id || response.user.pk));
 
         if (!userId) {
           toast.error(t('loginError'));
           setIsLoading(false);
+          return;
+        }
+
+        // 检查邮箱验证状态
+        if (response.user && !response.user.email_verified) {
+          loginModal.onClose();
+          toast.error(t('emailNotVerified'));
+          toast(t('pleaseVerifyEmail'), {
+            duration: 6000,
+            icon: '📧',
+          });
+          
+          // 跳转到重发验证邮件页面
+          window.location.href = `/resend-verification?email=${encodeURIComponent(formData.email)}`;
           return;
         }
 
@@ -87,18 +122,25 @@ export default function LoginModal() {
 
         {error && <div className="p-3 text-sm bg-red-100 text-red-600 rounded-lg">{error}</div>}
         <form className="flex flex-col gap-4">
-          <input
-            type="email"
-            placeholder={t('email')}
-            value={formData.email}
-            onChange={e =>
-              setFormData(prev => ({
-                ...prev,
-                email: e.target.value,
-              }))
-            }
-            className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-airbnb"
-          />
+          <div className="flex flex-col">
+            <input
+              type="email"
+              placeholder={t('email')}
+              value={formData.email}
+              onChange={e => {
+                setFormData(prev => ({
+                  ...prev,
+                  email: e.target.value,
+                }));
+                setEmailError('');
+              }}
+              className={`p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-airbnb ${
+                emailError ? 'border-red-500' : ''
+              }`}
+              disabled={isLoading}
+            />
+            {emailError && <span className="text-sm text-red-500 mt-1">{emailError}</span>}
+          </div>
           <input
             type="password"
             placeholder={t('password')}
@@ -110,12 +152,25 @@ export default function LoginModal() {
               }))
             }
             className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-airbnb"
+            disabled={isLoading}
           />
+          
+          {/* 忘记密码链接 */}
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={handleForgotPassword}
+              className="text-sm text-gray-600 hover:text-airbnb hover:underline transition-colors"
+              disabled={isLoading}
+            >
+              {t('forgotPassword')}
+            </button>
+          </div>
+          
           <CustomButton
             label={isLoading ? t('loading') : t('login')}
-            onClick={() => {
-              onSubmit();
-            }}
+            onClick={onSubmit}
+            disabled={isLoading}
           />
         </form>
       </div>

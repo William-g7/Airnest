@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { PropertyType } from '@/app/constants/propertyType';
-import DatePicker from './DatePicker';
+import DatePickerDynamic from './DatePickerDynamic';
 import apiService from '@/app/services/apiService';
 import { useLoginModal } from '../hooks/useLoginModal';
 import { useTranslations } from 'next-intl';
@@ -125,7 +125,7 @@ const ReservationSideBar = ({ property }: { property: PropertyType }) => {
         <span className="text-lg text-gray-500 ml-2">{t('perNight')}</span>
       </div>
 
-      <DatePicker
+      <DatePickerDynamic
         checkIn={dates[0]}
         checkOut={dates[1]}
         onChange={newDates => setDates(newDates)}

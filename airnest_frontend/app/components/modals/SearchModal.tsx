@@ -1,6 +1,6 @@
 'use client';
 
-import DatePicker from '@/app/components/properties/DatePicker';
+import DatePickerDynamic from '@/app/components/properties/DatePickerDynamic';
 import { useTranslations } from 'next-intl';
 import { formatDateForAPI } from '@/app/utils/dateUtils';
 import { motion } from 'framer-motion';
@@ -99,7 +99,7 @@ const SearchModal = ({
         {/* Date selection */}
         <div className="mb-6">
           <h3 className="font-semibold mb-2">{t('when')}</h3>
-          <DatePicker
+          <DatePickerDynamic
             checkIn={checkInDate}
             checkOut={checkOutDate}
             onChange={handleDateChange}

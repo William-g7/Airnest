@@ -3,7 +3,7 @@
 import { PropertyType } from '@/app/constants/propertyType';
 import Image from 'next/image';
 import WishlistButton from './WishlistButton';
-import { useCallback, useRef, useMemo, useState, useEffect } from 'react';
+import { useCallback, useRef, useMemo, useState, useEffect, memo } from 'react';
 import { useLoginModal } from '../hooks/useLoginModal';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
@@ -13,12 +13,14 @@ import { debounce } from '@/app/utils/debounce';
 import toast from 'react-hot-toast';
 import { useLocaleStore } from '@/app/stores/localeStore';
 import CurrencyDisplay from '../common/CurrencyDisplay';
-import { motion } from 'framer-motion';
 import { getReviewHighlights } from './PropertyHilights';
 import { useIntersectionObserver } from '@/app/hooks/useIntersectionObserver';
+import StarRating from '../reviews/StarRating';
+import ReviewTag from '../reviews/ReviewTag';
 
 interface PropertyListItemProps {
   property: PropertyType;
+  isFirstScreen?: boolean;
   translations?: {
     title: string;
     city: string;
@@ -26,7 +28,7 @@ interface PropertyListItemProps {
   };
 }
 
-const PropertyListItem = ({ property, translations }: PropertyListItemProps) => {
+const PropertyListItem = memo(({ property, translations, isFirstScreen }: PropertyListItemProps) => {
   const t = useTranslations('properties');
   const tFavorites = useTranslations('favorites');
   const router = useRouter();
@@ -79,7 +81,13 @@ const PropertyListItem = ({ property, translations }: PropertyListItemProps) => 
   const { isAuthenticated } = useAuth();
   const { isFavorite, toggleFavorite } = useFavoritesStore();
 
-  const reviewHighlights = useMemo(() => getReviewHighlights(property, locale), [property, locale]);
+  // 获取评论亮点 - 优先使用真实数据，fallback到虚假数据
+  const reviewHighlights = useMemo(() => {
+    const hasRealReviewData = property.most_popular_tags && property.most_popular_tags.length > 0;
+    return hasRealReviewData 
+      ? property.most_popular_tags!.map(tag => tag.name)
+      : getReviewHighlights(property, locale);
+  }, [property, locale]);
 
   const translatedTitle =
     locale !== 'en' && translations?.title ? translations.title : property.title;
@@ -124,29 +132,26 @@ const PropertyListItem = ({ property, translations }: PropertyListItemProps) => 
   );
 
   return (
-    <motion.div
-      className="relative group"
+    <div
+      className="relative group animate-fade-in hover:-translate-y-0.5 transition-all duration-300 ease-in-out"
       ref={itemRef}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      whileHover={{ y: -5 }}
     >
       <div
-        className="cursor-pointer overflow-hidden rounded-xl bg-white transition-all duration-300 ease-in-out hover:shadow-md"
+        className="cursor-pointer overflow-hidden rounded-xl bg-white transition-all duration-300 ease-in-out hover:shadow-md h-full flex flex-col"
         onClick={() => router.push({ pathname: '/properties/[id]', params: { id: property.id } })}
       >
-        <div className="relative overflow-hidden aspect-square rounded-t-xl">
+        <div className="relative overflow-hidden aspect-square rounded-t-xl flex-shrink-0">
           {/* Image */}
           <Image
             src={getOptimalPropertyImage}
             alt={property.title}
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
             fill
-            className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110"
-            quality={screenWidth >= 1024 ? 85 : 80}
-            loading={isInViewport ? "eager" : "lazy"}
-            priority={isInViewport}
+            className="object-cover w-full h-full"
+            quality={screenWidth >= 1024 ? 80 : 75}
+            loading={isFirstScreen ? "eager" : isInViewport ? "eager" : "lazy"}
+            priority={isFirstScreen || isInViewport}
+            fetchPriority={isFirstScreen ? "high" : "auto"}
           />
           {/* Pricetag */}
           <div className="absolute bottom-3 left-3 bg-white bg-opacity-90 py-1 px-2 rounded-lg shadow-sm">
@@ -157,41 +162,73 @@ const PropertyListItem = ({ property, translations }: PropertyListItemProps) => 
           </div>
         </div>
 
-        <div className="p-3">
-          {/* Title */}
-          <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">{translatedTitle}</h3>
+        <div className="p-3 flex flex-col flex-grow">
+          {/* Title - 固定2行高度 */}
+          <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 h-14 flex items-center">
+            {translatedTitle}
+          </h3>
 
-          {/* Location */}
-          <p className="text-sm text-gray-600 mt-1 line-clamp-1">
+          {/* Location - 固定1行高度 */}
+          <p className="text-sm text-gray-600 mt-1 line-clamp-1 h-5">
             {translatedCity}, {translatedCountry}
           </p>
 
-          {/* Highlights */}
-          <div className="mt-2 flex items-center justify-between">
-            <div className="flex flex-wrap gap-2">
-              {reviewHighlights.map((highlight, index) => (
-                <span
-                  key={index}
-                  className="inline-block bg-gray-100 rounded-full px-2 py-1 text-xs font-medium text-gray-800"
-                >
-                  {highlight}
+          {/* Rating & Reviews - 固定高度 */}
+          <div className="mt-2 h-6 flex items-center">
+            {property.average_rating && property.total_reviews && property.total_reviews > 0 ? (
+              <div className="flex items-center space-x-2">
+                <StarRating rating={property.average_rating} readOnly size="small" />
+                <span className="text-sm text-gray-600">
+                  {property.average_rating.toFixed(1)} · {property.total_reviews} {t('reviews')}
                 </span>
-              ))}
-            </div>
+              </div>
+            ) : (
+              <div></div>
+            )}
+          </div>
 
-            {/* Wishlist Button */}
-            <div onClick={e => e.stopPropagation()} className="ml-2">
-              <WishlistButton
-                isFavorited={isFavorite(property.id)}
-                onToggle={debouncedToggleWishlist}
-                isInline={true}
-              />
+          {/* Highlights/Tags - 固定高度，推到底部 */}
+          <div className="mt-2 flex-grow flex items-end">
+            <div className="w-full flex items-center justify-between">
+              <div className="flex flex-wrap gap-2 max-h-8 overflow-hidden">
+                {property.most_popular_tags && property.most_popular_tags.length > 0 ? (
+                  property.most_popular_tags.slice(0, 2).map((tag) => (
+                    <ReviewTag
+                      key={tag.key}
+                      tag={{
+                        tag_key: tag.key,
+                        name: tag.name,
+                        color: tag.color
+                      }}
+                      size="small"
+                    />
+                  ))
+                ) : (
+                  reviewHighlights.slice(0, 2).map((highlight, index) => (
+                    <span
+                      key={index}
+                      className="inline-block bg-gray-100 rounded-full px-2 py-1 text-xs font-medium text-gray-800 truncate max-w-20"
+                    >
+                      {highlight}
+                    </span>
+                  ))
+                )}
+              </div>
+
+              {/* Wishlist Button */}
+              <div onClick={e => e.stopPropagation()} className="ml-2 flex-shrink-0">
+                <WishlistButton
+                  isFavorited={isFavorite(property.id)}
+                  onToggle={debouncedToggleWishlist}
+                  isInline={true}
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
-};
+});
 
 export default PropertyListItem;
