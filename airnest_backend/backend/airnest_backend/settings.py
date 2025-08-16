@@ -135,7 +135,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'djangobnb_backend.urls'
+ROOT_URLCONF = 'airnest_backend.urls'
 
 TEMPLATES = [
     {
@@ -153,8 +153,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'djangobnb_backend.wsgi.application'
-ASGI_APPLICATION = 'djangobnb_backend.asgi.application'
+WSGI_APPLICATION = 'airnest_backend.wsgi.application'
+ASGI_APPLICATION = 'airnest_backend.asgi.application'
 
 
 # Database
@@ -163,7 +163,7 @@ ASGI_APPLICATION = 'djangobnb_backend.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_DB', 'djangobnb'),
+        'NAME': os.environ.get('POSTGRES_DB', 'airnest'),
         'USER': os.environ.get('POSTGRES_USER', 'postgresuser'),
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'postgrespassword'),
         'HOST': os.environ.get('SQL_HOST', 'db'),

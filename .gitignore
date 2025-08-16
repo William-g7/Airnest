@@ -30,16 +30,17 @@ media/
 venv/
 ENV/
 
+# Environment Variables
+.env*
+
 # Frontend
-djangobnb_frontend/node_modules/
-djangobnb_frontend/.next/
-djangobnb_frontend/.env*
+airnest_frontend/node_modules/
+airnest_frontend/.next/
 
 # Backend
-djangobnb_backend/backend/djangobnb_backend/.env*
-djangobnb_backend/backend/djangobnb_backend/google-credentials.json
+airnest_backend/backend/google-credentials.json
 
-# IDE
+# IDE`
 .vscode/
 .idea/
 *.swp
@@ -50,7 +51,7 @@ djangobnb_backend/backend/djangobnb_backend/google-credentials.json
 **/.DS_Store
 Thumbs.db
 
-# cursor and claude code
+# Cursor and Claude Code
 .claude/
 .cursor/
 .specstory/
