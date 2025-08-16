@@ -407,8 +407,7 @@
     "emailNotVerified": "Email non vérifié",
     "pleaseVerifyEmail": "Veuillez vérifier votre adresse email pour continuer",
     "verifyNow": "Vérifier maintenant",
-    "emailSendError": "Échec de l'envoi de l'email de vérification",
-    "alreadyVerified": "Votre email a déjà été vérifié avec succès !"
+    "emailSendError": "Échec de l'envoi de l'email de vérification"
   },
   "myproperties": {
     "title": "Mes propriétés",
@@ -528,7 +527,6 @@
     "popularTags": "Tags populaires",
     "cancelReview": "Annuler l'avis",
     "contentRequired": "Le contenu de l'avis est requis",
-    "reviewSubmitted": "Avis soumis avec succès !",
     "submitError": "Échec de la soumission de l'avis. Veuillez réessayer.",
     "submitting": "Soumission...",
     "submitReview": "Soumettre l'avis",
@@ -536,11 +534,8 @@
     "optional": "optionnel",
     "titlePlaceholder": "Donnez un titre à votre avis...",
     "contentPlaceholder": "Partagez votre expérience avec cette propriété...",
-    "selectTags": "Sélectionnez des tags qui décrivent votre séjour",
     "showAllReviews": "Afficher les {count} autres avis",
-    "showLess": "Afficher moins d'avis",
-    "noReviews": "Aucun avis pour le moment",
-    "beFirstToReview": "Soyez le premier à donner votre avis !"
+    "showLess": "Afficher moins d'avis"
   },
   "reviewTags": {
     "modern_amenities": "Équipements modernes",

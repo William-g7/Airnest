@@ -332,7 +332,6 @@
     "popularTags": "Popular tags",
     "cancelReview": "Cancel Review",
     "contentRequired": "Review content is required",
-    "reviewSubmitted": "Review submitted successfully!",
     "submitError": "Failed to submit review. Please try again.",
     "submitting": "Submitting...",
     "submitReview": "Submit Review",
@@ -340,11 +339,8 @@
     "optional": "optional",
     "titlePlaceholder": "Give your review a title...",
     "contentPlaceholder": "Share your experience with this property...",
-    "selectTags": "Select tags that describe your stay",
     "showAllReviews": "Show all {count} more reviews",
-    "showLess": "Show less reviews",
-    "noReviews": "No reviews yet",
-    "beFirstToReview": "Be the first to review!"
+    "showLess": "Show less reviews"
   },
   "reviewTags": {
     "modern_amenities": "Modern amenities",
@@ -492,8 +488,7 @@
     "emailNotVerified": "Email not verified",
     "pleaseVerifyEmail": "Please verify your email address to continue",
     "verifyNow": "Verify Now",
-    "emailSendError": "Failed to send verification email",
-    "alreadyVerified": "Your email has already been verified successfully!"
+    "emailSendError": "Failed to send verification email"
   },
   "myproperties": {
     "title": "My Properties",

@@ -332,7 +332,6 @@
     "popularTags": "热门标签",
     "cancelReview": "取消评论",
     "contentRequired": "评论内容不能为空",
-    "reviewSubmitted": "评论提交成功！",
     "submitError": "评论提交失败，请重试",
     "submitting": "提交中...",
     "submitReview": "提交评论",
@@ -340,11 +339,8 @@
     "optional": "可选",
     "titlePlaceholder": "为您的评论起个标题...",
     "contentPlaceholder": "分享您对这处房源的体验...",
-    "selectTags": "选择描述您住宿体验的标签",
     "showAllReviews": "显示全部 {count} 条评论",
-    "showLess": "收起评论",
-    "noReviews": "暂无评论",
-    "beFirstToReview": "成为第一个评论的人！"
+    "showLess": "收起评论"
   },
   "reviewTags": {
     "modern_amenities": "设施现代",
@@ -492,8 +488,7 @@
     "emailNotVerified": "邮箱未验证",
     "pleaseVerifyEmail": "请验证您的邮箱地址以继续",
     "verifyNow": "立即验证",
-    "emailSendError": "验证邮件发送失败",
-    "alreadyVerified": "您的邮箱已经验证成功了！"
+    "emailSendError": "验证邮件发送失败"
   },
   "myproperties": {
     "title": "我的房源",
