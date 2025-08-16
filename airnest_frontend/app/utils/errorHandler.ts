@@ -73,7 +73,7 @@ export const getErrorMessage = (error: unknown, t?: (key: string) => string): st
     }
   }
 
-  return t(`errors.${errorType}`);
+  return t(errorType);
 };
 
 // 显示错误提示
