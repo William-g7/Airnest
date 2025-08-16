@@ -5,6 +5,5 @@ public
 .env
 .vscode
 .DS_Store
-.sentry
 .vercel
 tailwind.config.ts
