@@ -137,9 +137,21 @@ async function makeRequest<T>(
 ): Promise<T> {
   const requestUrl = `${process.env.NEXT_PUBLIC_API_URL}${url}`;
   const csrfToken = getCsrfToken();
+  // 获取当前语言环境
+  let currentLocale = 'en';
+  if (typeof window !== 'undefined') {
+    // 尝试从URL或localStorage获取当前语言
+    const pathname = window.location.pathname;
+    const localeMatch = pathname.match(/^\/([a-z]{2})\//);
+    if (localeMatch) {
+      currentLocale = localeMatch[1];
+    }
+  }
+
   const headers: Record<string, string> = {
     Authorization: `Bearer ${token}`,
     'X-CSRFToken': csrfToken,
+    'Accept-Language': currentLocale,
     ...customHeaders,
   };
 
@@ -256,9 +268,20 @@ function handleUnauthenticatedResponseError(response: Response, responseData: an
 const apiService = {
   get: async function (url: string, options: RequestOptions = {}): Promise<any> {
     try {
+      // 获取当前语言环境
+      let currentLocale = 'en';
+      if (typeof window !== 'undefined') {
+        const pathname = window.location.pathname;
+        const localeMatch = pathname.match(/^\/([a-z]{2})\//);
+        if (localeMatch) {
+          currentLocale = localeMatch[1];
+        }
+      }
+
       const headers: Record<string, string> = {
         Accept: 'application/json',
         'Content-Type': 'application/json',
+        'Accept-Language': currentLocale,
       };
 
       if (options.forceRefresh) {
@@ -295,7 +318,10 @@ const apiService = {
     try {
       return await executeAuthenticatedRequest<T>('GET', url, undefined, undefined, options);
     } catch (error) {
-      console.error('API request failed:', error);
+      // 只在不抑制错误时记录控制台错误
+      if (!options.suppressToast) {
+        console.error('API request failed:', error);
+      }
       throw error;
     }
   },
@@ -308,7 +334,9 @@ const apiService = {
     try {
       return await executeAuthenticatedRequest<T>('POST', url, data, undefined, options);
     } catch (error) {
-      console.error('POST request error:', error);
+      if (!options.suppressToast) {
+        console.error('POST request error:', error);
+      }
       throw error;
     }
   },
@@ -345,8 +373,10 @@ const apiService = {
         }
         return responseData;
       } catch (parseError) {
-        console.error('JSON parsing error:', parseError);
-        console.log('Response text:', text);
+        // 如果JSON解析失败，但我们有响应体，先检查是否包含有用的错误信息
+        if (text && text.includes('A user is already registered')) {
+          throw new ApiError('A user is already registered with this e-mail address.', ErrorType.VALIDATION_ERROR);
+        }
 
         const errorType = url.includes('/login/')
           ? ErrorType.AUTH_INVALID_CREDENTIALS
@@ -367,7 +397,9 @@ const apiService = {
     try {
       return await executeAuthenticatedRequest<T>('PATCH', url, data, undefined, options);
     } catch (error) {
-      console.error('PATCH request error:', error);
+      if (!options.suppressToast) {
+        console.error('PATCH request error:', error);
+      }
       throw error;
     }
   },
@@ -379,7 +411,9 @@ const apiService = {
     try {
       return await executeAuthenticatedRequest<T>('DELETE', url, undefined, undefined, options);
     } catch (error) {
-      console.error('DELETE request error:', error);
+      if (!options.suppressToast) {
+        console.error('DELETE request error:', error);
+      }
       throw error;
     }
   },
@@ -409,6 +443,109 @@ const apiService = {
     } catch (error) {
       throw error;
     }
+  },
+
+  // 评论相关API
+  getReviewTags: async function (): Promise<any> {
+    return this.get('/api/properties/review-tags/');
+  },
+
+  getPropertyReviews: async function (
+    propertyId: string, 
+    page: number = 1, 
+    pageSize: number = 10
+  ): Promise<any> {
+    return this.get(`/api/properties/${propertyId}/reviews/?page=${page}&page_size=${pageSize}`);
+  },
+
+  getPropertyReviewStats: async function (propertyId: string): Promise<any> {
+    return this.get(`/api/properties/${propertyId}/review-stats/`);
+  },
+
+  createPropertyReview: async function (
+    propertyId: string,
+    reviewData: {
+      rating: number;
+      title?: string;
+      content: string;
+      tag_keys?: string[];
+    }
+  ): Promise<any> {
+    return this.post(`/api/properties/${propertyId}/reviews/`, reviewData);
+  },
+
+  updateReview: async function (
+    reviewId: string,
+    reviewData: {
+      rating?: number;
+      title?: string;
+      content?: string;
+      tag_keys?: string[];
+    }
+  ): Promise<any> {
+    return this.patch(`/api/properties/reviews/${reviewId}/`, reviewData);
+  },
+
+  deleteReview: async function (reviewId: string): Promise<any> {
+    return this.delete(`/api/properties/reviews/${reviewId}/`);
+  },
+
+  // 获取带评论统计的房源列表
+  getPropertiesWithReviews: async function (params?: URLSearchParams): Promise<any> {
+    const queryString = params ? `?${params.toString()}` : '';
+    return this.get(`/api/properties/with-reviews/${queryString}`);
+  },
+
+  // 获取单个房源的详细信息（包含评论统计）
+  getPropertyWithReviews: async function (propertyId: string): Promise<any> {
+    return this.get(`/api/properties/${propertyId}/with-reviews/`);
+  },
+
+  // 邮箱验证相关API
+  sendVerificationEmail: async function (data: {
+    email: string;
+    verification_type?: string;
+    language?: string;
+  }): Promise<any> {
+    return this.postwithouttoken('/api/auth/send-verification/', data);
+  },
+
+  verifyEmailToken: async function (token: string): Promise<any> {
+    return this.postwithouttoken('/api/auth/verify-email/', { token });
+  },
+
+  resendVerificationEmail: async function (data: {
+    verification_type?: string;
+    language?: string;
+  }): Promise<any> {
+    return this.post('/api/auth/resend-verification/', data);
+  },
+
+  getVerificationStatus: async function (): Promise<any> {
+    return this.getwithtoken('/api/auth/verification-status/');
+  },
+
+  cancelVerification: async function (verification_type: string): Promise<any> {
+    return this.post('/api/auth/cancel-verification/', { verification_type });
+  },
+
+  // 密码重置相关API
+  verifyResetToken: async function (token: string): Promise<any> {
+    return this.postwithouttoken('/api/auth/verify-reset-token/', { token });
+  },
+  
+  resetPassword: async function (data: {
+    token: string;
+    password: string;
+  }): Promise<any> {
+    return this.postwithouttoken('/api/auth/reset-password/', data);
+  },
+
+  changePassword: async function (data: {
+    current_password: string;
+    new_password: string;
+  }): Promise<any> {
+    return this.post('/api/auth/change-password/', data);
   },
 };
 
