@@ -1,6 +1,7 @@
 import os
 from datetime import timedelta
 from pathlib import Path
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -15,7 +16,12 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG',default=False)
 
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost 127.0.0.1 [::1] testserver').split(' ')
+def _split_env_list(key, default=""):
+    return [x.strip() for x in os.environ.get(key, default).split(",") if x.strip()]
+
+ALLOWED_HOSTS = _split_env_list(
+    "DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,[::1],testserver"
+)
 
 AUTH_USER_MODEL = 'useraccount.User'
 
@@ -23,11 +29,16 @@ SITE_ID = 1
 
 WEBSITE_URL = 'http://localhost:8000'
 
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
-    },
-}
+REDIS_URL = os.environ.get("REDIS_URL")
+if REDIS_URL:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {"hosts": [REDIS_URL]},
+        }
+    }
+else:
+    CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
 
 REST_AUTH = {
     'USE_JWT': True,
@@ -66,10 +77,13 @@ ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = None
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'http://localhost:8000',
-]
+CORS_ALLOWED_ORIGINS = _split_env_list(
+    "CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8000"
+)
+CSRF_TRUSTED_ORIGINS = _split_env_list(
+    "CSRF_TRUSTED_ORIGINS", "http://localhost:3000,http://localhost:8000"
+)
+
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
     'DELETE',
@@ -160,16 +174,26 @@ ASGI_APPLICATION = 'airnest_backend.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_DB', 'airnest'),
-        'USER': os.environ.get('POSTGRES_USER', 'postgresuser'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'postgrespassword'),
-        'HOST': os.environ.get('SQL_HOST', 'db'),
-        'PORT': os.environ.get('SQL_PORT', '5432'),
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    DATABASES = {
+            "default": dj_database_url.config(
+                default=DATABASE_URL,
+                conn_max_age=600,
+                ssl_require=True,
+            )
+        }
+else :
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("POSTGRES_DB", "airnest"),
+            "USER": os.environ.get("POSTGRES_USER", "postgresuser"),
+            "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "postgrespassword"),
+            "HOST": os.environ.get("SQL_HOST", "localhost"),
+            "PORT": os.environ.get("SQL_PORT", "5432"),
+        }
     }
-}
 
 
 # Password validation
