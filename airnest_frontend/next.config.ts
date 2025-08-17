@@ -17,7 +17,13 @@ const nextConfig: NextConfig = {
         port: '8000',
         pathname: '/media/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'media.airnest.me',
+        pathname: '/**', 
+      },
     ],
+    formats: ['image/avif', 'image/webp'], 
   },
   eslint: {
     ignoreDuringBuilds: true,
