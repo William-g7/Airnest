@@ -123,6 +123,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
 
     'corsheaders',
+    'storages',
 
     'allauth',
     'allauth.account',
@@ -230,9 +231,52 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# Cloudflare R2 Storage Configuration
+AWS_ACCESS_KEY_ID = os.environ.get('R2_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('R2_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('R2_BUCKET', 'airnest-media')
+AWS_S3_ENDPOINT_URL = os.environ.get('R2_ENDPOINT')
+AWS_S3_REGION_NAME = 'auto'  # Cloudflare R2 uses 'auto'
+AWS_DEFAULT_ACL = None
+AWS_S3_FILE_OVERWRITE = False  # 防止同名文件覆盖
+AWS_S3_VERIFY = True
+AWS_S3_USE_SSL = True
+
+# R2 特定配置优化
+AWS_S3_SIGNATURE_VERSION = 's3v4'  # R2要求使用Signature Version 4
+AWS_S3_ADDRESSING_STYLE = 'virtual'  # R2推荐virtual host风格
+AWS_QUERYSTRING_AUTH = False  # 公开媒体文件不需要签名URL
+
+# Public domain for CDN access
+R2_PUBLIC_BASE = os.environ.get('R2_PUBLIC_BASE', 'https://media.airnest.me')
+AWS_S3_CUSTOM_DOMAIN = R2_PUBLIC_BASE.replace('https://', '').replace('http://', '')
+
+# Cache control for media files
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',  # 1天缓存
+}
+
+# Media files configuration - 根据环境选择存储后端
+USE_R2_STORAGE = os.environ.get('USE_R2_STORAGE', 'False').lower() == 'true'
+
+if USE_R2_STORAGE and AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY:
+    # 生产环境使用R2
+    STORAGES = {
+        "default": {"BACKEND": "airnest_backend.storage.R2MediaStorage"},
+        "staticfiles": {"BACKEND": "airnest_backend.storage.R2StaticStorage"},
+    }
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+else:
+    # 开发环境或R2未配置时使用本地存储
+    STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
+    STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -286,6 +330,7 @@ LOGGING = {
     },
 }
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'False') == 'True'  # 生产环境设为True
 CSRF_COOKIE_HTTPONLY = False  
 CSRF_COOKIE_SAMESITE = 'Lax'  
