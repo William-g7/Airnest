@@ -56,10 +56,16 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ['name',]
 
     def avatar_url(self):
-        if self.avatar:
-            return f'{settings.WEBSITE_URL}{self.avatar.url}'
-        else:
+        """获取头像完整URL，兼容本地存储和R2存储"""
+        if not self.avatar:
             return ''
+            
+        # 如果已经是完整URL（R2存储），直接返回
+        if self.avatar.url.startswith(('http://', 'https://')):
+            return self.avatar.url
+        # 如果是相对路径（本地存储），拼接WEBSITE_URL
+        else:
+            return f'{settings.WEBSITE_URL}{self.avatar.url}'
     
     @property
     def landlord_average_rating(self):

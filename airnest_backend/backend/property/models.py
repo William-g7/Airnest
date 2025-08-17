@@ -13,6 +13,22 @@ from django.dispatch import receiver
 
 from useraccount.models import User
 
+
+def get_file_url(file_field):
+    """
+    获取文件的完整URL
+    兼容本地存储和R2存储
+    """
+    if not file_field:
+        return None
+        
+    # 如果已经是完整URL（R2存储），直接返回
+    if file_field.url.startswith(('http://', 'https://')):
+        return file_field.url
+    # 如果是相对路径（本地存储），拼接WEBSITE_URL
+    else:
+        return f'{settings.WEBSITE_URL}{file_field.url}'
+
 class Property(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=255)
@@ -272,25 +288,25 @@ class PropertyImage(models.Model):
         super().save(*args, **kwargs)
     
     def imageURL(self):
-        return f'{settings.WEBSITE_URL}{self.image.url}' if self.image else None
+        return get_file_url(self.image)
     
     def thumbnailURL(self):
-        return f'{settings.WEBSITE_URL}{self.image_thumbnail.url}' if self.image_thumbnail else None
+        return get_file_url(self.image_thumbnail)
     
     def mediumURL(self):
-        return f'{settings.WEBSITE_URL}{self.image_medium.url}' if self.image_medium else None
+        return get_file_url(self.image_medium)
         
     def largeURL(self):
-        return f'{settings.WEBSITE_URL}{self.image_large.url}' if self.image_large else None
+        return get_file_url(self.image_large)
         
     def xlargeURL(self):
-        return f'{settings.WEBSITE_URL}{self.image_xlarge.url}' if self.image_xlarge else None
+        return get_file_url(self.image_xlarge)
 
     def mainJpgURL(self):
-        return f'{settings.WEBSITE_URL}{self.image_main_jpg.url}' if self.image_main_jpg else None
+        return get_file_url(self.image_main_jpg)
         
     def originalURL(self):
-        return f'{settings.WEBSITE_URL}{self.image_original.url}' if self.image_original else None
+        return get_file_url(self.image_original)
 
 class Reservation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
