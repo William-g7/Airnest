@@ -15,11 +15,6 @@ RUN pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 
-COPY ./entrypoint.sh .
-CMD ["daphne","-b","0.0.0.0","-p","$PORT","airnest_backend.asgi:application"]
-RUN sed -i 's/\r//' entrypoint.sh
-RUN chmod +x entrypoint.sh
-
 COPY . .
-
+RUN chmod +x entrypoint.sh
 ENTRYPOINT ["./entrypoint.sh"]
