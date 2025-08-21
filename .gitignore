@@ -40,6 +40,8 @@ airnest_frontend/tsconfig.tsbuildinfo
 
 # Backend
 airnest_backend/backend/google-credentials.json
+airnest_backend/backend/staticfiles
+
 
 # IDE`
 .vscode/
