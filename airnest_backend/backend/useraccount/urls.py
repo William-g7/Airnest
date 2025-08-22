@@ -1,11 +1,10 @@
 from django.urls import path
 
-from dj_rest_auth.jwt_auth import get_refresh_view
 from dj_rest_auth.views import LoginView, LogoutView, UserDetailsView
 from rest_framework_simplejwt.views import TokenVerifyView
 
 from . import api
-from .views import TurnstileRegisterView
+from .views import TurnstileRegisterView, SecureTokenRefreshView
 
 
 urlpatterns = [
@@ -14,7 +13,7 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='rest_login'),
     path('logout/', LogoutView.as_view(), name='rest_logout'),
     path('me/', UserDetailsView.as_view(), name='user_details'),
-    path('token/refresh/', get_refresh_view().as_view(), name='token_refresh'),
+    path('token/refresh/', SecureTokenRefreshView.as_view(), name='token_refresh'),
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     
     # 用户资料相关

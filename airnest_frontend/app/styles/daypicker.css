@@ -1,0 +1,207 @@
+.rdp-custom {
+  --rdp-cell-size: 40px;
+  --rdp-accent-color: #e11d48; /* Airbnb red */
+  --rdp-background-color: #fee2e2;
+  --rdp-outline: 2px solid #e11d48;
+  --rdp-selected-border: 1px solid #e11d48;
+  margin: 0;
+}
+
+.rdp-custom .rdp-months {
+  display: flex;
+  gap: 1rem;
+}
+
+.rdp-custom .rdp-month {
+  width: 100%;
+}
+
+.rdp-custom .rdp-table {
+  width: 100%;
+  max-width: none;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.rdp-custom .rdp-cell {
+  width: var(--rdp-cell-size);
+  height: var(--rdp-cell-size);
+  border-radius: 6px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.rdp-custom .rdp-day {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  background: transparent;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rdp-custom .rdp-day:hover:not([disabled]) {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.rdp-custom .rdp-day_selected {
+  background-color: var(--rdp-accent-color) !important;
+  color: white !important;
+  font-weight: 600;
+}
+
+.rdp-custom .rdp-day_selected:hover {
+  background-color: #be123c !important;
+}
+
+.rdp-custom .rdp-day_range_start {
+  background-color: var(--rdp-accent-color) !important;
+  color: white !important;
+  border-radius: 6px 0 0 6px;
+}
+
+.rdp-custom .rdp-day_range_end {
+  background-color: var(--rdp-accent-color) !important;
+  color: white !important;
+  border-radius: 0 6px 6px 0;
+}
+
+.rdp-custom .rdp-day_range_middle {
+  background-color: var(--rdp-background-color) !important;
+  color: var(--rdp-accent-color) !important;
+  border-radius: 0;
+}
+
+.rdp-custom .rdp-day_disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  color: #9ca3af;
+}
+
+.rdp-custom .rdp-day_outside {
+  opacity: 0.5;
+  color: #9ca3af;
+}
+
+.rdp-custom .rdp-day_today {
+  font-weight: 700;
+  color: var(--rdp-accent-color);
+  position: relative;
+}
+
+.rdp-custom .rdp-day_today:not(.rdp-day_selected)::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background-color: var(--rdp-accent-color);
+  border-radius: 50%;
+}
+
+/* 已预订日期样式 */
+.rdp-custom .rdp-day_booked {
+  background-color: #fee2e2 !important;
+  color: #dc2626 !important;
+  position: relative;
+}
+
+.rdp-custom .rdp-day_booked::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 20px;
+  background-color: #dc2626;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+/* 部分预订日期样式 */
+.rdp-custom .rdp-day_partiallyBooked {
+  background-color: #fef3c7 !important;
+  color: #d97706 !important;
+  position: relative;
+}
+
+.rdp-custom .rdp-day_partiallyBooked::after {
+  content: '!';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 10px;
+  font-weight: bold;
+  color: #d97706;
+}
+
+/* 月份导航 */
+.rdp-custom .rdp-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.rdp-custom .rdp-nav_button {
+  border: none;
+  background: #f3f4f6;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rdp-custom .rdp-nav_button:hover:not([disabled]) {
+  background: #e5e7eb;
+}
+
+.rdp-custom .rdp-nav_button[disabled] {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.rdp-custom .rdp-caption_label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  text-align: center;
+  flex-grow: 1;
+}
+
+/* 星期标题 */
+.rdp-custom .rdp-head_cell {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-align: center;
+  padding: 8px 0;
+  width: var(--rdp-cell-size);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .rdp-custom {
+    --rdp-cell-size: 36px;
+  }
+
+  .rdp-custom .rdp-months {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .rdp-custom .rdp-day {
+    font-size: 13px;
+  }
+}

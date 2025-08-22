@@ -68,14 +68,14 @@ const PropertyListItem = memo(({ property, translations, isFirstScreen }: Proper
     const mainImage = property.images[0];
 
     if (screenWidth >= 1024) {
-      return mainImage.mediumURL || mainImage.imageURL;
+      return mainImage.imageURL;
     }
     
     if (screenWidth >= 768) {
-      return mainImage.mediumURL || mainImage.imageURL;
+      return mainImage.imageURL;
     }
     
-    return mainImage.mediumURL || mainImage.thumbnailURL || mainImage.imageURL;
+    return mainImage.imageURL;
   }, [property.images, screenWidth]);
 
   const { isAuthenticated } = useAuth();

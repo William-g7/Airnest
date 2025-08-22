@@ -6,7 +6,6 @@ import { propertyCategories } from '@/app/constants/propertyCategores';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 const Categories = () => {
   const t = useTranslations('categories');
@@ -74,7 +73,9 @@ const Categories = () => {
           className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white rounded-full shadow-md p-1 cursor-pointer hover:scale-110 transition-transform"
           onClick={() => scroll('left')}
         >
-          <ChevronLeftIcon className="h-6 w-6 text-gray-600" />
+          <svg className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
         </div>
       )}
 
@@ -144,7 +145,9 @@ const Categories = () => {
           className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white rounded-full shadow-md p-1 cursor-pointer hover:scale-110 transition-transform"
           onClick={() => scroll('right')}
         >
-          <ChevronRightIcon className="h-6 w-6 text-gray-600" />
+          <svg className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
         </div>
       )}
     </div>

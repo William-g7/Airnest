@@ -7,7 +7,7 @@ import { useLoginModal } from '@/app/components/hooks/useLoginModal';
 import apiService from '@/app/services/apiService';
 import StarRating from '../reviews/StarRating';
 import ReviewTag from '../reviews/ReviewTag';
-import CustomButton from '../forms/CustomButton';
+import CustomButton from '../common/CustomButton';
 import toast from 'react-hot-toast';
 
 interface Review {
@@ -60,9 +60,10 @@ interface ReviewTag {
 
 interface PropertyReviewsProps {
   propertyId: string;
+  propertyStatus?: string; // 添加房源状态参数
 }
 
-export default function PropertyReviews({ propertyId }: PropertyReviewsProps) {
+export default function PropertyReviews({ propertyId, propertyStatus }: PropertyReviewsProps) {
   const t = useTranslations('reviews');
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewStats, setReviewStats] = useState<ReviewStats | null>(null);
@@ -82,9 +83,14 @@ export default function PropertyReviews({ propertyId }: PropertyReviewsProps) {
   const loginModal = useLoginModal();
 
   useEffect(() => {
-    fetchReviewsAndStats();
-    fetchAvailableTags();
-  }, [propertyId]);
+    // 草稿房源不加载评论
+    if (propertyStatus !== 'draft') {
+      fetchReviewsAndStats();
+      fetchAvailableTags();
+    } else {
+      setIsLoading(false);
+    }
+  }, [propertyId, propertyStatus]);
 
   const fetchReviewsAndStats = async () => {
     try {
@@ -94,10 +100,16 @@ export default function PropertyReviews({ propertyId }: PropertyReviewsProps) {
         apiService.getPropertyReviewStats(propertyId)
       ]);
       
+      
       setReviews(reviewsData.reviews || reviewsData.results || []);
       setReviewStats(statsData);
     } catch (error) {
       console.error('Error fetching reviews:', error);
+      console.error('Error details:', {
+        message: (error as any)?.message || 'Unknown error',
+        statusCode: (error as any)?.statusCode || 'Unknown',
+        errorType: (error as any)?.errorType || 'Unknown'
+      });
     } finally {
       setIsLoading(false);
     }

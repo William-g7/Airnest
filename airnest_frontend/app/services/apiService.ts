@@ -7,6 +7,7 @@ import { getCsrfToken, initCsrfToken } from './csrfService';
 interface RequestOptions {
   forceRefresh?: boolean;
   suppressToast?: boolean;
+  cacheStrategy?: 'no-cache' | 'short-cache' | 'medium-cache' | 'default';
 }
 
 export class ApiError extends Error {
@@ -34,6 +35,69 @@ export function createAuthError(
     default:
       return new ApiError('Authentication error', ErrorType.UNAUTHORIZED);
   }
+}
+
+// 缓存策略函数 - 根据URL和用户状态确定适当的缓存策略
+function getCacheHeaders(url: string, options: RequestOptions = {}): Record<string, string> {
+  // 如果强制刷新，始终禁用缓存
+  if (options.forceRefresh) {
+    return {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache'
+    };
+  }
+
+  // 如果指定了缓存策略，使用指定的策略
+  if (options.cacheStrategy) {
+    switch (options.cacheStrategy) {
+      case 'no-cache':
+        return { 'Cache-Control': 'no-cache, no-store, must-revalidate' };
+      case 'short-cache':
+        return { 'Cache-Control': 'public, max-age=300' }; // 5分钟
+      case 'medium-cache':
+        return { 'Cache-Control': 'public, max-age=1800' }; // 30分钟
+      default:
+        return {}; // 使用浏览器默认缓存策略
+    }
+  }
+
+  // 自动判断缓存策略
+  
+  // 1. 用户私有数据 - 禁止缓存
+  const privatePatterns = [
+    '/api/auth/',
+    '/api/properties/my/',
+    '/api/auth/profile/',
+    '/api/auth/verification-status/',
+    '/api/properties/.+/reservations/',
+    '/api/media/presigned-url/',
+    '/api/media/draft-properties/'
+  ];
+  
+  if (privatePatterns.some(pattern => new RegExp(pattern).test(url))) {
+    return { 'Cache-Control': 'no-cache, no-store, must-revalidate' };
+  }
+
+  // 2. 公开房源数据 - 短期缓存
+  const publicCacheablePatterns = [
+    '/api/properties/$', // 房源列表
+    '/api/properties/\\d+/$', // 单个房源详情
+    '/api/properties/with-reviews/',
+    '/api/properties/review-tags/',
+    '/api/properties/\\d+/review-stats/'
+  ];
+  
+  if (publicCacheablePatterns.some(pattern => new RegExp(pattern).test(url))) {
+    return { 'Cache-Control': 'public, max-age=300' }; // 5分钟缓存
+  }
+
+  // 3. 评论数据 - 中期缓存
+  if (url.includes('/reviews/') && !url.includes('/reviews/') + '[0-9]+' && url.includes('?')) {
+    return { 'Cache-Control': 'public, max-age=600' }; // 10分钟缓存
+  }
+
+  // 4. 默认不缓存敏感API
+  return { 'Cache-Control': 'no-cache' };
 }
 
 // Prevent multiple requests from refreshing the token at the same time
@@ -83,7 +147,7 @@ async function executeAuthenticatedRequest<T>(
   url: string,
   data?: any,
   customHeaders?: Record<string, string>,
-  options: { suppressToast?: boolean } = {}
+  options: RequestOptions = {}
 ): Promise<T> {
   const token = await getAccessToken();
   if (!token) {
@@ -99,7 +163,7 @@ async function executeAuthenticatedRequest<T>(
   }
 
   try {
-    return await makeRequest<T>(method, url, token, data, customHeaders);
+    return await makeRequest<T>(method, url, token, data, customHeaders, options);
   } catch (error: any) {
     if (error.message.includes('HTTP error! status: 401')) {
       try {
@@ -108,7 +172,7 @@ async function executeAuthenticatedRequest<T>(
 
         if (newToken) {
           // 刷新成功，重试请求
-          return await makeRequest<T>(method, url, newToken, data, customHeaders);
+          return await makeRequest<T>(method, url, newToken, data, customHeaders, options);
         } else {
           // 刷新失败，需要重新登录
           useAuthStore.getState().setUnauthenticated('session_expired');
@@ -133,7 +197,8 @@ async function makeRequest<T>(
   url: string,
   token: string,
   data?: any,
-  customHeaders?: Record<string, string>
+  customHeaders?: Record<string, string>,
+  options: RequestOptions = {}
 ): Promise<T> {
   const requestUrl = `${process.env.NEXT_PUBLIC_API_URL}${url}`;
   const csrfToken = getCsrfToken();
@@ -148,14 +213,18 @@ async function makeRequest<T>(
     }
   }
 
+  // 获取缓存策略
+  const cacheHeaders = getCacheHeaders(url, options);
+  
   const headers: Record<string, string> = {
     Authorization: `Bearer ${token}`,
     'X-CSRFToken': csrfToken,
     'Accept-Language': currentLocale,
+    ...cacheHeaders,
     ...customHeaders,
   };
 
-  const options: RequestInit = {
+  const requestOptions: RequestInit = {
     method,
     headers,
     credentials: 'include',
@@ -164,14 +233,14 @@ async function makeRequest<T>(
   if (data) {
     if (data instanceof FormData) {
       delete headers['Content-Type'];
-      options.body = data;
+      requestOptions.body = data;
     } else {
       headers['Content-Type'] = 'application/json';
-      options.body = JSON.stringify(data);
+      requestOptions.body = JSON.stringify(data);
     }
   }
   try {
-    const response = await fetch(requestUrl, options);
+    const response = await fetch(requestUrl, requestOptions);
     if (!response.ok) {
       const statusError = new ApiError(
         `HTTP error! status: ${response.status}`,
@@ -284,10 +353,9 @@ const apiService = {
         'Accept-Language': currentLocale,
       };
 
-      if (options.forceRefresh) {
-        headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
-        headers['Pragma'] = 'no-cache';
-      }
+      // 应用缓存策略
+      const cacheHeaders = getCacheHeaders(url, options);
+      Object.assign(headers, cacheHeaders);
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
         method: 'GET',
@@ -313,7 +381,7 @@ const apiService = {
 
   getwithtoken: async function <T = any>(
     url: string,
-    options: { suppressToast?: boolean } = {}
+    options: RequestOptions = {}
   ): Promise<T> {
     try {
       return await executeAuthenticatedRequest<T>('GET', url, undefined, undefined, options);
@@ -329,7 +397,7 @@ const apiService = {
   post: async function <T = any>(
     url: string,
     data: any,
-    options: { suppressToast?: boolean } = {}
+    options: RequestOptions = {}
   ): Promise<T> {
     try {
       return await executeAuthenticatedRequest<T>('POST', url, data, undefined, options);
@@ -392,7 +460,7 @@ const apiService = {
   patch: async function <T = any>(
     url: string,
     data: any,
-    options: { suppressToast?: boolean } = {}
+    options: RequestOptions = {}
   ): Promise<T> {
     try {
       return await executeAuthenticatedRequest<T>('PATCH', url, data, undefined, options);
@@ -406,7 +474,7 @@ const apiService = {
 
   delete: async function <T = any>(
     url: string,
-    options: { suppressToast?: boolean } = {}
+    options: RequestOptions = {}
   ): Promise<T> {
     try {
       return await executeAuthenticatedRequest<T>('DELETE', url, undefined, undefined, options);
@@ -447,7 +515,7 @@ const apiService = {
 
   // 评论相关API
   getReviewTags: async function (): Promise<any> {
-    return this.get('/api/properties/review-tags/');
+    return this.get('/api/properties/review-tags/', { cacheStrategy: 'medium-cache' });
   },
 
   getPropertyReviews: async function (
@@ -455,11 +523,11 @@ const apiService = {
     page: number = 1, 
     pageSize: number = 10
   ): Promise<any> {
-    return this.get(`/api/properties/${propertyId}/reviews/?page=${page}&page_size=${pageSize}`);
+    return this.get(`/api/properties/${propertyId}/reviews/?page=${page}&page_size=${pageSize}`, { cacheStrategy: 'short-cache' });
   },
 
   getPropertyReviewStats: async function (propertyId: string): Promise<any> {
-    return this.get(`/api/properties/${propertyId}/review-stats/`);
+    return this.get(`/api/properties/${propertyId}/review-stats/`, { cacheStrategy: 'short-cache' });
   },
 
   createPropertyReview: async function (
@@ -493,12 +561,12 @@ const apiService = {
   // 获取带评论统计的房源列表
   getPropertiesWithReviews: async function (params?: URLSearchParams): Promise<any> {
     const queryString = params ? `?${params.toString()}` : '';
-    return this.get(`/api/properties/with-reviews/${queryString}`);
+    return this.get(`/api/properties/with-reviews/${queryString}`, { cacheStrategy: 'short-cache' });
   },
 
   // 获取单个房源的详细信息（包含评论统计）
   getPropertyWithReviews: async function (propertyId: string): Promise<any> {
-    return this.get(`/api/properties/${propertyId}/with-reviews/`);
+    return this.get(`/api/properties/${propertyId}/with-reviews/`, { cacheStrategy: 'short-cache' });
   },
 
   // 邮箱验证相关API
@@ -546,6 +614,33 @@ const apiService = {
     new_password: string;
   }): Promise<any> {
     return this.post('/api/auth/change-password/', data);
+  },
+
+  // R2直传相关API
+  createDraftProperty: async function (initialData?: any): Promise<any> {
+    return this.post('/api/properties/draft/', initialData || {});
+  },
+
+  getPresignedUploadUrl: async function (data: {
+    file_type: string;
+    file_size: number;
+    prefix?: string;
+    propertyId?: string;
+  }): Promise<any> {
+    return this.post('/api/media/presigned-url/', data);
+  },
+
+  updatePropertyImages: async function (propertyId: string, images: any[]): Promise<any> {
+    return this.post('/api/media/draft-properties/images/', { draft_id: propertyId, images });
+  },
+
+  publishDraftProperty: async function (propertyId: string, propertyData?: any): Promise<any> {
+    const payload = { draft_id: propertyId, ...(propertyData || {}) };
+    return this.post('/api/media/draft-properties/publish/', payload);
+  },
+
+  deletePropertyImageR2: async function (propertyId: string, imageKey: string): Promise<any> {
+    return this.post('/api/media/delete-file/', { file_key: imageKey, property_id: propertyId });
   },
 };
 

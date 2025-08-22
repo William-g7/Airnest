@@ -19,6 +19,8 @@ export interface PropertyType {
   postal_code: string;
   timezone?: string;
 
+  status?: 'draft' | 'published';
+
   images: PropertyImage[];
 
   landlord: {
@@ -28,7 +30,6 @@ export interface PropertyType {
     avatar_url?: string;
   };
 
-  // 评论统计数据（可选，仅在需要时提供）
   average_rating?: number;
   total_reviews?: number;
   positive_review_rate?: number;
@@ -43,19 +44,7 @@ export interface PropertyType {
 export interface PropertyImage {
   id: number;
   imageURL: string;
-  // 缩略图URL - 列表和卡片视图中使用
-  thumbnailURL: string | null;
-  // 中等尺寸图片URL - 详情页轮播图使用
-  mediumURL: string | null;
-  // 大尺寸图片URL - 大屏幕设备上的详情页轮播图使用
-  largeURL: string | null;
-  // 超大尺寸图片URL - 4K等高分辨率显示器上使用
-  xlargeURL: string | null;
-  // 高质量JPG主图 - 轮播图首图使用
-  mainJpgURL: string | null;
-  // 高清原图URL - 点击查看大图时使用
-  originalURL: string | null;
-  // 图片顺序和主图标记
   order: number;
   is_main: boolean;
+  alt_text?: string;
 }

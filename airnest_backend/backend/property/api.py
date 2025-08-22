@@ -2,10 +2,15 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from .cache_utils import (
+    property_list_cache, property_detail_cache, review_cache, 
+    user_private_data, static_data_cache, no_cache
+)
 
 from datetime import datetime, timedelta
 import pytz
 from .models import Property, PropertyImage, Reservation, Wishlist, PropertyReview, ReviewTag, ReviewTagAssignment
+import json
 from .serializers import PropertySerializer, PropertyLandlordSerializer, PropertyImageSerializer, PropertyReviewSerializer, PropertyReviewListSerializer, ReviewTagSerializer, PropertyWithReviewStatsSerializer
 from .forms import PropertyForm
 from django.db import models
@@ -13,9 +18,11 @@ from django.db import models
 @api_view(['GET'])
 @authentication_classes([])
 @permission_classes([])
+@property_list_cache()  # 公开房源列表，5分钟缓存
 # 该api用来获取符合条件的房源，默认情况全部展示，可以按照地理位置、类别、入住/退房日期进行筛选
 def property_list(request):
-    properties = Property.objects.all()
+    # 只显示已发布的房源
+    properties = Property.objects.filter(status='published')
     
     location = request.GET.get('location', '')
     check_in = request.GET.get('check_in', None)
@@ -143,7 +150,10 @@ def property_detail(request,pk):
         # GET方法 - 返回房源详情
         if request.method == 'GET':
             serializer = PropertyLandlordSerializer(property, many=False)
-            return JsonResponse(serializer.data, safe=False)
+            response = JsonResponse(serializer.data, safe=False)
+            # 房源详情公开可缓存10分钟
+            response['Cache-Control'] = 'public, max-age=600'
+            return response
         
         # PATCH方法 - 更新房源信息
         elif request.method == 'PATCH':
@@ -166,7 +176,7 @@ def property_detail(request,pk):
                 if new_images:
                     # 获取当前最大的order值
                     max_order = 0
-                    existing_images = PropertyImage.objects.filter(property=property)
+                    existing_images = PropertyImage.objects.filter(property_ref=property)
                     if existing_images.exists():
                         max_order = existing_images.aggregate(models.Max('order'))['order__max'] + 1
                     
@@ -196,6 +206,7 @@ def property_detail(request,pk):
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
+@user_private_data()  # 用户私有数据，禁止缓存
 def my_properties(request):
     properties = Property.objects.filter(landlord=request.user)
     serializer = PropertySerializer(properties, many=True)
@@ -412,6 +423,7 @@ def get_booked_dates(request, pk):
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
+@user_private_data()  # 用户私有数据，禁止缓存
 def get_user_reservations(request):
     try:
         reservations = Reservation.objects.filter(user=request.user).select_related('property').order_by('-created_at')
@@ -476,6 +488,7 @@ def toggle_favorite(request, pk):
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
+@user_private_data()  # 用户私有数据，禁止缓存
 def get_wishlist(request):
     wishlist_items = Wishlist.objects.filter(user=request.user).select_related('property')
     properties = [item.property for item in wishlist_items]
@@ -531,14 +544,12 @@ def update_property_images_order(request, property_id):
         
         # 获取图片顺序数据
         image_orders = request.data.get('image_orders', [])
-        print(f"收到图片排序请求 - 房源ID: {property_id}, 图片数量: {len(image_orders)}")
-        print(f"排序数据: {image_orders}")
         
         if not image_orders:
             return JsonResponse({'error': '未提供图片排序数据'}, status=400)
         
         # 首先将所有图片设为非主图
-        PropertyImage.objects.filter(property=property).update(is_main=False)
+        PropertyImage.objects.filter(property_ref=property).update(is_main=False)
         
         # 保存图片ID和其新顺序的映射
         updated_images = []
@@ -551,28 +562,20 @@ def update_property_images_order(request, property_id):
             if image_id and isinstance(new_order, int):
                 try:
                     # 确保图片属于该房源
-                    image = PropertyImage.objects.get(id=image_id, property=property)
+                    image = PropertyImage.objects.get(id=image_id, property_ref=property)
                     image.order = new_order
                     # 将第一张图片（order=0）设为主图
                     if new_order == 0:
                         image.is_main = True
-                        print(f"设置图片ID {image_id} 为主图")
                     image.save()
                     updated_images.append(image)
-                    print(f"已更新图片 ID: {image_id}, 新顺序: {new_order}, 是否主图: {image.is_main}")
                 except PropertyImage.DoesNotExist:
-                    print(f"图片ID {image_id} 不存在")
                     pass  # 忽略不存在的图片
         
         # 获取并返回更新后的图片列表（按顺序排序）
-        images = PropertyImage.objects.filter(property=property).order_by('order')
+        images = PropertyImage.objects.filter(property_ref=property).order_by('order')
         serializer = PropertyImageSerializer(images, many=True)
         response_data = serializer.data
-        
-        # 打印最终图片顺序
-        print("更新后的图片顺序:")
-        for img in response_data:
-            print(f"ID: {img['id']}, 顺序: {img.get('order')}, 主图: {img.get('is_main')}")
         
         return JsonResponse(response_data, safe=False)
     
@@ -593,12 +596,12 @@ def delete_property_image(request, property_id, image_id):
         
         # 获取要删除的图片并验证其属于该房源
         try:
-            image = PropertyImage.objects.get(id=image_id, property=property)
+            image = PropertyImage.objects.get(id=image_id, property_ref=property)
         except PropertyImage.DoesNotExist:
             return JsonResponse({'error': '找不到该图片'}, status=404)
         
         # 检查是否只有一张图片，如果是则不允许删除
-        if PropertyImage.objects.filter(property=property).count() <= 1:
+        if PropertyImage.objects.filter(property_ref=property).count() <= 1:
             return JsonResponse({'error': '无法删除房源的唯一图片'}, status=400)
         
         # 检查是否为主图
@@ -609,13 +612,13 @@ def delete_property_image(request, property_id, image_id):
         
         # 如果删除的是主图，则将第一张图片（order最小的）设为主图
         if is_main:
-            new_main_image = PropertyImage.objects.filter(property=property).order_by('order').first()
+            new_main_image = PropertyImage.objects.filter(property_ref=property).order_by('order').first()
             if new_main_image:
                 new_main_image.is_main = True
                 new_main_image.save()
         
         # 返回剩余的图片列表
-        images = PropertyImage.objects.filter(property=property).order_by('order')
+        images = PropertyImage.objects.filter(property_ref=property).order_by('order')
         serializer = PropertyImageSerializer(images, many=True)
         
         return JsonResponse({
@@ -635,6 +638,7 @@ def delete_property_image(request, property_id, image_id):
 @api_view(['GET'])
 @authentication_classes([])
 @permission_classes([])
+@static_data_cache()  # 静态数据，1小时缓存
 def get_review_tags(request):
     """获取所有可用的评论标签"""
     try:
@@ -671,13 +675,16 @@ def property_reviews(request, pk):
             
             serializer = PropertyReviewListSerializer(reviews_page, many=True)
             
-            return JsonResponse({
+            response = JsonResponse({
                 'reviews': serializer.data,
                 'total_count': total_count,
                 'page': page,
                 'page_size': page_size,
                 'has_next': end < total_count
             })
+            # 评论列表可以短期缓存10分钟
+            response['Cache-Control'] = 'public, max-age=600'
+            return response
         
         elif request.method == 'POST':
             # 创建新评论
@@ -733,6 +740,7 @@ def property_reviews(request, pk):
 @api_view(['GET'])
 @authentication_classes([])
 @permission_classes([])
+@review_cache()  # 评论统计数据，10分钟缓存
 def property_review_stats(request, pk):
     """获取房源评论统计信息"""
     try:
@@ -746,11 +754,27 @@ def property_review_stats(request, pk):
         elif 'fr' in accept_language:
             locale = 'fr'
         
+        
+        # 检查是否有计算过的统计信息
+        try:
+            average_rating = property_obj.average_rating
+            total_reviews = property_obj.total_reviews
+            positive_review_rate = property_obj.positive_review_rate
+        except Exception as e:
+            average_rating = None
+            total_reviews = 0
+            positive_review_rate = None
+        
+        try:
+            most_popular_tags = property_obj.get_most_popular_tags(locale=locale, limit=2)
+        except Exception as e:
+            most_popular_tags = []
+        
         stats = {
-            'average_rating': property_obj.average_rating,
-            'total_reviews': property_obj.total_reviews,
-            'positive_review_rate': property_obj.positive_review_rate,
-            'most_popular_tags': property_obj.get_most_popular_tags(locale=locale, limit=2)
+            'average_rating': average_rating,
+            'total_reviews': total_reviews,
+            'positive_review_rate': positive_review_rate,
+            'most_popular_tags': most_popular_tags
         }
         
         return JsonResponse(stats)
@@ -810,10 +834,12 @@ def manage_review(request, review_id):
 @api_view(['GET'])
 @authentication_classes([])
 @permission_classes([])
+@property_list_cache()  # 房源列表，5分钟缓存
 def properties_with_reviews(request):
     """获取带评论统计的房源列表（更新版的property_list）"""
     try:
-        properties = Property.objects.all()
+        # 只显示已发布的房源
+        properties = Property.objects.filter(status='published')
         
         # 应用原有的过滤逻辑
         location = request.GET.get('location', '')
@@ -901,6 +927,7 @@ def properties_with_reviews(request):
 @api_view(['GET'])
 @authentication_classes([])
 @permission_classes([])
+@property_detail_cache()  # 房源详情，10分钟缓存
 def property_with_reviews(request, pk):
     """获取单个房源的详细信息，包含评论统计"""
     try:
@@ -913,4 +940,123 @@ def property_with_reviews(request, pk):
     except Property.DoesNotExist:
         return JsonResponse({'error': 'Property not found'}, status=404)
     except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+# R2直传相关API - 创建草稿房源
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def create_draft_property(request):
+    """创建草稿房源，获取property_id用于R2上传"""
+    try:
+        data = json.loads(request.body) if request.body else {}
+        
+        # 创建草稿房源，只需要基本信息
+        property = Property.objects.create(
+            title=data.get('title', 'New Property Draft'),
+            landlord=request.user,
+            category=data.get('category', 'house'),
+            place_type=data.get('place_type', 'entire_place'),
+            city=data.get('city', ''),
+            status='draft',  # 设置为草稿状态
+            # 设置默认值，避免必填字段为空
+            description='Property Draft',
+            price_per_night=0,
+            guests=1,
+            bedrooms=1,
+            beds=1,
+            bathrooms=1,
+            country=data.get('country', ''),
+            state=data.get('state', ''),
+            address='',
+            postal_code='',
+            timezone='UTC'
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'data': {
+                'id': property.id,
+                'title': property.title,
+                'status': property.status,
+                'created_at': property.created_at.isoformat()
+            }
+        })
+        
+    except Exception as e:
+        print(f"Error creating draft property: {e}")
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+# R2直传相关API - 发布草稿房源
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def publish_property(request, pk):
+    """发布草稿房源，包含完整的房源信息和R2图片数据"""
+    try:
+        
+        # 获取草稿房源
+        property = Property.objects.get(pk=pk, landlord=request.user)
+        
+        if property.status != 'draft':
+            return JsonResponse({'error': '只能发布草稿状态的房源'}, status=400)
+        
+        data = json.loads(request.body) if request.body else {}
+        
+        # 更新房源信息
+        property.title = data.get('title', property.title)
+        property.description = data.get('description', property.description)
+        property.price_per_night = data.get('price_per_night', property.price_per_night)
+        property.category = data.get('category', property.category)
+        property.place_type = data.get('place_type', property.place_type)
+        property.guests = data.get('guests', property.guests)
+        property.bedrooms = data.get('bedrooms', property.bedrooms)
+        property.beds = data.get('beds', property.beds)
+        property.bathrooms = data.get('bathrooms', property.bathrooms)
+        property.country = data.get('country', property.country)
+        property.state = data.get('state', property.state)
+        property.city = data.get('city', property.city)
+        property.address = data.get('address', property.address)
+        property.postal_code = data.get('postal_code', property.postal_code)
+        property.timezone = data.get('timezone', property.timezone)
+        property.status = 'published'  # 更改状态为已发布
+        
+        property.save()
+        
+        # 处理R2图片信息
+        images_data = data.get('images', [])
+        
+        # 删除现有图片（如果有的话）
+        existing_images_count = PropertyImage.objects.filter(property_ref=property).count()
+        PropertyImage.objects.filter(property_ref=property).delete()
+        
+        # 创建新的图片记录
+        created_images = []
+        for index, image_data in enumerate(images_data):
+            image_record = PropertyImage.objects.create(
+                property_ref=property,
+                object_key=image_data.get('objectKey'),
+                file_url=image_data.get('fileUrl'),
+                file_size=image_data.get('fileSize', 0),
+                content_type=image_data.get('contentType', 'image/jpeg'),
+                order=image_data.get('order', 0),
+                is_main=image_data.get('isMain', False),
+                uploaded_by=request.user
+            )
+            created_images.append(image_record)
+        
+        
+        # 序列化返回数据
+        serializer = PropertySerializer(property, context={'request': request})
+        
+        return JsonResponse({
+            'success': True,
+            'data': serializer.data
+        })
+        
+    except Property.DoesNotExist:
+        return JsonResponse({'error': '房源不存在或无权访问'}, status=404)
+    except Exception as e:
+        print(f"Error publishing property: {e}")
         return JsonResponse({'error': str(e)}, status=400)

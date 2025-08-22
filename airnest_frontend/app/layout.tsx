@@ -1,12 +1,10 @@
 import type { Metadata } from 'next';
-import './globals.css';
 import { Geist, Geist_Mono } from 'next/font/google';
 import AuthProvider from './providers/AuthProvider';
 import ErrorBoundaryProvider from './providers/ErrorBoundaryProvider';
 import { Toaster } from 'react-hot-toast';
 import AuthStatusDetector from './components/AuthStatusDetector';
-import { ClientSideCsrfInitializer } from './components/security/CsrfInitializer';
-import { NonceProvider } from './providers/NonceProvider';
+import './globals.css';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -38,8 +36,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <NonceProvider>
-          <ClientSideCsrfInitializer />
           <Toaster position="top-center" />
           <AuthProvider>
             <ErrorBoundaryProvider>
@@ -47,7 +43,6 @@ export default function RootLayout({
               {children}
             </ErrorBoundaryProvider>
           </AuthProvider>
-        </NonceProvider>
       </body>
     </html>
   );

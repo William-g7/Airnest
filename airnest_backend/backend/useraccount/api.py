@@ -1,5 +1,6 @@
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from django.http import JsonResponse
+from property.cache_utils import user_private_data, no_cache
 from .models import User, EmailVerification
 from .serializers import LandlordSerializer, UserSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -17,6 +18,7 @@ from .services import EmailService, RateLimitExceeded
 
 @api_view(['GET', 'PATCH'])
 @permission_classes([IsAuthenticated])
+@user_private_data()  # 用户私有数据，禁止缓存
 def profile_detail(request, pk):
     user = get_object_or_404(User, pk=pk)
     
@@ -245,6 +247,7 @@ def resend_verification_email(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+@user_private_data()  # 用户私有数据，禁止缓存
 def verification_status(request):
     """
     获取用户邮箱验证状态

@@ -10,13 +10,12 @@ import Categories from '../addproperty/Catogories';
 import PlaceTypes from '../addproperty/PlaceTypes';
 import LocationForm from '../addproperty/LocationForm';
 import BasicInfoForm from '../addproperty/BasicInfoForm';
-import ImageUpload from '../addproperty/ImageUpload';
 import PropertyDetailsForm from '../addproperty/PropertyDetailsForm';
 import apiService from '@/app/services/apiService';
 import { useTranslations } from 'next-intl';
-import ImageManagerLazy from '../addproperty/ImageManagerLazy';
 import toast from 'react-hot-toast';
-import { ImageData } from '../addproperty/ImageManager';
+import ImagePreviewAndCompress from '../addproperty/ImagePreviewAndCompress';
+import { R2ImageData } from '../../constants/upload';
 
 const TOTAL_STEPS = 6;
 
@@ -41,8 +40,9 @@ export default function AddPropertyModal() {
     beds: 1,
     bathrooms: 1,
   });
-  const [images, setImages] = useState<string[]>([]);
-  const [existingImages, setExistingImages] = useState<ImageData[]>([]);
+  const [imagePreviewData, setImagePreviewData] = useState<any[]>([]);
+  const [existingImages, setExistingImages] = useState<R2ImageData[]>([]);
+  const [currentPropertyId, setCurrentPropertyId] = useState<string>('');
 
   const [propertyDetails, setPropertyDetails] = useState({
     title: '',
@@ -56,6 +56,8 @@ export default function AddPropertyModal() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  // 移除了复杂的上传队列，使用简化的直接上传
 
   useEffect(() => {
     if (addPropertyModal.isOpen && addPropertyModal.isEditMode && addPropertyModal.propertyToEdit) {
@@ -84,11 +86,13 @@ export default function AddPropertyModal() {
       });
 
       if (property.images && property.images.length > 0) {
-        const mappedImages = property.images.map(img => ({
-          id: img.id,
-          imageURL: img.imageURL,
-          thumbnailURL: img.thumbnailURL,
-          is_main: img.is_main,
+        const mappedImages: R2ImageData[] = property.images.map(img => ({
+          id: img.id?.toString(),
+          objectKey: img.imageURL, // 使用imageURL作为objectKey的临时方案
+          fileUrl: img.imageURL,
+          fileSize: 0, // 无法从旧数据获取
+          contentType: 'image/jpeg',
+          isMain: img.is_main,
           order: img.order,
         }));
         setExistingImages(mappedImages);
@@ -113,13 +117,15 @@ export default function AddPropertyModal() {
         beds: 1,
         bathrooms: 1,
       });
-      setImages([]);
+      setImagePreviewData([]);
       setExistingImages([]);
       setPropertyDetails({
         title: '',
         description: '',
         price: 0,
       });
+      
+      // 清理图片预览数据（modal关闭时）
     }
   }, [addPropertyModal.isOpen, addPropertyModal.isEditMode, addPropertyModal.propertyToEdit]);
 
@@ -153,7 +159,7 @@ export default function AddPropertyModal() {
       case 4:
         return true;
       case 5:
-        return addPropertyModal.isEditMode ? true : images.length > 0;
+        return addPropertyModal.isEditMode ? true : imagePreviewData.length > 0;
       case 6:
         return (
           propertyDetails.title !== '' &&
@@ -175,59 +181,138 @@ export default function AddPropertyModal() {
     }
   };
 
-  const handleImagesChange = (updatedImages: ImageData[]) => {
-    setExistingImages(updatedImages as any);
+  const handleImagesChange = (updatedImages: R2ImageData[]) => {
+    setExistingImages(updatedImages);
   };
 
+  // 创建草稿房源并获取property_id
+  const createDraftProperty = async (): Promise<string> => {
+    if (currentPropertyId) return currentPropertyId;
+    
+    const draftData = {
+      title: propertyDetails.title || t('draftTitle'),
+      category: category,
+      place_type: placeType,
+      city: location.city,
+    };
+    
+    const response = await apiService.post('/api/properties/draft/', draftData);
+    if (response.success && response.data.id) {
+      const propertyId = response.data.id.toString();
+      setCurrentPropertyId(propertyId);
+      return propertyId;
+    }
+    throw new Error(t('draftCreationFailed'));
+  };
+
+  // 简化的图片上传函数
+  const uploadImagesToR2 = async (images: any[], propertyId: string): Promise<R2ImageData[]> => {
+    if (images.length === 0) {
+      return [];
+    }
+
+    const uploadedImages: R2ImageData[] = [];
+    
+    for (let i = 0; i < images.length; i++) {
+      const imgData = images[i];
+      
+      try {
+        // 获取预签名URL
+        const presignedResponse = await apiService.getPresignedUploadUrl({
+          file_type: imgData.file.type,
+          file_size: imgData.file.size,
+          propertyId: propertyId,
+        });
+        
+        if (!presignedResponse.success) {
+          throw new Error(presignedResponse.error || '获取预签名URL失败');
+        }
+        
+        // 直接上传到R2
+        const response = await fetch(presignedResponse.data.upload_url, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': imgData.file.type,
+          },
+          body: imgData.file,
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Upload failed with status ${response.status}`);
+        }
+        
+        uploadedImages.push({
+          objectKey: presignedResponse.data.object_key,
+          fileUrl: presignedResponse.data.file_url,
+          fileSize: imgData.file.size,
+          contentType: imgData.file.type,
+          order: i,
+          isMain: i === 0
+        });
+        
+      } catch (error) {
+        console.error(`Failed to upload ${imgData.file.name}:`, error);
+        throw new Error(`图片 ${imgData.file.name} 上传失败: ${(error as any)?.message || 'Unknown error'}`);
+      }
+    }
+    
+    return uploadedImages;
+  };
+
+  // 简化的提交逻辑
   const onSubmit = async () => {
     try {
       setIsLoading(true);
       setError('');
 
-      const formData = new FormData();
+      let propertyId = currentPropertyId;
+      
+      // 如果是新建房源且没有propertyId，先创建草稿
+      if (!addPropertyModal.isEditMode && !propertyId) {
+        propertyId = await createDraftProperty();
+      }
 
-      formData.append('title', propertyDetails.title);
-      formData.append('description', propertyDetails.description);
-      formData.append('price_per_night', propertyDetails.price.toString());
-      formData.append('category', category);
-      formData.append('place_type', placeType);
-      formData.append('guests', basicInfo.guests.toString());
-      formData.append('bedrooms', basicInfo.bedrooms.toString());
-      formData.append('beds', basicInfo.beds.toString());
-      formData.append('bathrooms', basicInfo.bathrooms.toString());
-      formData.append('country', location.country);
-      formData.append('state', location.state);
-      formData.append('city', location.city);
-      formData.append('address', location.street);
-      formData.append('postal_code', location.postalCode);
-      formData.append('timezone', location.timezone);
+      // 上传图片（如果有的话）
+      let uploadedImages: R2ImageData[] = [];
+      if (imagePreviewData.length > 0) {
+        uploadedImages = await uploadImagesToR2(imagePreviewData, propertyId);
+      }
+
+      // 准备房源数据
+      const propertyData = {
+        title: propertyDetails.title,
+        description: propertyDetails.description,
+        price_per_night: propertyDetails.price,
+        category: category,
+        place_type: placeType,
+        guests: basicInfo.guests,
+        bedrooms: basicInfo.bedrooms,
+        beds: basicInfo.beds,
+        bathrooms: basicInfo.bathrooms,
+        country: location.country,
+        state: location.state,
+        city: location.city,
+        address: location.street,
+        postal_code: location.postalCode,
+        timezone: location.timezone,
+      };
 
       if (addPropertyModal.isEditMode && addPropertyModal.propertyToEdit) {
-        for (const [index, image] of images.entries()) {
-          if (image.startsWith('data:')) {
-            const byteString = atob(image.split(',')[1]);
-            const mimeType = image.split(',')[0].split(':')[1].split(';')[0];
-            const arrayBuffer = new ArrayBuffer(byteString.length);
-            const intArray = new Uint8Array(arrayBuffer);
-            
-            for (let i = 0; i < byteString.length; i++) {
-              intArray[i] = byteString.charCodeAt(i);
-            }
-            
-            const blob = new Blob([arrayBuffer], { type: mimeType });
-            formData.append('new_images', blob, `image${index}.jpg`);
-          } else {
-            const file = await fetch(image).then(r => r.blob());
-            formData.append('new_images', file, `image${index}.jpg`);
-          }
-        }
-
+        // 编辑模式：更新房源信息
         const response = await apiService.patch(
           `/api/properties/${addPropertyModal.propertyToEdit.id}/`,
-          formData
+          propertyData
         );
 
         if (response.success) {
+          // 如果有新上传的图片，更新图片信息
+          if (uploadedImages.length > 0) {
+            await apiService.patch(
+              `/api/properties/${addPropertyModal.propertyToEdit.id}/`,
+              { images: uploadedImages }
+            );
+          }
+          
           toast.success(t('updateSuccess'));
           addPropertyModal.onClose();
           router.refresh();
@@ -235,28 +320,13 @@ export default function AddPropertyModal() {
           setError(response.errors || response.error || t('updateFailed'));
         }
       } else {
-        for (const [index, image] of images.entries()) {
-          if (image.startsWith('data:')) {
-            // 直接从data URL创建Blob
-            const byteString = atob(image.split(',')[1]);
-            const mimeType = image.split(',')[0].split(':')[1].split(';')[0];
-            const arrayBuffer = new ArrayBuffer(byteString.length);
-            const intArray = new Uint8Array(arrayBuffer);
-            
-            for (let i = 0; i < byteString.length; i++) {
-              intArray[i] = byteString.charCodeAt(i);
-            }
-            
-            const blob = new Blob([arrayBuffer], { type: mimeType });
-            formData.append('images', blob, `image${index}.jpg`);
-          } else {
-            // 对于非data URL，仍然使用fetch
-            const file = await fetch(image).then(r => r.blob());
-            formData.append('images', file, `image${index}.jpg`);
-          }
-        }
-
-        const response = await apiService.post('/api/properties/create/', formData);
+        // 新建模式：发布草稿房源
+        const publishData = {
+          ...propertyData,
+          images: uploadedImages
+        };
+        
+        const response = await apiService.post(`/api/properties/${propertyId}/publish/`, publishData);
 
         if (response.success) {
           toast.success(t('createSuccess'));
@@ -264,12 +334,14 @@ export default function AddPropertyModal() {
           router.push('/');
           router.refresh();
         } else {
+          // 发布失败，房源作为草稿保存
           setError(response.errors || response.error || t('createFailed'));
+          toast.error(t('publishFailedDraftSaved'));
         }
       }
     } catch (error: any) {
       console.error('Submission error:', error);
-      setError(error.message || 'An error occurred');
+      setError(error?.message || 'An error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -308,25 +380,50 @@ export default function AddPropertyModal() {
           <>
             <h2 className="mb-6 text-2xl font-semibold">{t('photosDescription')}</h2>
             <p className="text-gray-500 mb-6">{t('photosNote')}</p>
-            {addPropertyModal.isEditMode ? (
-              <div className="space-y-8">
-                {addPropertyModal.propertyToEdit && existingImages.length > 0 && (
-                  <div className="mb-8">
-                    <ImageManagerLazy
-                      propertyId={addPropertyModal.propertyToEdit.id}
-                      initialImages={existingImages}
-                      onImagesChange={handleImagesChange}
-                    />
-                  </div>
-                )}
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">{t('uploadNewImages')}</h3>
-                  <ImageUpload images={images} setImages={setImages} />
+            
+            {/* 新的R2直传图片管理 */}
+            <div className="space-y-6">
+              <ImagePreviewAndCompress
+                images={imagePreviewData}
+                onImagesChange={setImagePreviewData}
+                maxImages={5}
+                maxSizeKB={5120} // 5MB
+                quality={85}
+                className=""
+              />
+              
+              {/* 图片选择提示 */}
+              {imagePreviewData.length > 0 && (
+                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-700">
+                    {t('imagesSelectedWillUpload', { count: imagePreviewData.length })}
+                  </p>
                 </div>
-              </div>
-            ) : (
-              <ImageUpload images={images} setImages={setImages} />
-            )}
+              )}
+              
+              {/* 编辑模式下显示已有图片 */}
+              {addPropertyModal.isEditMode && existingImages.length > 0 && (
+                <div className="border-t pt-6">
+                  <h3 className="text-lg font-semibold mb-4">{t('existingImages')}</h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    {existingImages.map((img, index) => (
+                      <div key={img.id || index} className="relative aspect-square rounded-lg overflow-hidden border">
+                        <img
+                          src={img.fileUrl}
+                          alt={t('existingImageAlt', { index: index + 1 })}
+                          className="w-full h-full object-cover"
+                        />
+                        {img.isMain && (
+                          <div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-1 rounded">
+                            {t('mainPhoto')}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </>
         )}
         {currentStep === 6 && (
@@ -363,28 +460,40 @@ export default function AddPropertyModal() {
             </div>
           </div>
 
-          <button
-            onClick={currentStep === TOTAL_STEPS ? onSubmit : onNext}
-            disabled={isLoading || !validateStep()}
-            className={`
-                            px-6 py-2 rounded-lg
-                            ${
-                              isLoading
-                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                : validateStep()
-                                  ? 'bg-gray-900 text-white hover:bg-gray-800'
-                                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                            }
-                        `}
-          >
-            {isLoading
-              ? commonT('loading')
-              : currentStep === TOTAL_STEPS
-                ? addPropertyModal.isEditMode
-                  ? t('updateListing')
-                  : t('createListing')
-                : commonT('next')}
-          </button>
+          <div className="flex flex-col items-end">
+            <button
+              onClick={currentStep === TOTAL_STEPS ? onSubmit : onNext}
+              disabled={isLoading || !validateStep()}
+              className={`
+                              px-6 py-2 rounded-lg
+                              ${
+                                isLoading
+                                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                  : validateStep()
+                                    ? 'bg-gray-900 text-white hover:bg-gray-800'
+                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                              }
+                          `}
+            >
+              {isLoading
+                ? currentStep === TOTAL_STEPS
+                  ? t('creating')
+                  : commonT('loading')
+                : currentStep === TOTAL_STEPS
+                  ? addPropertyModal.isEditMode
+                    ? t('updateListing')
+                    : t('createListing')
+                  : commonT('next')}
+            </button>
+            
+            {/* 发布时的加载状态显示 */}
+            {isLoading && currentStep === TOTAL_STEPS && (
+              <div className="mt-2 text-sm text-gray-600 flex items-center">
+                <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin mr-2"></div>
+                <span>{addPropertyModal.isEditMode ? t('updating') : t('creating')}</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

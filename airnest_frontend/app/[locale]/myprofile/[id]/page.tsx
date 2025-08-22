@@ -4,7 +4,7 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import Image from 'next/image';
 import apiService from '@/app/services/apiService';
-import CustomButton from '@/app/components/forms/CustomButton';
+import CustomButton from '@/app/components/common/CustomButton';
 import { useTranslations } from 'next-intl';
 import toast from 'react-hot-toast';
 import { useErrorHandler } from '@/app/hooks/useErrorHandler';

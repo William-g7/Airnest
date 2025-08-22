@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import apiService from '@/app/services/apiService';
-import CustomButton from '@/app/components/forms/CustomButton';
+import CustomButton from '@/app/components/common/CustomButton';
 import toast from 'react-hot-toast';
 import { useLoginModal } from '@/app/components/hooks/useLoginModal';
 
