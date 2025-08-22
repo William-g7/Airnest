@@ -28,6 +28,8 @@ export const tokenService = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          // 确保包含 Origin 头用于安全验证
+          'Origin': typeof window !== 'undefined' ? window.location.origin : '',
         },
         credentials: 'include',
       });
