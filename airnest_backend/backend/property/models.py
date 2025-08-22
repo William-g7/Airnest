@@ -22,6 +22,14 @@ def get_file_url(file_field):
     else:
         return f'{settings.WEBSITE_URL}{file_field.url}'
 
+# 临时保留此函数用于旧迁移文件兼容性
+def property_image_path(instance, filename):
+    """
+    DEPRECATED: 仅用于旧迁移文件兼容性
+    现在使用R2存储，不再使用此路径函数
+    """
+    return f'property_images/{filename}'
+
 class Property(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=255)
@@ -119,14 +127,14 @@ class Property(models.Model):
 class PropertyImage(models.Model):
     # 基本关联
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    property_ref = models.ForeignKey(Property, related_name='images', on_delete=models.CASCADE)
+    property_ref = models.ForeignKey(Property, related_name='images', on_delete=models.CASCADE, null=True, blank=True)
     
     # R2存储核心信息
-    object_key = models.CharField(max_length=500, unique=True)
-    file_url = models.URLField(max_length=500)
-    file_size = models.BigIntegerField()
-    content_type = models.CharField(max_length=100)
-    etag = models.CharField(max_length=100, blank=True)
+    object_key = models.CharField(max_length=500, unique=True, default='')
+    file_url = models.URLField(max_length=500, default='')
+    file_size = models.BigIntegerField(default=0)
+    content_type = models.CharField(max_length=100, default='image/jpeg')
+    etag = models.CharField(max_length=100, blank=True, default='')
     
     # 展示控制
     order = models.IntegerField(default=0)
@@ -134,8 +142,8 @@ class PropertyImage(models.Model):
     alt_text = models.CharField(max_length=255, blank=True)
     
     # 元数据
-    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='uploaded_images')
-    uploaded_at = models.DateTimeField(auto_now_add=True)
+    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='uploaded_images', null=True, blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
