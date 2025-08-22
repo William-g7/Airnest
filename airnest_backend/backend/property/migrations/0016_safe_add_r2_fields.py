@@ -30,11 +30,11 @@ class Migration(migrations.Migration):
             """
             DO $$ 
             BEGIN
-                -- Add object_key if not exists
+                -- Add object_key if not exists (WITHOUT unique constraint for now)
                 IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
                               WHERE table_name='property_propertyimage' AND column_name='object_key') THEN
                     ALTER TABLE property_propertyimage ADD COLUMN object_key VARCHAR(500) DEFAULT '' NOT NULL;
-                    ALTER TABLE property_propertyimage ADD CONSTRAINT property_propertyimage_object_key_unique UNIQUE (object_key);
+                    -- UNIQUE constraint temporarily removed to avoid deployment issues
                 END IF;
                 
                 -- Add file_url if not exists
