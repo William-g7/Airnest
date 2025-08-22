@@ -97,9 +97,11 @@ CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
     'authorization',
+    'cache-control',
     'content-type',
     'dnt',
     'origin',
+    'pragma',
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
@@ -135,6 +137,7 @@ INSTALLED_APPS = [
     'chat',
     'property',
     'useraccount',
+    'media_upload',
     
     'django_cleanup.apps.CleanupConfig',
 ]
