@@ -20,7 +20,12 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'media.airnest.me',
-        pathname: '/**', 
+        pathname: '/properties/*/images/**', 
+      },
+      {
+        protocol: 'https',
+        hostname: 'media.airnest.me',
+        pathname: '/users/*/avatars/**', 
       },
     ],
     formats: ['image/avif', 'image/webp'], 
