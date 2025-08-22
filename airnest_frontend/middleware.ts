@@ -4,7 +4,6 @@ import { NextRequest } from 'next/server';
 
 const intlMiddleware = createMiddleware(routing);
 
-// 生成随机nonce (16字节的Base64编码)
 function generateNonce() {
   if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
     const buffer = new Uint8Array(16);
@@ -16,90 +15,66 @@ function generateNonce() {
 }
 
 export default async function middleware(request: NextRequest) {
-  // 排除图标文件和静态资源，避免被 i18n 处理
-  const pathname = request.nextUrl.pathname;
-  if (
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/api') ||
-    pathname.endsWith('.ico') ||
-    pathname.endsWith('.svg') ||
-    pathname.endsWith('.png') ||
-    pathname.endsWith('.jpg') ||
-    pathname.endsWith('.jpeg') ||
-    pathname.endsWith('.gif') ||
-    pathname.endsWith('.webp') ||
-    pathname.endsWith('.js') ||
-    pathname.endsWith('.css') ||
-    pathname === '/robots.txt' ||
-    pathname === '/sitemap.xml' ||
-    pathname === '/icon.svg' ||
-    pathname === '/favicon.ico'
-  ) {
-    // 对于静态资源，跳过 i18n 中间件，但仍然添加安全头
-    return;
+  const response = intlMiddleware(request);
+
+  if (request.method === 'GET' || request.method === 'HEAD') {
+    const accept = request.headers.get('accept') || '';
+    const isHtml = accept.includes('text/html');
+    if (isHtml ){
+      const nonce = generateNonce() ;
+
+      response.headers.set('x-middleware-override-headers', 'x-csp-nonce');
+      response.headers.set('x-middleware-request-x-csp-nonce', nonce);
+
+      response.cookies.set('csp-nonce', nonce, {
+        httpOnly: true, 
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 60 * 5,
+        path: '/',
+      });
+
+      const isDev = process.env.NODE_ENV === 'development';
+      // Cloudflare Turnstile域名
+      const cloudflareDomains = 'challenges.cloudflare.com';
+      // Cloudflare R2存储域名
+      const r2Domains = '*.r2.cloudflarestorage.com';
+      // 汇率API域名
+      const exchangeRateApiDomain = 'api.exchangerate-api.com';
+
+      const cspHeader = isDev
+        ? `
+          default-src 'self';
+          script-src 'self' 'unsafe-eval' 'unsafe-inline' ${cloudflareDomains};
+          style-src 'self' 'unsafe-inline';
+          img-src 'self' data: blob:;
+          font-src 'self' data:;
+          connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_WS_HOST} ws://localhost:* ${cloudflareDomains} ${r2Domains} ${exchangeRateApiDomain};
+          frame-src 'self' ${cloudflareDomains};
+          worker-src 'self' blob:;
+        `
+        : `
+          default-src 'self';
+          script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https: ${cloudflareDomains} ;
+          style-src 'self' 'nonce-${nonce}';
+          img-src 'self' data: blob:;
+          font-src 'self' data:;
+          connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_WS_HOST} ${cloudflareDomains} ${r2Domains} ${exchangeRateApiDomain};
+          frame-src 'self' ${cloudflareDomains};
+          base-uri 'self';
+          form-action 'self';
+          frame-ancestors 'self';
+          upgrade-insecure-requests;
+        `;
+
+      const cleanCspHeader = cspHeader.replace(/\s{2,}/g, ' ').trim();
+
+      response.headers.set('Content-Security-Policy', cleanCspHeader);
+      response.headers.set('X-Content-Type-Options', 'nosniff');
+      response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+      response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+   }
   }
-  
-  const nonce = generateNonce();
-
-  const response = await intlMiddleware(request);
-
-  response.cookies.set('csp-nonce', nonce, {
-    httpOnly: false,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    maxAge: 60 * 5,
-    path: '/',
-  });
-
-  const isDev = process.env.NODE_ENV === 'development';
-
-  const reportUri = '/api/csp-report';
-
-  // Cloudflare Turnstile域名
-  const cloudflareDomains = 'challenges.cloudflare.com';
-
-  const cspHeader = isDev
-    ? `
-      default-src 'self';
-      script-src 'self' 'unsafe-eval' 'unsafe-inline' ${cloudflareDomains};
-      style-src 'self' 'unsafe-inline';
-      img-src 'self' data: blob: ${process.env.NEXT_PUBLIC_API_URL};
-      font-src 'self' data:;
-      connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_WS_HOST} ws://localhost:* ${cloudflareDomains};
-      frame-src 'self' ${cloudflareDomains};
-      worker-src 'self' blob:;
-      report-uri ${reportUri};
-    `
-    : `
-      default-src 'self';
-      script-src 'self' 'unsafe-inline' ${cloudflareDomains};
-      style-src 'self' 'nonce-${nonce}' 'unsafe-inline';
-      img-src 'self' data: blob: ${process.env.NEXT_PUBLIC_API_URL};
-      font-src 'self' data:;
-      connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_WS_HOST} ${cloudflareDomains};
-      frame-src 'self' ${cloudflareDomains};
-      base-uri 'self';
-      form-action 'self';
-      frame-ancestors 'self';
-      block-all-mixed-content;
-      upgrade-insecure-requests;
-      report-uri ${reportUri};
-    `;
-
-  const cleanCspHeader = cspHeader.replace(/\s{2,}/g, ' ').trim();
-
-  response.headers.set('Content-Security-Policy', cleanCspHeader);
-
-  // 创建干净的 CSP Report-Only 头值，去除换行符和多余空格
-  const reportOnlyCsp = `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' ${cloudflareDomains}; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: ${process.env.NEXT_PUBLIC_API_URL}; font-src 'self' data:; connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_WS_HOST} ${cloudflareDomains}; frame-src 'self' ${cloudflareDomains}; report-uri ${reportUri}`;
-
-  response.headers.set('Content-Security-Policy-Report-Only', reportOnlyCsp);
-
-  response.headers.set('X-Content-Type-Options', 'nosniff');
-  response.headers.set('X-Frame-Options', 'DENY');
-  response.headers.set('X-XSS-Protection', '1; mode=block');
-  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
   return response;
 }
