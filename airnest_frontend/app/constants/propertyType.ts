@@ -19,6 +19,8 @@ export interface PropertyType {
   postal_code: string;
   timezone?: string;
 
+  status?: 'draft' | 'published';
+
   images: PropertyImage[];
 
   landlord: {
@@ -28,7 +30,6 @@ export interface PropertyType {
     avatar_url?: string;
   };
 
-  // 评论统计数据（可选，仅在需要时提供）
   average_rating?: number;
   total_reviews?: number;
   positive_review_rate?: number;
