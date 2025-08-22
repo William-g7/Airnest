@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useSignupModal } from '../hooks/useSignupModal';
 import { useLoginModal } from '../hooks/useLoginModal';
 import Modal from './Modal';
-import CustomButton from '../forms/CustomButton';
+import CustomButton from '../common/CustomButton';
 import apiService from '@/app/services/apiService';
 import { useTranslations } from 'next-intl';
 import toast from 'react-hot-toast';

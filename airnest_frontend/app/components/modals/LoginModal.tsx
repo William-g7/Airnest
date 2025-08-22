@@ -5,7 +5,7 @@ import { useRouter } from '@/i18n/navigation';
 import { useLoginModal } from '../hooks/useLoginModal';
 import { useForgotPasswordModal } from '../hooks/useForgotPasswordModal';
 import Modal from './Modal';
-import CustomButton from '../forms/CustomButton';
+import CustomButton from '../common/CustomButton';
 import apiService from '@/app/services/apiService';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/app/stores/authStore';

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import Modal from './Modal';
-import CustomButton from '../forms/CustomButton';
+import CustomButton from '../common/CustomButton';
 import { useChangePasswordModal } from '../hooks/useChangePasswordModal';
 import apiService from '@/app/services/apiService';
 import toast from 'react-hot-toast';

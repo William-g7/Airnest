@@ -12,7 +12,7 @@ import { Link } from '@/i18n/navigation';
 import { PropertyType } from '@/app/constants/propertyType';
 import ContactButton from '@/app/components/ContactButton';
 import { useTranslations } from 'next-intl';
-import CustomButton from '@/app/components/forms/CustomButton';
+import CustomButton from '@/app/components/common/CustomButton';
 import toast from 'react-hot-toast';
 import { useTranslate } from '@/app/hooks/useTranslate';
 import PropertyReviews from './PropertyReviews';
@@ -232,7 +232,7 @@ const PropertyDetail = ({ property }: { property: PropertyType }) => {
 
           <hr className="my-6" />
 
-          <PropertyReviews propertyId={property.id} />
+          <PropertyReviews propertyId={property.id} propertyStatus={property.status} />
         </div>
 
         <div className="md:col-span-5 lg:col-span-4">
