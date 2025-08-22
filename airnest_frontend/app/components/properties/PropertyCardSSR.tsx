@@ -36,10 +36,7 @@ export default async function PropertyCardSSR({
     }
     
     const mainImage = property.images[0];
-    
-    // 服务器端默认使用中等质量图片，避免客户端匹配水化不一致
-    const imageUrl = mainImage.mediumURL || mainImage.imageURL;
-    return imageUrl;
+    return mainImage.imageURL;
   };
 
   // 处理翻译后的内容

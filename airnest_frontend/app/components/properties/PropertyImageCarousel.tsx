@@ -67,40 +67,24 @@ const ImageCarousel = ({ images, title }: ImageCarouselProps) => {
     setLoadedImages(prev => new Set(prev).add(index));
   }, []);
 
-  const getOptimalImageUrl = (image: PropertyImage, index: number) => {
-    const defaultImage = '/placeholder.jpg';
-    
-    if (!image) return defaultImage;
-
+  const getOptimalImageSize = (index: number) => {
     const screenWidth = getScreenWidth();
 
-    // 如果是首图且有JPG格式，优先使用高质量JPG
-    if (index === 0 && image.mainJpgURL) {
-      return image.mainJpgURL;
-    }
-    
-    // 超大屏幕 (4K等高分辨率显示器) 优先使用超高清图片
+    // 根据屏幕尺寸和图片位置决定尺寸
     if (screenWidth >= 2560) {
-      return image.xlargeURL || image.largeURL || image.mediumURL || image.imageURL || defaultImage;
+      return { width: 2400, height: 1800, quality: index === 0 ? 95 : 90 };
     }
     
-    // 大屏幕优先使用高分辨率图片
     if (screenWidth >= 1440) {
-      return image.largeURL || image.mediumURL || image.imageURL || defaultImage;
+      return { width: 1600, height: 1200, quality: index === 0 ? 90 : 85 };
     }
     
-    // 中等屏幕使用中等尺寸
     if (screenWidth >= 768) {
-      return image.mediumURL || image.imageURL || defaultImage;
+      return { width: 1200, height: 900, quality: 85 };
     }
     
-    // 小屏幕使用中等尺寸或原始尺寸
-    return image.mediumURL || image.imageURL || defaultImage;
-  };
-  
-  const getFullscreenImageUrl = (image: PropertyImage) => {
-    if (!image) return '/placeholder.jpg';
-    return image.originalURL || image.xlargeURL || image.largeURL || image.imageURL || '/placeholder.jpg';
+    // 移动设备
+    return { width: 800, height: 600, quality: 80 };
   };
 
   // 处理点击轮播图展示全屏大图
@@ -144,7 +128,7 @@ const ImageCarousel = ({ images, title }: ImageCarouselProps) => {
             clickable: true,
           }}
           autoplay={{
-            delay: 4000, // 增加轮播间隔，给图片预加载更多时间
+            delay: 4000, 
             disableOnInteraction: false,
           }}
           loop={true}
@@ -153,7 +137,7 @@ const ImageCarousel = ({ images, title }: ImageCarouselProps) => {
             swiperRef.current = swiper;
           }}
           onSlideChange={handleSlideChange}
-          onInit={handleSlideChange} // 处理初始化
+          onInit={handleSlideChange} 
         >
           {images && images.length > 0 ? (
             images.map((image, index) => (
@@ -163,8 +147,8 @@ const ImageCarousel = ({ images, title }: ImageCarouselProps) => {
                   onClick={() => openFullscreenImage(index)}
                 >
                   <Image
-                    src={getOptimalImageUrl(image, index)}
-                    alt={`${title} - Image ${index + 1}`}
+                    src={image.imageURL}
+                    alt={image.alt_text || `${title} - Image ${index + 1}`}
                     fill
                     className={`object-cover transition-opacity duration-500 ease-in-out ${
                       loadedImages.has(index) ? 'opacity-100' : 'opacity-0'
@@ -172,10 +156,9 @@ const ImageCarousel = ({ images, title }: ImageCarouselProps) => {
                     priority={index === 0}
                     loading={index <= 2 ? 'eager' : 'lazy'}
                     sizes="(max-width: 768px) 100vw, (max-width: 1440px) 100vw, (max-width: 2560px) 100vw, 100vw"
-                    quality={index === 0 ? 95 : (getScreenWidth() >= 1440 ? 90 : 85)}
+                    quality={getOptimalImageSize(index).quality}
                     onLoad={() => handleImageLoad(index)}
                     onError={() => {
-                      // 图片加载失败，静默处理
                       console.warn(`Failed to load image ${index + 1}`);
                     }}
                   />
@@ -267,11 +250,11 @@ const ImageCarousel = ({ images, title }: ImageCarouselProps) => {
 
           <div className="relative w-[90vw] h-[90vh]">
             <Image
-              src={getFullscreenImageUrl(images[currentFullscreenIndex])}
-              alt={`${title} - 大图 ${currentFullscreenIndex + 1}`}
+              src={images[currentFullscreenIndex].imageURL}
+              alt={images[currentFullscreenIndex].alt_text || `${title} - 大图 ${currentFullscreenIndex + 1}`}
               fill
               className="object-contain"
-              quality={100}
+              quality={95}
               sizes="90vw"
             />
           </div>

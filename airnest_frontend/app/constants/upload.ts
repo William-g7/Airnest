@@ -43,11 +43,10 @@ export interface R2ImageData {
   uploadedAt?: string;
 }
 
-// 用于兼容现有ImageData接口
-export interface LegacyImageData {
+export interface SimplifiedImageData {
   id: number;
   imageURL: string;
-  thumbnailURL?: string | null;
   is_main: boolean;
   order: number;
+  alt_text?: string;
 }
