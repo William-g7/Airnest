@@ -1,4 +1,3 @@
-// 服务器端渲染的房产卡片组件
 import Image from 'next/image';
 import { PropertyType } from '@/app/constants/propertyType';
 import { CurrencyIsland } from './CurrencyIsland';
@@ -37,8 +36,10 @@ export default async function PropertyCardSSR({
     }
     
     const mainImage = property.images[0];
+    
     // 服务器端默认使用中等质量图片，避免客户端匹配水化不一致
-    return mainImage.mediumURL || mainImage.imageURL;
+    const imageUrl = mainImage.mediumURL || mainImage.imageURL;
+    return imageUrl;
   };
 
   // 处理翻译后的内容
