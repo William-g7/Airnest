@@ -56,7 +56,7 @@ export default async function middleware(request: NextRequest) {
         : `
           default-src 'self';
           script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https: ${cloudflareDomains} ;
-          style-src 'self' 'nonce-${nonce}';
+          style-src 'self' 'nonce-${nonce}' 'unsafe-inline';
           img-src 'self' data: blob:;
           font-src 'self' data:;
           connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_WS_HOST} ${cloudflareDomains} ${r2Domains} ${exchangeRateApiDomain};
