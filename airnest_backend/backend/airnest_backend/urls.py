@@ -17,7 +17,7 @@ urlpatterns = [
     path('api/properties/', include('property.urls')),
     path('api/auth/', include('useraccount.urls')),
     path('api/chat/', include('chat.urls')),
+    path('api/media/', include('media_upload.urls')),
     path('api/translate/', translate_text, name='translate-text'),
     path('api/translate/batch/', translate_batch, name='translate-batch'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
