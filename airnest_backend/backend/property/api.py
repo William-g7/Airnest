@@ -995,20 +995,14 @@ def create_draft_property(request):
 def publish_property(request, pk):
     """发布草稿房源，包含完整的房源信息和R2图片数据"""
     try:
-        print(f"🔍 [PUBLISH DEBUG] Starting publish for property {pk}")
-        print(f"🔍 [PUBLISH DEBUG] User: {request.user.id}")
-        print(f"🔍 [PUBLISH DEBUG] Request body: {request.body}")
-        
-        # 获取草稿房源
+        # 获取房源
         property = Property.objects.get(pk=pk, landlord=request.user)
-        print(f"🔍 [PUBLISH DEBUG] Property found: {property.title}, status: {property.status}")
         
-        if property.status != 'draft':
-            print(f"❌ [PUBLISH DEBUG] Property status is {property.status}, not draft")
-            return JsonResponse({'error': '只能发布草稿状态的房源'}, status=400)
+        # 允许更新草稿和已发布的房源
+        if property.status not in ['draft', 'published']:
+            return JsonResponse({'error': '无效的房源状态'}, status=400)
         
         data = json.loads(request.body) if request.body else {}
-        print(f"🔍 [PUBLISH DEBUG] Parsed data: {data}")
         
         # 更新房源信息
         property.title = data.get('title', property.title)
@@ -1032,25 +1026,17 @@ def publish_property(request, pk):
         
         # 处理R2图片信息
         images_data = data.get('images', [])
-        print(f"🔍 [PUBLISH DEBUG] Images data received: {images_data}")
-        print(f"🔍 [PUBLISH DEBUG] Number of images: {len(images_data)}")
         
         # 删除现有图片（如果有的话）
-        existing_images_count = PropertyImage.objects.filter(property_ref=property).count()
-        print(f"🔍 [PUBLISH DEBUG] Existing images count: {existing_images_count}")
         PropertyImage.objects.filter(property_ref=property).delete()
         
         # 验证是否有图片数据
         if not images_data:
-            print(f"❌ [PUBLISH DEBUG] No images provided - business validation will fail")
             return JsonResponse({'error': '至少需要上传一张图片'}, status=400)
         
         # 创建新的图片记录
-        created_images = []
         for index, image_data in enumerate(images_data):
-            print(f"🔍 [PUBLISH DEBUG] Processing image {index}: {image_data}")
-            
-            image_record = PropertyImage.objects.create(
+            PropertyImage.objects.create(
                 property_ref=property,
                 object_key=image_data.get('objectKey'),
                 file_url=image_data.get('fileUrl'),
@@ -1060,31 +1046,18 @@ def publish_property(request, pk):
                 is_main=image_data.get('isMain', False),
                 uploaded_by=request.user
             )
-            created_images.append(image_record)
-            print(f"✅ [PUBLISH DEBUG] Created image record: {image_record.id}")
-        
-        print(f"🔍 [PUBLISH DEBUG] Total images created: {len(created_images)}")
-        
-        # 验证图片是否真的创建成功
-        final_image_count = PropertyImage.objects.filter(property_ref=property).count()
-        print(f"🔍 [PUBLISH DEBUG] Final image count in DB: {final_image_count}")
         
         
         # 序列化返回数据
         serializer = PropertySerializer(property, context={'request': request})
         
-        print(f"✅ [PUBLISH DEBUG] Property published successfully!")
         return JsonResponse({
             'success': True,
             'data': serializer.data
         })
         
     except Property.DoesNotExist:
-        print(f"❌ [PUBLISH DEBUG] Property not found: {pk}")
         return JsonResponse({'error': '房源不存在或无权访问'}, status=404)
     except Exception as e:
-        print(f"❌ [PUBLISH DEBUG] Exception occurred: {e}")
-        print(f"❌ [PUBLISH DEBUG] Exception type: {type(e)}")
-        import traceback
-        print(f"❌ [PUBLISH DEBUG] Traceback: {traceback.format_exc()}")
+        print(f"Error publishing property: {e}")
         return JsonResponse({'error': str(e)}, status=400)
