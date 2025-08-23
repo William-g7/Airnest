@@ -1,47 +1,36 @@
 'use client';
 
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useLocale } from 'next-intl';        // 你在用 next-intl
 import { useSearchStore } from '@/app/stores/searchStore';
 
-const ResetLogo = () => {
-  const router = useRouter();
+export default function ResetLogo() {
+  const locale = useLocale();
   const { resetFilters } = useSearchStore();
 
-  const handleLogoClick = () => {
-    try {
-      // 重置搜索过滤器
-      resetFilters();
-      
-      // 导航到首页
-      router.push('/');
-    } catch (error) {
-      console.error('Logo click navigation error:', error);
-      // 如果Zustand store失败，至少确保导航能工作
-      try {
-        window.location.href = '/';
-      } catch (fallbackError) {
-        console.error('Fallback navigation also failed:', fallbackError);
-      }
-    }
-  };
-
   return (
-    <div
-      className="flex-shrink-0 cursor-pointer transition-transform duration-300"
-      onClick={handleLogoClick}
+    <Link
+      href={`/${locale}`}                      
+      prefetch={false}
+      className="relative z-50 flex-shrink-0 inline-flex cursor-pointer transition-transform duration-300 pointer-events-auto"
       style={{ transform: `scale(var(--logo-scale, 1))` }}
+      aria-label="Go to home"
+      onClickCapture={(e) => {
+        // 捕获阶段先执行，避免父级 onClick/onClickCapture 阻止事件
+        try { resetFilters(); } catch {}
+        e.stopPropagation();
+        e.nativeEvent?.stopImmediatePropagation?.();
+      }}
     >
-      <Image 
-        src="/logo.png" 
-        alt="Airnest" 
-        width={100} 
+      <Image
+        src="/logo.png"
+        alt="Airnest"
+        width={100}
         height={38}
-        style={{ width: 'auto', height: 'auto' }}
         priority
+        style={{ width: 'auto', height: 'auto' }}
       />
-    </div>
+    </Link>
   );
-};
-
-export default ResetLogo;
+}
