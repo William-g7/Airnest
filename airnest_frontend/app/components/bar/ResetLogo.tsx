@@ -9,8 +9,21 @@ const ResetLogo = () => {
   const { resetFilters } = useSearchStore();
 
   const handleLogoClick = () => {
-    resetFilters();
-    router.push('/');
+    try {
+      // 重置搜索过滤器
+      resetFilters();
+      
+      // 导航到首页
+      router.push('/');
+    } catch (error) {
+      console.error('Logo click navigation error:', error);
+      // 如果Zustand store失败，至少确保导航能工作
+      try {
+        window.location.href = '/';
+      } catch (fallbackError) {
+        console.error('Fallback navigation also failed:', fallbackError);
+      }
+    }
   };
 
   return (
@@ -25,6 +38,7 @@ const ResetLogo = () => {
         width={100} 
         height={38}
         style={{ width: 'auto', height: 'auto' }}
+        priority
       />
     </div>
   );
