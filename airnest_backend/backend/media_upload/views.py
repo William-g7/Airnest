@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@csrf_exempt
 def get_presigned_upload_url(request):
     """
     获取单个文件的预签名上传URL
@@ -105,6 +106,7 @@ def get_presigned_upload_url(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@csrf_exempt
 def get_batch_presigned_upload_urls(request):
     """
     批量获取预签名上传URL
@@ -194,6 +196,7 @@ def get_batch_presigned_upload_urls(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@csrf_exempt
 def verify_upload(request):
     """
     验证文件上传是否成功
@@ -347,6 +350,7 @@ def delete_uploaded_file(request):
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
+@csrf_exempt
 def draft_properties_list_create(request):
     """
     草稿房源列表和创建的统一端点
@@ -601,6 +605,7 @@ def delete_draft_property_impl(request, draft_id):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@csrf_exempt
 def publish_draft_property(request):
     """
     发布草稿房源到正式房源
@@ -705,6 +710,7 @@ def publish_draft_property(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@csrf_exempt
 def add_draft_property_images(request):
     """
     添加草稿房源图片

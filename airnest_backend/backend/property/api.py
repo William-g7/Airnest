@@ -1,6 +1,7 @@
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .cache_utils import (
     property_list_cache, property_detail_cache, review_cache, 
@@ -215,6 +216,7 @@ def my_properties(request):
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
+@csrf_exempt
 def create_property(request):
     try:
         form = PropertyForm(request.POST)
@@ -250,6 +252,7 @@ def create_property(request):
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
+@csrf_exempt
 def create_reservation(request, pk):
     try:
         check_in_date = request.data['check_in'] 
@@ -462,6 +465,7 @@ def get_user_reservations(request):
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
+@csrf_exempt
 def toggle_favorite(request, pk):
     try:
         property = Property.objects.get(pk=pk)
@@ -526,6 +530,7 @@ def get_timezone_list(request):
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
+@csrf_exempt
 def update_property_images_order(request, property_id):
     """
     更新房源图片的顺序
@@ -642,7 +647,8 @@ def get_review_tags(request):
 
 @api_view(['GET', 'POST'])
 @authentication_classes([JWTAuthentication])
-@permission_classes([])  # GET不需要认证，POST需要认证
+@permission_classes([IsAuthenticatedOrReadOnly])  # GET 允许匿名，POST 需要认证
+@csrf_exempt  # 对于 API 请求，禁用 CSRF 检查，使用 JWT 认证
 def property_reviews(request, pk):
     """获取房源评论列表或创建新评论"""
     try:
@@ -937,6 +943,7 @@ def property_with_reviews(request, pk):
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
+@csrf_exempt
 def create_draft_property(request):
     """创建草稿房源，获取property_id用于R2上传"""
     try:
@@ -983,6 +990,7 @@ def create_draft_property(request):
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
+@csrf_exempt
 def publish_property(request, pk):
     """发布草稿房源，包含完整的房源信息和R2图片数据"""
     try:

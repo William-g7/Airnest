@@ -298,17 +298,17 @@ export default function PropertyReviews({ propertyId, propertyStatus }: Property
               </label>
               <div className="flex flex-wrap gap-2">
                 {availableTags.map(tag => (
-                  <button
+                  <ReviewTag
                     key={tag.tag_key}
+                    tag={{
+                      tag_key: tag.tag_key,
+                      name: tag.tag_key, // Use tag_key for translation
+                      color: tag.color
+                    }}
                     onClick={() => toggleTag(tag.tag_key)}
-                    className={`px-3 py-1 rounded-full text-sm border transition-colors ${
-                      formTags.includes(tag.tag_key)
-                        ? 'bg-airbnb text-white border-airbnb'
-                        : 'bg-white text-gray-700 border-gray-300 hover:border-airbnb'
-                    }`}
-                  >
-                    {tag.name_en}
-                  </button>
+                    selected={formTags.includes(tag.tag_key)}
+                    size="medium"
+                  />
                 ))}
               </div>
             </div>
@@ -372,7 +372,7 @@ export default function PropertyReviews({ propertyId, propertyStatus }: Property
                           key={tag.tag_key}
                           tag={{
                             tag_key: tag.tag_key,
-                            name: tag.name_en, // Use English by default, can be made dynamic
+                            name: tag.tag_key, // Use tag_key for translation
                             color: tag.color
                           }}
                           size="small"

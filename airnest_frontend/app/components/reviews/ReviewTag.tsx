@@ -37,14 +37,14 @@ export default function ReviewTag({
   
   const colorStyle = selected 
     ? { 
-        backgroundColor: '#F3F4F6', 
-        color: '#1F2937',
-        borderColor: 'transparent'
+        backgroundColor: '#EF4444', 
+        color: '#FFFFFF',
+        borderColor: '#EF4444'
       }
     : { 
         backgroundColor: '#F3F4F6', 
         color: '#1F2937',
-        borderColor: 'transparent'
+        borderColor: '#D1D5DB'
       };
   
   return (
