@@ -432,17 +432,8 @@ def get_user_reservations(request):
         for reservation in reservations:
             property_images = []
             for image in reservation.property.images.all():
-                host = request.get_host()
-                protocol = 'https' if request.is_secure() else 'http'
-                base_url = f"{protocol}://{host}"
-                
-                image_url = image.image.url
-                if not image_url.startswith(('http://', 'https://')):
-                    if image_url.startswith('/'):
-                        image_url = f"{base_url}{image_url}"
-                    else:
-                        image_url = f"{base_url}/{image_url}"
-                
+                # 使用新的R2存储字段
+                image_url = image.file_url or image.get_url()
                 property_images.append({'imageURL': image_url})
             
             property_timezone = reservation.property.timezone
