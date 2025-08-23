@@ -1,5 +1,6 @@
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from property.cache_utils import user_private_data, no_cache
 from .models import User, EmailVerification
 from .serializers import LandlordSerializer, UserSerializer
@@ -208,6 +209,7 @@ def verify_email_token(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@csrf_exempt
 def resend_verification_email(request):
     """
     重新发送验证邮件（需要登录）
@@ -294,6 +296,7 @@ def verification_status(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@csrf_exempt
 def cancel_verification(request):
     """
     取消待处理的验证请求
@@ -482,6 +485,7 @@ def reset_password(request):
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
+@csrf_exempt
 def change_password(request):
     """
     已登录用户修改密码
