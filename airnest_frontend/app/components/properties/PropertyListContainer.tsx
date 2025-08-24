@@ -297,7 +297,18 @@ function PropertyListContent({
 
   // 渲染列表
   if (isLoading) {
-    return <PropertyListSkeleton count={initialBatchSize} />;
+    // 如果在父网格中渲染，返回足够数量的骨架屏卡片填满网格
+    if (renderInParentGrid) {
+      return (
+        <>
+          {Array.from({ length: Math.max(15, initialBatchSize) }).map((_, index) => (
+            <div key={`loading-skeleton-${index}`} className="animate-pulse bg-gray-200 h-64 rounded-xl"></div>
+          ))}
+        </>
+      );
+    }
+    // 独立模式显示完整的骨架屏
+    return <PropertyListSkeleton count={Math.max(15, initialBatchSize)} />;
   }
 
   if (error) {
@@ -459,7 +470,7 @@ export default function PropertyListContainer({
   renderInParentGrid = false
 }: PropertyListContainerProps) {
   return (
-    <Suspense fallback={<PropertyListSkeleton />}>
+    <Suspense fallback={<PropertyListSkeleton count={15} />}>
       <PropertyListContent
         initialProperties={initialProperties}
         searchParams={searchParams}

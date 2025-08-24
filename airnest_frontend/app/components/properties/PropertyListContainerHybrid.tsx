@@ -90,8 +90,8 @@ export default async function PropertyListContainerHybrid({
         
         {/* 客户端渲染组件：从第6条开始在同一网格中渲染 */}
         <Suspense fallback={
-          // 骨架屏占位，确保网格布局稳定
-          Array.from({ length: Math.min(10, Math.max(0, 15 - firstScreenProperties.length)) }).map((_, index) => (
+          // 骨架屏占位，确保网格布局稳定 - 显示足够的骨架屏填满网格
+          Array.from({ length: Math.max(10, 20 - firstScreenProperties.length) }).map((_, index) => (
             <div key={`skeleton-${index}`} className="animate-pulse bg-gray-200 h-64 rounded-xl"></div>
           ))
         }>
