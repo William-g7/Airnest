@@ -255,7 +255,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
               modifiers={modifiers}
               modifiersStyles={modifiersStyles}
               locale={dateLocale}
-              numberOfMonths={2}
+              numberOfMonths={1}
               showOutsideDays
               className="rdp-custom"
             />
@@ -377,7 +377,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
               modifiers={modifiers}
               modifiersStyles={modifiersStyles}
               locale={dateLocale}
-              numberOfMonths={2}
+              numberOfMonths={1}
               showOutsideDays
               className="rdp-custom"
             />
