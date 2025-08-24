@@ -42,7 +42,7 @@ export default async function Home({ searchParams }: HomeProps) {
       <EnhancedCategories />
 
       <div className="mt-6">
-        <Suspense fallback={<PropertyListSkeleton />}>
+        <Suspense fallback={<PropertyListSkeleton count={15} />}>
           <PropertyListContainerHybrid 
             key={getSearchKey(parsedParams)}
             initialProperties={initialProperties}
