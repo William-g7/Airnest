@@ -70,12 +70,12 @@ export default async function PropertyListContainerHybrid({
 
   return (
     <div className="w-full">
-      {/* 房产列表区域标题 - 修复H1->H3跳跃问题 */}
+      {/* 房产列表区域标题 */}
       {firstScreenProperties.length > 0 && (
         <h2 className="sr-only">{t('availableProperties')}</h2>
       )}
       
-      {/* 统一的网格容器 - 服务端和客户端卡片都在这里 */}
+      {/* 统一的网格容器 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 w-full">
         {/* 服务端渲染的前5个卡片 */}
         {firstScreenProperties.map((property, index) => (
@@ -84,13 +84,13 @@ export default async function PropertyListContainerHybrid({
             property={property}
             locale={locale}
             isFirstScreen={true}
-            isLCPCandidate={index === 0} // 只有第一个卡片是LCP候选者
+            isLCPCandidate={index === 0} 
           />
         ))}
         
         {/* 客户端渲染组件：从第6条开始在同一网格中渲染 */}
         <Suspense fallback={
-          // 骨架屏占位，确保网格布局稳定 - 显示足够的骨架屏填满网格
+          // 骨架屏占位
           Array.from({ length: Math.max(10, 20 - firstScreenProperties.length) }).map((_, index) => (
             <div key={`skeleton-${index}`} className="animate-pulse bg-gray-200 h-64 rounded-xl"></div>
           ))
@@ -101,7 +101,7 @@ export default async function PropertyListContainerHybrid({
             isMyProperties={isMyProperties}
             isWishlist={isWishlist}
             serverRenderedCount={firstScreenProperties.length} // 传递已渲染数量
-            renderInParentGrid={true} // 新增：标识要在父网格中渲染
+            renderInParentGrid={true} // 在父网格中渲染
           />
         </Suspense>
       </div>

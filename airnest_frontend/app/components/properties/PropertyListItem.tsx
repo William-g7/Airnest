@@ -14,7 +14,6 @@ import toast from 'react-hot-toast';
 import { useLocaleStore } from '@/app/stores/localeStore';
 import CurrencyDisplay from '../common/CurrencyDisplay';
 import { getReviewHighlights } from './PropertyHilights';
-import { useIntersectionObserver } from '@/app/hooks/useIntersectionObserver';
 import StarRating from '../reviews/StarRating';
 import ReviewTag from '../reviews/ReviewTag';
 
@@ -33,14 +32,7 @@ const PropertyListItem = memo(({ property, translations, isFirstScreen }: Proper
   const tFavorites = useTranslations('favorites');
   const router = useRouter();
   const loginModal = useLoginModal();
-  const itemRef = useRef<HTMLDivElement>(null);
   const { locale } = useLocaleStore();
-  
-  const isInViewport = useIntersectionObserver(itemRef, {
-    rootMargin: '200px',
-    threshold: 0.1
-  });
-  
   const [screenWidth, setScreenWidth] = useState<number>(1024);
 
   useEffect(() => {
@@ -60,28 +52,12 @@ const PropertyListItem = memo(({ property, translations, isFirstScreen }: Proper
     };
   }, []);
   
-  const getOptimalPropertyImage = useMemo(() => {
-    if (!property.images || property.images.length === 0) {
-      return '/placeholder.jpg';
-    }
-    
-    const mainImage = property.images[0];
-
-    if (screenWidth >= 1024) {
-      return mainImage.imageURL;
-    }
-    
-    if (screenWidth >= 768) {
-      return mainImage.imageURL;
-    }
-    
-    return mainImage.imageURL;
-  }, [property.images, screenWidth]);
+  const imageSrc = property.images?.[0]?.imageURL ?? '/placeholder.jpg';
 
   const { isAuthenticated } = useAuth();
   const { isFavorite, toggleFavorite } = useFavoritesStore();
 
-  // 获取评论亮点 - 优先使用真实数据，fallback到虚假数据
+  // 获取评论亮点
   const reviewHighlights = useMemo(() => {
     const hasRealReviewData = property.most_popular_tags && property.most_popular_tags.length > 0;
     return hasRealReviewData 
@@ -134,7 +110,6 @@ const PropertyListItem = memo(({ property, translations, isFirstScreen }: Proper
   return (
     <div
       className="relative group animate-fade-in hover:-translate-y-0.5 transition-all duration-300 ease-in-out"
-      ref={itemRef}
     >
       <div
         className="cursor-pointer overflow-hidden rounded-xl bg-white transition-all duration-300 ease-in-out hover:shadow-md h-full flex flex-col"
@@ -143,15 +118,14 @@ const PropertyListItem = memo(({ property, translations, isFirstScreen }: Proper
         <div className="relative overflow-hidden aspect-square rounded-t-xl flex-shrink-0">
           {/* Image */}
           <Image
-            src={getOptimalPropertyImage}
+            src={imageSrc}
             alt={property.title}
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
             fill
             className="object-cover w-full h-full"
             quality={screenWidth >= 1024 ? 80 : 75}
-            loading={isFirstScreen ? "eager" : isInViewport ? "eager" : "lazy"}
-            priority={isFirstScreen || isInViewport}
-            fetchPriority={isFirstScreen ? "high" : "auto"}
+            loading={isFirstScreen ? "eager" : "lazy"}
+            priority={isFirstScreen}
           />
           {/* Pricetag */}
           <div className="absolute bottom-3 left-3 bg-white bg-opacity-90 py-1 px-2 rounded-lg shadow-sm">
@@ -163,17 +137,17 @@ const PropertyListItem = memo(({ property, translations, isFirstScreen }: Proper
         </div>
 
         <div className="p-3 flex flex-col flex-grow">
-          {/* Title - 固定2行高度 */}
+          {/* Title */}
           <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 h-14 flex items-center">
             {translatedTitle}
           </h3>
 
-          {/* Location - 固定1行高度 */}
+          {/* Location */}
           <p className="text-sm text-gray-600 mt-1 line-clamp-1 h-5">
             {translatedCity}, {translatedCountry}
           </p>
 
-          {/* Rating & Reviews - 固定高度 */}
+          {/* Rating & Reviews */}
           <div className="mt-2 h-6 flex items-center">
             {property.average_rating && property.total_reviews && property.total_reviews > 0 ? (
               <div className="flex items-center space-x-2">
@@ -187,7 +161,7 @@ const PropertyListItem = memo(({ property, translations, isFirstScreen }: Proper
             )}
           </div>
 
-          {/* Highlights/Tags - 固定高度，推到底部 */}
+          {/* Highlights/Tags */}
           <div className="mt-2 flex-grow flex items-end">
             <div className="w-full flex items-center justify-between">
               <div className="flex flex-wrap gap-2 max-h-8 overflow-hidden">
