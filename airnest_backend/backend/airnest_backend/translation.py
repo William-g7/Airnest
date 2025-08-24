@@ -21,6 +21,9 @@ LANGUAGE_MAP = {
 GOOGLE_CREDENTIALS_PATH = os.path.join(settings.BASE_DIR, 'google-credentials.json')
 GOOGLE_PROJECT_ID = 'airnest-459809'
 
+# 全局翻译客户端实例，用于缓存
+_translate_client = None
+
 def get_translate_client():
     """
     支持三种凭证来源：
