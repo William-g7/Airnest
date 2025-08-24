@@ -87,15 +87,14 @@ const MyReservationsPage = () => {
                   <div className="col-span-1 md:col-span-1 aspect-video md:aspect-square w-full max-w-full">
                     {hasImages ? (
                       <div className="relative w-full h-0 pb-[75%] rounded-lg overflow-hidden bg-gray-100">
-                        <img
+                        <Image
                           src={completeImageUrl}
                           alt={reservation.property.title}
-                          className="absolute inset-0 w-full h-full object-cover"
-                          onError={e => {
-                            console.error(`图片加载失败: ${completeImageUrl}`);
-                            e.currentTarget.src = '/beach_1.jpg';
-                            e.currentTarget.onerror = null;
-                          }}
+                          fill
+                          className="object-cover rounded-lg"
+                          sizes="(max-width: 768px) 100vw, 300px"
+                          priority={false}
+                          quality={75}
                         />
                       </div>
                     ) : (
