@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo, Suspense } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback, Suspense } from 'react';
 import { useTranslations } from 'next-intl';
 import PropertyListItem from './PropertyListItem';
 import { PropertyType } from '@/app/constants/propertyType';
@@ -22,8 +22,8 @@ interface TranslationContext {
 interface PropertyListContainerProps {
   initialProperties: PropertyType[]; // 从服务器组件接收的初始数据
   searchParams?: SearchParams; // 搜索参数，用于客户端分页
-  isMyProperties?: boolean;
-  isWishlist?: boolean;
+  isMyProperties?: boolean; // 用于预订页
+  isWishlist?: boolean; // 用于心愿单页
   serverRenderedCount?: number; // 服务端已渲染的数量，用于计算偏移量
   renderInParentGrid?: boolean; // 是否在父组件的网格中渲染
 }
@@ -46,7 +46,10 @@ function PropertyListContent({
   const [lastSearchParams, setLastSearchParams] = useState('');
   const [initialBatchSize, setInitialBatchSize] = useState(10);
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  const isLoadMoreVisible = useIntersectionObserver(loadMoreRef, { rootMargin: '300px' });
+  const isLoadMoreVisible = useIntersectionObserver(loadMoreRef, { rootMargin: '150px' });
+  const [hasMore, setHasMore] = useState(true);
+  const prevLenRef = useRef(0);
+  const fetchSize = 15;
 
   const [isTranslating, setIsTranslating] = useState(false);
   const [translationContext, setTranslationContext] = useState<TranslationContext>({
@@ -102,12 +105,14 @@ function PropertyListContent({
 
   // 更新可见属性的逻辑
   useEffect(() => {
-    setVisibleProperties(visiblePropertiesMemo);
-  }, [visiblePropertiesMemo]);
+    if(renderPhase === 1){
+      setVisibleProperties(visiblePropertiesMemo);
+    }
+  }, [renderPhase, visiblePropertiesMemo]);
 
   // 检测到加载更多区域时的处理逻辑
   useEffect(() => {
-    if (isLoadMoreVisible && !isLoading && renderPhase === 2) {
+    if (isLoadMoreVisible && hasMore && !isLoading && renderPhase === 2) {
       // 情况1：本地还有未显示的数据，先显示本地数据
       if (visibleProperties.length < properties.length) {
         const nextBatch = properties.slice(0, visibleProperties.length + initialBatchSize);
@@ -119,22 +124,19 @@ function PropertyListContent({
         (async () => {
           try {
             setIsLoading(true);
-            const endpoint = '/api/properties/with-reviews/';
-            
+
             const apiParams = formatApiParams({
               ...currentSearchParams,
               offset: serverRenderedCount + properties.length,  
-              limit: 20
+              limit: fetchSize
             });
             
             const params = new URLSearchParams(apiParams);
             const data = await apiService.getPropertiesWithReviews(params);
-            
-            if (data.length > 0) {
-              const allProperties = [...properties, ...data];
-              setProperties(allProperties);
-              setVisibleProperties(allProperties.slice(0, initialBatchSize));
-            }
+
+            setProperties(prev => [...prev, ...data]);
+            setVisibleProperties(prev => prev.concat(data.slice(0, initialBatchSize)));
+            setHasMore(data.length === fetchSize);
           } catch (error) {
             setError(t('loadError'));
             console.error('Error fetching more properties:', error);
@@ -144,7 +146,7 @@ function PropertyListContent({
         })();
       }
     }
-  }, [isLoadMoreVisible, visibleProperties.length, properties, initialBatchSize, isLoading, renderPhase, isMyProperties, isWishlist, currentSearchParams, t]);
+  }, [isLoadMoreVisible, visibleProperties.length, properties, initialBatchSize, isLoading, renderPhase, isMyProperties, isWishlist, t]);
 
   // 根据屏幕尺寸调整初始加载数量
   useEffect(() => {
@@ -175,7 +177,7 @@ function PropertyListContent({
     };
   }, []);
 
-  // 初始化：根据不同情况获取数据
+  // 初始化：根据处于主页还是预定/心愿单页选择全量加载数据还是分步加载数据
   useEffect(() => {
     if (initialProperties.length === 0) {
       if (isMyProperties || isWishlist) {
@@ -194,6 +196,7 @@ function PropertyListContent({
             const data = await apiService.getwithtoken(endpoint);
             setProperties(data);
             setVisibleProperties(data.slice(0, initialBatchSize));
+            setHasMore(false);
           } catch (error) {
             setError(t('loadError'));
             console.error('Error fetching properties:', error);
@@ -205,13 +208,12 @@ function PropertyListContent({
         // 主页：服务端已渲染前几条，客户端获取剩余数据
         (async () => {
           try {
-            setIsLoading(true);
-            const endpoint = '/api/properties/with-reviews/';
-            
+            setIsLoading(true);  
+                  
             const apiParams = formatApiParams({
               ...currentSearchParams,
               offset: serverRenderedCount,  
-              limit: 20
+              limit: fetchSize
             });
             
             const params = new URLSearchParams(apiParams);
@@ -219,6 +221,7 @@ function PropertyListContent({
             
             setProperties(data);
             setVisibleProperties(data.slice(0, initialBatchSize));
+            setHasMore(data.length === fetchSize);
           } catch (error) {
             setError(t('loadError'));
             console.error('Error fetching initial properties:', error);
@@ -240,60 +243,63 @@ function PropertyListContent({
     }
   }, [serializedParams, lastSearchParams]);
 
-  // 处理翻译
-  useEffect(() => {
-    setTranslationContext({
-      titles: {},
-      cities: {},
-      countries: {},
-    });
+// 翻译逻辑
+const translateSubset = useCallback(async (subset: PropertyType[]) => {
+  if (locale === 'en' || subset.length === 0) return;
 
-    if (locale !== 'en' && properties.length > 0 && !isLoading) {
-      translateAllProperties();
-    }
-  }, [locale, properties, isLoading]);
+  // 按原文去重 & 已翻译跳过
+  const titles: string[] = [];
+  const cities: string[] = [];
+  const countries: string[] = [];
 
-  const translateAllProperties = async () => {
-    if (locale === 'en' || properties.length === 0 || isTranslating) {
-      return;
-    }
+  for (const p of subset) {
+    if (p.title && !translationContext.titles[p.title]) titles.push(p.title);
+    if (p.city && !translationContext.cities[p.city]) cities.push(p.city);
+    if (p.country && !translationContext.countries[p.country]) countries.push(p.country);
+  }
 
-    setIsTranslating(true);
-    console.log(`Begin translating ${properties.length} properties`);
+  // 如果这批里要翻译的都翻译过了，就直接返回
+  if (titles.length === 0 && cities.length === 0 && countries.length === 0) return;
 
-    try {
-      const titles: string[] = [];
-      const cities: string[] = [];
-      const countries: string[] = [];
+  setIsTranslating(true);
+  try {
+    const res = await translateGrouped({ titles, cities, countries }, locale);
+    setTranslationContext(prev => ({
+      titles: { ...prev.titles, ...(res.titles || {}) },
+      cities: { ...prev.cities, ...(res.cities || {}) },
+      countries: { ...prev.countries, ...(res.countries || {}) },
+    }));
+  } catch (e) {
+    console.error('Translation error:', e);
+  } finally {
+    setIsTranslating(false);
+  }
+}, [locale, translateGrouped, translationContext]);
 
-      properties.forEach(property => {
-        if (property.title) titles.push(property.title);
-        if (property.city) cities.push(property.city);
-        if (property.country) countries.push(property.country);
-      });
+// 增量翻译：当 properties 变长时，只翻译新增段
+useEffect(() => {
+  if (locale === 'en' || isLoading) return;
+  const curr = properties.length;
+  const prev = prevLenRef.current;
+  if (curr > prev) {
+    const added = properties.slice(prev, curr);
+    prevLenRef.current = curr;
+    translateSubset(added);
+  }
+}, [properties.length, locale, isLoading, translateSubset]); 
 
-      const translationsResult = await translateGrouped(
-        {
-          titles,
-          cities,
-          countries,
-        },
-        locale
-      );
+// 切换语言：清空上下文 -> 翻译当前已有的全部 properties
+useEffect(() => {
+  // 每次切语言，清空并从头开始
+  setTranslationContext({ titles: {}, cities: {}, countries: {} });
+  prevLenRef.current = 0;
 
-      setTranslationContext({
-        titles: translationsResult.titles || {},
-        cities: translationsResult.cities || {},
-        countries: translationsResult.countries || {},
-      });
-
-      console.log(`Translation success, translated ${properties.length} properties`);
-    } catch (error) {
-      console.error('Translation error:', error);
-    } finally {
-      setIsTranslating(false);
-    }
-  };
+  if (locale !== 'en' && properties.length > 0 && !isLoading) {
+    translateSubset(properties);
+    prevLenRef.current = properties.length; 
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [locale]); // 只依赖 locale；翻译调用里会读到最新的 properties
 
   // 渲染列表
   if (isLoading) {
@@ -382,7 +388,7 @@ function PropertyListContent({
           </div>
         )}
 
-        {visibleProperties.map((property, index) => (
+        {visibleProperties.map((property) => (
           <PropertyListItem
             key={`client-${property.id}`} // 使用不同前缀避免与服务端key冲突
             property={property}
