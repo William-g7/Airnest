@@ -23,20 +23,52 @@ GOOGLE_PROJECT_ID = 'airnest-459809'
 
 def get_translate_client():
     """
-    获取Google Translate v3客户端
+    支持三种凭证来源：
+    1) GCP_CREDENTIALS_JSON（完整 JSON 文本）
+    2) GOOGLE_APPLICATION_CREDENTIALS（指向文件路径）
+    3) 项目根目录 google-credentials.json（开发用）
     """
-    try:
-        if os.path.exists(GOOGLE_CREDENTIALS_PATH):
-            credentials = service_account.Credentials.from_service_account_file(
-                GOOGLE_CREDENTIALS_PATH
-            )
-            return translate_v3.TranslationServiceClient(credentials=credentials)
-        else:
-            logger.error(f"Google凭证文件未找到: {GOOGLE_CREDENTIALS_PATH}")
-            return None
-    except Exception as e:
-        logger.error(f"创建Google Translate v3客户端失败: {str(e)}")
-        return None
+    global _translate_client
+    if _translate_client:
+        return _translate_client
+
+    # 1) JSON 直接来自环境变量
+    raw = os.getenv('GCP_CREDENTIALS_JSON')
+    if raw:
+        try:
+            info = json.loads(raw)
+            creds = service_account.Credentials.from_service_account_info(info)
+            _translate_client = translate_v3.TranslationServiceClient(credentials=creds)
+            logger.info('[i18n] using GCP_CREDENTIALS_JSON for Translate client')
+            return _translate_client
+        except Exception as e:
+            logger.error(f'[i18n] invalid GCP_CREDENTIALS_JSON: {e}')
+
+    # 2) 指向文件的标准变量
+    json_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+    if json_path and os.path.exists(json_path):
+        try:
+            creds = service_account.Credentials.from_service_account_file(json_path)
+            _translate_client = translate_v3.TranslationServiceClient(credentials=creds)
+            logger.info('[i18n] using GOOGLE_APPLICATION_CREDENTIALS file for Translate client')
+            return _translate_client
+        except Exception as e:
+            logger.error(f'[i18n] failed reading GOOGLE_APPLICATION_CREDENTIALS: {e}')
+
+    # 3) 项目内文件（dev）
+    local_path = os.path.join(settings.BASE_DIR, 'google-credentials.json')
+    if os.path.exists(local_path):
+        try:
+            creds = service_account.Credentials.from_service_account_file(local_path)
+            _translate_client = translate_v3.TranslationServiceClient(credentials=creds)
+            logger.info('[i18n] using local google-credentials.json for Translate client')
+            return _translate_client
+        except Exception as e:
+            logger.error(f'[i18n] failed reading local google-credentials.json: {e}')
+
+    logger.error('[i18n] no valid Google credentials found')
+    return None
+
 
 def translate_with_google(text, target_language, source_language='en'):
     """
