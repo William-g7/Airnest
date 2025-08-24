@@ -83,24 +83,24 @@ const MyReservationsPage = () => {
                 key={reservation.id}
                 className="border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow p-4"
               >
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4 md:gap-6 items-start">
-                  <div className="col-span-1 md:col-span-1 aspect-video md:aspect-square w-full max-w-full">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4 md:gap-6 items-center">
+                  <div className="col-span-1 md:col-span-1 w-full max-w-full flex items-center justify-center">
                     {hasImages ? (
-                      <div className="relative w-full h-0 pb-[75%] rounded-lg overflow-hidden bg-gray-100">
+                      <div className="relative w-full aspect-square max-w-[200px] md:max-w-[180px] rounded-lg overflow-hidden bg-gray-100 mx-auto">
                         <Image
                           src={completeImageUrl}
                           alt={reservation.property.title}
                           fill
                           className="object-cover rounded-lg"
-                          sizes="(max-width: 768px) 100vw, 300px"
+                          sizes="(max-width: 768px) 200px, 180px"
                           priority={false}
                           quality={75}
                         />
                       </div>
                     ) : (
-                      <div className="relative w-full h-0 pb-[75%] rounded-lg bg-gray-200">
+                      <div className="relative w-full aspect-square max-w-[200px] md:max-w-[180px] rounded-lg bg-gray-200 mx-auto">
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <span>{t('noImage')}</span>
+                          <span className="text-gray-500 text-sm">{t('noImage')}</span>
                         </div>
                       </div>
                     )}
