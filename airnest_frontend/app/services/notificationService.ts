@@ -1,4 +1,4 @@
-import toast, { ToastOptions } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { TOAST_THEME_STYLES } from '../utils/toastStyles';
 
 export enum NotificationType {
@@ -28,8 +28,6 @@ interface MessageTemplate {
   };
 }
 
-// 使用共享的样式配置
-// const TOAST_THEME_STYLES 已从 ../styles/toastStyles 导入
 
 /**
  * 全局通知服务单例
@@ -135,7 +133,6 @@ class NotificationService {
     let locale: SupportedLocale = 'en';
 
     if (typeof window !== 'undefined') {
-      // 从路径中获取语言代码
       const localeMatch = window.location.pathname.match(/^\/([a-z]{2})/);
       if (localeMatch && localeMatch[1]) {
         const pathLocale = localeMatch[1];
@@ -143,7 +140,6 @@ class NotificationService {
           locale = pathLocale;
         }
       } else {
-        // 尝试从浏览器语言获取
         const browserLang = navigator.language.split('-')[0];
         if (browserLang === 'zh' || browserLang === 'en' || browserLang === 'fr') {
           locale = browserLang as SupportedLocale;

@@ -2,7 +2,7 @@
 
 import { handleLogin as serverHandleLogin } from '@/app/auth/session';
 import { getAuthChannel } from './AuthChannel';
-import { getNotificationService, NotificationType } from './notificationService';
+import { getNotificationService, NotificationType } from '@/app/services/notificationService';
 
 const USER_ID_KEY = 'app_user_id';
 

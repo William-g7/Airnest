@@ -2,11 +2,14 @@ import { Suspense } from 'react';
 import { PropertyType } from '@/app/constants/propertyType';
 import PropertyCardSSR from './PropertyCardSSR';
 import PropertyListContainer from './PropertyListContainer';
-import { getLocale, getTranslations } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { SearchParams } from '@/app/utils/searchParams';
+import { TranslationData } from '@/app/services/serverTranslationService';
 
 interface PropertyListContainerHybridProps {
   initialProperties: PropertyType[];
+  translationsData: TranslationData;
+  locale: string;
   searchParams?: SearchParams;
   isMyProperties?: boolean;
   isWishlist?: boolean;
@@ -14,11 +17,12 @@ interface PropertyListContainerHybridProps {
 
 export default async function PropertyListContainerHybrid({ 
   initialProperties, 
+  translationsData,
+  locale,
   searchParams,
   isMyProperties = false, 
   isWishlist = false 
 }: PropertyListContainerHybridProps) {
-  const locale = await getLocale();
   const t = await getTranslations('properties');
   
   // 如果没有初始数据且是特殊页面（我的房源、心愿单），使用完全的客户端渲染
@@ -84,7 +88,12 @@ export default async function PropertyListContainerHybrid({
             property={property}
             locale={locale}
             isFirstScreen={true}
-            isLCPCandidate={index === 0} 
+            isLCPCandidate={index === 0}
+            translations={{
+              title: translationsData.titles[property.title || ''] || property.title,
+              city: translationsData.cities[property.city || ''] || property.city,
+              country: translationsData.countries[property.country || ''] || property.country,
+            }}
           />
         ))}
         
