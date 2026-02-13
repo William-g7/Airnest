@@ -10,11 +10,11 @@ django_asgi_app = get_asgi_application()
 
 
 from chat import routing
-from chat.token_auth import TokenAuthMiddleware
+from chat.token_auth import CookieOrTokenAuthMiddleware
 
 application = ProtocolTypeRouter({
     'http': get_asgi_application(),
-    'websocket': TokenAuthMiddleware(
+    'websocket': CookieOrTokenAuthMiddleware(
         URLRouter(routing.websocket_urlpatterns)
     ),
 })
