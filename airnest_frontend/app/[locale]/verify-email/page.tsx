@@ -3,10 +3,10 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import apiService from '@/app/services/apiService';
-import CustomButton from '@/app/components/common/CustomButton';
+import apiService from '@auth/client/clientApiService';
+import Button from '@sharedUI/Button';
 import toast from 'react-hot-toast';
-import { useLoginModal } from '@/app/components/hooks/useLoginModal';
+import { useLoginModal } from '@auth/client/modalStore';
 
 interface VerificationState {
   loading: boolean;
@@ -126,7 +126,7 @@ function VerifyEmailContent() {
     router.push('/');
     // 延迟一小段时间让页面加载完成后再打开登录模态框
     setTimeout(() => {
-      loginModal.onOpen();
+      loginModal.open();
     }, 100);
   };
 
@@ -180,7 +180,7 @@ function VerifyEmailContent() {
             )}
 
             <div className="mt-6">
-              <CustomButton
+              <Button
                 label={t('goToLogin')}
                 onClick={handleGoToLogin}
                 className="w-full"
@@ -212,7 +212,7 @@ function VerifyEmailContent() {
           </p>
 
           <div className="mt-6 space-y-3">
-            <CustomButton
+            <Button
               label={t('resendEmail')}
               onClick={handleResendEmail}
               className="w-full"

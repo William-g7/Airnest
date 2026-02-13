@@ -1,0 +1,18 @@
+{
+    "datePicker": {
+      "bookingNotes": "预订备注",
+      "bookingDates": "预订日期",
+      "localTimeNote": "所有时间均为房源所在地的当地时间",
+      "checkInTime": "入住时间",
+      "checkInAfter": "或更晚",
+      "checkOutTime": "退房时间",
+      "checkOutBefore": "或更早",
+      "cleaningTime": "清洁时间",
+      "hours": "小时",
+      "deepCleaning": "深度清洁",
+      "unavailable": "不可预订",
+      "needConfirmation1": "需要确认",
+      "needConfirmation2": "需要确认，可能受清洁时间影响",
+      "partiallyBooked": "部分已预订"
+    }
+}

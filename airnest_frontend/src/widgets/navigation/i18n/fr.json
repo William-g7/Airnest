@@ -1,0 +1,36 @@
+{
+    "navigation": {
+    "home": "Accueil",
+    "properties": "Propriétés",
+    "wishlist": "Favoris",
+    "inbox": "Messages",
+    "profile": "Profil",
+    "login": "Se connecter",
+    "register": "S'inscrire",
+    "logout": "Se déconnecter",
+    "messages": "Messages",
+    "notifications": "Notifications",
+    "trips": "Voyages",
+    "myAccount": "Mon Compte",
+    "myProperties": "Mes Propriétés",
+    "myReservations": "Mes Réservations",
+    "myWishlists": "Mes Favoris"
+  },
+  "categories": {
+    "omg": "OMG!",
+    "icons": "Icônes",
+    "beach": "Plage",
+    "castles": "Châteaux",
+    "apartment": "Appartement",
+    "beach house": "Maison de plage",
+    "bed and breakfast": "Chambre d'hôtes",
+    "castle": "Château",
+    "farm house": "Ferme",
+    "ferry": "Ferry",
+    "hotel": "Hôtel",
+    "house": "Maison",
+    "treehouse": "Cabane dans les arbres",
+    "selectCategory": "Sélectionner une catégorie",
+    "loading": "Chargement..."
+  }
+}

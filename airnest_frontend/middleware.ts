@@ -1,5 +1,5 @@
 import createMiddleware from 'next-intl/middleware';
-import { routing } from './i18n/routing';
+import { routing } from '@i18n/routing';
 import { NextRequest } from 'next/server';
 
 const intlMiddleware = createMiddleware(routing);
@@ -23,9 +23,6 @@ export default async function middleware(request: NextRequest) {
     if (isHtml ){
       const nonce = generateNonce() ;
 
-      response.headers.set('x-middleware-override-headers', 'x-csp-nonce');
-      response.headers.set('x-middleware-request-x-csp-nonce', nonce);
-
       response.cookies.set('csp-nonce', nonce, {
         httpOnly: true, 
         secure: process.env.NODE_ENV === 'production',
@@ -47,7 +44,7 @@ export default async function middleware(request: NextRequest) {
           default-src 'self';
           script-src 'self' 'unsafe-eval' 'unsafe-inline' ${cloudflareDomains};
           style-src 'self' 'unsafe-inline';
-          img-src 'self' data: blob:;
+          img-src 'self' https://media.airnest.me data: blob:;
           font-src 'self' data:;
           connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_WS_HOST} ws://localhost:* ${cloudflareDomains} ${r2Domains} ${exchangeRateApiDomain};
           frame-src 'self' ${cloudflareDomains};
@@ -57,7 +54,7 @@ export default async function middleware(request: NextRequest) {
           default-src 'self';
           script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https: ${cloudflareDomains} ;
           style-src 'self' 'unsafe-inline';
-          img-src 'self' data: blob:;
+          img-src 'self' ${process.env.NEXT_PUBLIC_API_URL} data: blob:;
           font-src 'self' data:;
           connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_WS_HOST} ${cloudflareDomains} ${r2Domains} ${exchangeRateApiDomain};
           frame-src 'self' ${cloudflareDomains};
@@ -84,5 +81,5 @@ export const config = {
   // - 以 /_next 开头的 Next.js 内部路由
   // - 以 /_ 开头的其他内部路由
   // - 静态文件如图片、字体等
-  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)'],
+  matcher: ['/((?!api|_next|backend|_vercel|.*\\..*).*)'],
 };

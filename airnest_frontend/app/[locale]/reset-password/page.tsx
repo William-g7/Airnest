@@ -3,10 +3,10 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import apiService from '@/app/services/apiService';
-import CustomButton from '@/app/components/common/CustomButton';
+import apiService from '@auth/client/clientApiService';
+import Button from '@sharedUI/Button';
 import toast from 'react-hot-toast';
-import { useLoginModal } from '@/app/components/hooks/useLoginModal';
+import { useLoginModal } from '@auth/client/modalStore';
 
 interface ResetPasswordState {
   tokenVerified: boolean;
@@ -201,7 +201,7 @@ function ResetPasswordContent() {
     router.push('/');
     // 延迟一小段时间让页面加载完成后再打开登录模态框
     setTimeout(() => {
-      loginModal.onOpen();
+      loginModal.open();
     }, 100);
   };
 
@@ -245,7 +245,7 @@ function ResetPasswordContent() {
             </p>
 
             <div className="mt-6">
-              <CustomButton
+              <Button
                 label={t('goToLogin') || 'Go to Login'}
                 onClick={handleGoToLogin}
                 className="w-full"
@@ -278,7 +278,7 @@ function ResetPasswordContent() {
             </p>
 
             <div className="mt-6 space-y-3">
-              <CustomButton
+              <Button
                 label={t('requestNewReset') || 'Request New Reset'}
                 onClick={() => router.push('/')}
                 className="w-full"
@@ -386,7 +386,7 @@ function ResetPasswordContent() {
           </div>
 
           {/* 重置按钮 */}
-          <CustomButton
+          <Button
             label={isResetting ? (t('resetting') || 'Resetting...') : (t('resetPasswordButton') || 'Reset Password')}
             onClick={handleResetPassword}
             disabled={isResetting || !isPasswordValid() || password !== confirmPassword}

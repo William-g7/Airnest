@@ -1,0 +1,14 @@
+{   
+    "mywishlists": {
+        "title": "我的收藏",
+        "loading": "加载中...",
+        "loadError": "加载收藏失败",
+        "noSavedProperties": "没有收藏的房源",
+        "propertiesWillAppearHere": "您收藏的房源将显示在这里"
+    },
+    "favorites": {
+        "added": "已加入收藏",
+        "removed": "已取消收藏",
+        "error": "操作失败，请稍后重试"
+    }
+}

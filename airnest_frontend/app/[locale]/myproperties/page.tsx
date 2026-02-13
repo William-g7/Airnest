@@ -1,9 +1,9 @@
 'use client';
 
-import PropertyListContainer from '@/app/components/properties/PropertyListContainer';
-import { useAddPropertyModal } from '@/app/components/hooks/useAddPropertyModal';
-import { useLoginModal } from '@/app/components/hooks/useLoginModal';
-import { useAuthStore } from '@/app/stores/authStore';
+import ListClient from '@properties/list/List.Client';
+import { useAddPropertyModal } from '@addProperty/hooks/useAddPropertyModal';
+import { useLoginModal } from '@auth/client/modalStore';
+import { useAuthStore } from '@auth/client/authStore';
 import { useTranslations } from 'next-intl';
 
 const MyPropertiesPage = () => {
@@ -16,7 +16,7 @@ const MyPropertiesPage = () => {
     if (isAuthenticated) {
       addPropertyModal.onOpen();
     } else {
-      loginModal.onOpen();
+      loginModal.open();
     }
   };
 
@@ -32,7 +32,7 @@ const MyPropertiesPage = () => {
         </button>
       </div>
 
-      <PropertyListContainer initialProperties={[]} isMyProperties={true} />
+      <ListClient initialProperties={[]} isMyProperties={true} />
     </main>
   );
 };

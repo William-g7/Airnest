@@ -1,13 +1,15 @@
 import { Suspense } from 'react';
-import EnhancedCategories from '../components/search/EnhancedCategories';
-import AnimatedText from '../components/common/AnimatedText';
-import PropertyListContainerHybrid from '../components/properties/PropertyListContainerHybrid';
-import PropertyListSkeleton from '../components/properties/PropertyListSkeleton';
-import { getProperties } from '../services/serverApiService';
-import { getTranslations, getLocale } from 'next-intl/server'; 
-import { parseSearchParams, getSearchKey, formatApiParams } from '../utils/searchParams';
-import { getServerTranslations } from '../services/serverTranslationService';
+import CategoryScroller from '@search/components/CategoryScroller';
+import AnimatedText from '@sharedUI/AnimatedText';
+import ListHybrid from '@properties/list/List.Hybrid'; 
+import ListSkeleton from '@properties/list/List.Skeleton';
+import { getPropertiesWithPersonalization } from '@properties/server/queries';
+import { getUserContext } from '@auth/server/session'; 
+import { getTranslations, getLocale } from 'next-intl/server';
+import { parseSearchParams, getSearchKey, formatApiParams } from '@properties/utils/searchParams'; 
+import { getServerTranslations } from '@translation/server/serverTranslationService';
 
+// 具体的页面UI与数据
 interface HomeProps {
   searchParams: Promise<Record<string, string | string[]>>;
 }
@@ -18,16 +20,17 @@ export default async function Home({ searchParams }: HomeProps) {
   const locale = await getLocale();
   const parsedParams = parseSearchParams(resolvedSearchParams);
   
+  const userContext = await getUserContext();
+  
   // 服务端始终获取前5条数据，无论是否有搜索参数
   const apiParams = formatApiParams({
     ...parsedParams,
     limit: 5,
     offset: 0
   });
-  const initialProperties = await getProperties(apiParams);
   
-  // 获取前5个房源的翻译数据（如果不是英文）
-  const translationsData = await getServerTranslations(initialProperties, locale);
+  const { properties: initialProperties, userWishlist } = await getPropertiesWithPersonalization(apiParams);
+  const translationsData = await getServerTranslations(initialProperties, locale, userContext);
   
   return (
     <main className="max-w-[1500px] mx-auto px-6">
@@ -40,16 +43,17 @@ export default async function Home({ searchParams }: HomeProps) {
         />
       </div>
 
-      <EnhancedCategories />
+      <CategoryScroller />
 
       <div className="mt-6">
-        <Suspense fallback={<PropertyListSkeleton count={15} />}>
-          <PropertyListContainerHybrid 
+        <Suspense fallback={<ListSkeleton count={15} />}>
+          <ListHybrid 
             key={getSearchKey(parsedParams)}
             initialProperties={initialProperties}
             translationsData={translationsData}
             locale={locale}
             searchParams={parsedParams}
+            initialUserWishlist={userWishlist}
           />
         </Suspense>
       </div>

@@ -1,98 +1,26 @@
-import { NextIntlClientProvider } from 'next-intl';
-import { ReactNode } from 'react';
-import { locales } from '../../i18n/routing';
-import { LocaleInitializer } from '../components/LocaleInitializer';
-import ToasterProvider from '../providers/ToasterProvider';
-import CurrencyProvider from '../providers/CurrencyProvider';
-import { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
+import {NextIntlClientProvider} from 'next-intl';
+import {getMessages} from 'next-intl/server';
+import {locales} from '@i18n/routing';
+import ToasterProvider from '@sharedUI/toast/ToasterProvider';
+import CurrencyProvider from '@currency/client/CurrencyProvider';
+import type {ReactNode} from 'react';
 
-export async function generateMetadata(props: { params: { locale: string } }): Promise<Metadata> {
-  const params = await props.params;
-  const locale = params.locale;
-  const t = await getTranslations({ locale, namespace: 'app' });
-
-  const siteTitle = `${t('name')} — ${t('slogan')}`;
-  const siteDescription = `${t('subSlogan')}. ${t('description')}`;
-
-  return {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://airnest.com'),
-    title: siteTitle,
-    description: siteDescription,
-    keywords: [
-      'vacation rentals',
-      'holiday homes',
-      'apartment rentals',
-      'house rentals',
-      'airnest',
-    ],
-    openGraph: {
-      type: 'website',
-      title: siteTitle,
-      description: siteDescription,
-      url: 'https://airnest.com',
-      siteName: t('name'),
-      images: [
-        {
-          url: '/images/og-image.jpg',
-          width: 1200,
-          height: 630,
-          alt: siteTitle,
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: siteTitle,
-      description: siteDescription,
-      images: ['/images/twitter-card.jpg'],
-      creator: '@airnest',
-    },
-    alternates: {
-      canonical: 'https://airnest.com',
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
-    },
-    verification: {
-      google: 'your-google-verification-code',
-    },
-  };
-}
-
+// 处理与 locale 参数相关的上下文，并在同一语言内持久存在。
 export function generateStaticParams() {
-  return locales.map(locale => ({ locale }));
+  return locales.map((locale) => ({locale}));
 }
 
-async function getMessages(locale: string) {
-  try {
-    return (await import(`../../messages/${locale}.json`)).default;
-  } catch (error) {
-    console.error(`Failed to load messages for locale: ${locale}`, error);
-    return (await import('../../messages/en.json')).default;
-  }
-}
-
-export default async function LocaleLayout(props: {
+export default async function LocaleLayout({
+  children,
+  params
+}: {
   children: ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>; 
 }) {
-  const params = await props.params;
-  const locale = params.locale;
-  const { children } = props;
-  const messages = await getMessages(locale);
-
+  const { locale } = await params;
+  const messages = await getMessages();
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <LocaleInitializer />
       <ToasterProvider />
       <CurrencyProvider>{children}</CurrencyProvider>
     </NextIntlClientProvider>

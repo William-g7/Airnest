@@ -1,14 +1,13 @@
 'use client';
 
 import { useState, useEffect, use } from 'react';
-import { useRouter } from '@/i18n/navigation';
 import Image from 'next/image';
-import apiService from '@/app/services/apiService';
-import CustomButton from '@/app/components/common/CustomButton';
+import apiService from '@auth/client/clientApiService';
+import Button from '@sharedUI/Button';
 import { useTranslations } from 'next-intl';
 import toast from 'react-hot-toast';
-import { useErrorHandler } from '@/app/hooks/useErrorHandler';
-import { useChangePasswordModal } from '@/app/components/hooks/useChangePasswordModal';
+import { useErrorHandler } from '@errors/useErrorHandler';
+import { useChangePasswordModal } from '@auth/client/modalStore';
 
 interface ProfileData {
   id: string;
@@ -44,7 +43,7 @@ export default function ProfilePage({
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await apiService.getwithtoken(`/api/auth/profile/${userId}/`, {
+        const response = await apiService.get(`/api/auth/profile/${userId}/`, {
           suppressToast: true,
         });
         setProfile(response);
@@ -161,7 +160,7 @@ export default function ProfilePage({
           <div className="p-8">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl font-semibold">{t('title')}</h1>
-              <CustomButton
+              <Button
                 label={isEditing ? t('cancel') : t('editProfile')}
                 onClick={() => setIsEditing(!isEditing)}
                 className="w-auto px-4 py-2 "
@@ -220,7 +219,7 @@ export default function ProfilePage({
                 </div>
 
                 <div className="flex justify-end">
-                  <CustomButton
+                  <Button
                     label={t('saveChanges')}
                     type="submit"
                     className="w-auto px-4 py-2"
@@ -256,7 +255,7 @@ export default function ProfilePage({
                     <h2 className="text-sm font-medium text-gray-500">{t('password')}</h2>
                     <div className="mt-1">
                       <button
-                        onClick={() => changePasswordModal.onOpen()}
+                        onClick={() => changePasswordModal.open()}
                         className="px-3 py-1 text-sm text-airbnb border border-airbnb rounded-md hover:bg-airbnb hover:text-white transition-colors"
                       >
                         {t('changePassword')}
