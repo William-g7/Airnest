@@ -3,9 +3,29 @@ from datetime import datetime
 
 from django.conf import settings
 from django.db import models
-
+from django.contrib.postgres.fields import ArrayField
 from useraccount.models import User
 
+# 预定义的房源标签ID列表
+ALLOWED_PROPERTY_TAG_IDS = [
+    # amenities
+    'wifi', 'parking', 'pool', 'gym', 'kitchen', 'laundry',
+    # comfort 
+    'ac', 'heating', 'luxury', 'spacious', 'cozy', 'great_view',
+    # location
+    'city_center', 'beach_nearby', 'mountain_view', 'quiet_area', 'metro_access',
+    # experience
+    'unique_architecture', 'historic', 'modern_design', 'local_culture',
+    # service
+    'excellent_host', 'fast_checkin', 'pet_friendly', 'family_friendly', 'business_ready'
+]
+
+
+def property_image_path(instance, filename):
+    """
+    生成房源图片的上传路径
+    """
+    return f'properties/{instance.property_ref.id}/images/{filename}'
 
 def get_file_url(file_field):
     """
@@ -21,14 +41,6 @@ def get_file_url(file_field):
     # 如果是相对路径（本地存储），拼接WEBSITE_URL
     else:
         return f'{settings.WEBSITE_URL}{file_field.url}'
-
-# 临时保留此函数用于旧迁移文件兼容性
-def property_image_path(instance, filename):
-    """
-    DEPRECATED: 仅用于旧迁移文件兼容性
-    现在使用R2存储，不再使用此路径函数
-    """
-    return f'property_images/{filename}'
 
 class Property(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -63,38 +75,23 @@ class Property(models.Model):
     #timezone
     timezone = models.CharField(max_length=50, default='UTC')
 
+    #tags
+    property_tags = ArrayField(
+        base_field=models.CharField(max_length=64),
+        default=list,
+        blank=True,
+    )
+
     #relationship and metadata
     landlord = models.ForeignKey(User, related_name='properties', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['-created_at', 'id']
 
     def __str__(self):
         return self.title
-    
-    def get_most_popular_tags(self, locale='en', limit=2):
-        """获取该房源最受欢迎的标签"""
-        from django.db.models import Count
-        
-        # 获取该房源下所有评论的标签，按频次排序
-        tag_counts = ReviewTag.objects.filter(
-            reviewtagassignment__review__property_ref=self,
-            reviewtagassignment__review__is_hidden=False,
-            is_active=True
-        ).annotate(
-            usage_count=Count('reviewtagassignment')
-        ).order_by('-usage_count')[:limit]
-        
-        return [
-            {
-                'key': tag.tag_key,
-                'name': tag.get_localized_name(locale),
-                'count': tag.usage_count,
-                'color': tag.color
-            }
-            for tag in tag_counts
-        ]
     
     @property
     def average_rating(self):
