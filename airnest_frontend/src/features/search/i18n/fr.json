@@ -1,0 +1,24 @@
+{
+    "search": {
+    "where": "Où",
+    "checkIn": "Arrivée",
+    "checkOut": "Départ",
+    "who": "Qui",
+    "anywhere": "N'importe où",
+    "addDate": "Ajouter des dates",
+    "search": "Rechercher",
+    "guest": "voyageur",
+    "guests": "voyageurs",
+    "whereTo": "Où allez-vous ?",
+    "searchDestinations": "Rechercher des destinations...",
+    "when": "Quand ?",
+    "whosComing": "Qui vient ?",
+    "closeModal": "Fermer la recherche",
+    "viewConversation": "Voir la conversation",
+    "searching": "Recherche en cours...",
+    "oneGuest": "1 voyageur",
+    "guestCount": "{count} voyageurs",
+    "agesInfo": "13 ans ou plus",
+    "searchDestination": "Rechercher une destination"
+  }
+}

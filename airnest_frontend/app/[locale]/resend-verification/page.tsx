@@ -3,8 +3,8 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import apiService from '@/app/services/apiService';
-import CustomButton from '@/app/components/common/CustomButton';
+import apiService from '@auth/client/clientApiService';
+import Button from '@sharedUI/Button';
 import toast from 'react-hot-toast';
 
 function ResendVerificationContent() {
@@ -133,7 +133,7 @@ function ResendVerificationContent() {
             </div>
           )}
 
-          <CustomButton
+          <Button
             label={
               isLoading 
                 ? t('sending') 

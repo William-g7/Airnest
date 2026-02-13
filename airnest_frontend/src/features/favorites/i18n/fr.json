@@ -1,0 +1,14 @@
+{   
+    "mywishlists": {
+        "title": "Mes favoris",
+        "loading": "Chargement...",
+        "loadError": "Échec du chargement des favoris",
+        "noSavedProperties": "Aucune propriété enregistrée",
+        "propertiesWillAppearHere": "Les propriétés que vous enregistrez apparaîtront ici"
+    },
+    "favorites": {
+        "added": "Ajouté aux favoris",
+        "removed": "Retiré des favoris",
+        "error": "Échec de l’action. Réessayez."
+    }
+}

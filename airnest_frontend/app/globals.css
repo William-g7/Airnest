@@ -5,6 +5,10 @@
 :root {
   --airbnb-color: #ff385c;
   --airbnb-dark-color: #d40027;
+  --nav-h: 80px; 
+  --search-height: 48px;
+  --nav-padding: 1rem;
+  
 }
 
 /* 替代 framer-motion 的轻量级动画 */

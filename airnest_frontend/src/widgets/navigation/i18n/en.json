@@ -1,0 +1,36 @@
+{
+    "navigation": {
+    "home": "Home",
+    "properties": "Properties",
+    "wishlist": "Wishlist",
+    "inbox": "Inbox",
+    "profile": "Profile",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "messages": "Messages",
+    "notifications": "Notifications",
+    "trips": "Trips",
+    "myAccount": "My Account",
+    "myProperties": "My Properties",
+    "myReservations": "My Reservations",
+    "myWishlists": "My Wishlists"
+  },
+  "categories": {
+    "omg": "OMG!",
+    "icons": "Icons",
+    "beach": "Beach",
+    "castles": "Castles",
+    "apartment": "Apartment",
+    "beach house": "Beach House",
+    "bed and breakfast": "Bed & Breakfast",
+    "castle": "Castle",
+    "farm house": "Farm House",
+    "ferry": "Ferry",
+    "hotel": "Hotel",
+    "house": "House",
+    "treehouse": "Treehouse",
+    "selectCategory": "Select category",
+    "loading": "Loading..."
+  }
+}

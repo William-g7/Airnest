@@ -1,0 +1,24 @@
+{
+    "search": {
+    "where": "Where",
+    "checkIn": "Check in",
+    "checkOut": "Check out",
+    "who": "Who",
+    "anywhere": "Anywhere",
+    "addDate": "Add date",
+    "search": "Search",
+    "guest": "guest",
+    "guests": "guests",
+    "whereTo": "Where to?",
+    "searchDestinations": "Search destinations...",
+    "searchDestination": "Search destination",
+    "when": "When?",
+    "whosComing": "Who's coming?",
+    "closeModal": "Close search modal",
+    "viewConversation": "View conversation",
+    "searching": "Searching...",
+    "oneGuest": "1 guest",
+    "guestCount": "{count} guests",
+    "agesInfo": "Ages 13 or above"
+  }
+}

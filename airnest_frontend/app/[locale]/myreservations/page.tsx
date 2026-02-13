@@ -2,23 +2,38 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { Link } from '@/i18n/navigation';
-import apiService from '@/app/services/apiService';
-import { ReservationType } from '@/app/constants/reservationType';
-import { useTranslations } from 'next-intl';
-import { formatLocalizedDate, calculateNights } from '@/app/utils/dateUtils';
-import CurrencyDisplay from '@/app/components/common/CurrencyDisplay';
+import { Link } from '@i18n/navigation';
+import apiService from '@auth/client/clientApiService';
+import { useLocale, useTranslations } from 'next-intl';
+import { formatLocalizedDate, calculateNightsZoned } from '@daysPicker/dateUtils';
+import CurrencyDisplay from '@currency/ui/CurrencyDisplay';
+
+interface ReservationType {
+  id: string;
+  property: {
+    id: number;
+    title: string;
+    images: Array<{ imageURL: string }>;
+    timezone: string;
+  };
+  check_in: string;
+  check_out: string;
+  guests: number;
+  total_price: number;
+  created_at: string;
+}
 
 const MyReservationsPage = () => {
   const t = useTranslations('myreservations');
   const [reservations, setReservations] = useState<ReservationType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const locale = useLocale();
 
   useEffect(() => {
     const fetchReservations = async () => {
       try {
-        const response = await apiService.getwithtoken('/api/properties/reservations/');
+        const response = await apiService.get('/api/properties/reservations/');
         setReservations(response);
       } catch (error) {
         setError(t('loadError'));
@@ -116,11 +131,7 @@ const MyReservationsPage = () => {
                             <strong>{t('checkIn')}: </strong>
                           </span>
                           <span className="ml-2">
-                            {formatLocalizedDate(
-                              reservation.check_in,
-                              reservation.property.timezone,
-                              'long'
-                            )}
+                          {formatLocalizedDate(reservation.check_in, reservation.property.timezone, 'long', locale)}
                           </span>
                           <span className="ml-2 text-sm bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md">
                             {t('notEarlierThan')} 15:00
@@ -151,11 +162,7 @@ const MyReservationsPage = () => {
                             <strong>{t('checkOut')}: </strong>
                           </span>
                           <span className="ml-2">
-                            {formatLocalizedDate(
-                              reservation.check_out,
-                              reservation.property.timezone,
-                              'long'
-                            )}
+                          {formatLocalizedDate(reservation.check_out, reservation.property.timezone, 'long', locale)}
                           </span>
                           <span className="ml-2 text-sm bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md">
                             {t('notLaterThan')} 11:00
@@ -186,8 +193,11 @@ const MyReservationsPage = () => {
                             <strong>{t('duration')}: </strong>
                           </span>
                           <span>
-                            {calculateNights(reservation.check_in, reservation.check_out)}{' '}
-                            {t('nights')}
+                          {calculateNightsZoned(
+                            reservation.check_in,
+                            reservation.check_out,
+                            reservation.property.timezone
+                          )} {t('nights')}
                           </span>
                         </div>
                       </div>

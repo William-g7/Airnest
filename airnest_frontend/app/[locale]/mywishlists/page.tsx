@@ -1,51 +1,14 @@
-'use client';
+import { getFavoritesSSR } from '@favorites/server/queries';
+import ListHybrid from '@properties/list/List.Hybrid';
+import {getLocale, getTranslations} from 'next-intl/server';
+import { getServerTranslations } from '@translation/server/serverTranslationService';
 
-import { useEffect, useState } from 'react';
-import PropertyListContainer from '@/app/components/properties/PropertyListContainer';
-import apiService from '@/app/services/apiService';
-import { PropertyType } from '@/app/constants/propertyType';
-import { useTranslations } from 'next-intl';
-import PropertyListSkeleton from '@/app/components/properties/PropertyListSkeleton';
-
-const MyWishlistsPage = () => {
-  const t = useTranslations('mywishlists');
-  const [properties, setProperties] = useState<PropertyType[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const fetchWishlists = async () => {
-      try {
-        const response = await apiService.getwithtoken('/api/properties/wishlist/');
-        setProperties(response);
-      } catch (error) {
-        setError(t('loadError'));
-        console.error('Error fetching wishlists:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchWishlists();
-  }, [t]);
-
-  if (isLoading) {
-    return (
-      <main className="max-w-[1500px] mx-auto px-6 pb-6">
-        <h1 className="text-3xl font-semibold my-8">{t('title')}</h1>
-        <PropertyListSkeleton count={8} />
-      </main>
-    );
-  }
-
-  if (error) {
-    return (
-      <main className="max-w-[1500px] mx-auto px-6 pb-6">
-        <h1 className="text-3xl font-semibold my-8">{t('title')}</h1>
-        <div className="text-red-500 text-center">{error}</div>
-      </main>
-    );
-  }
+export default async function MyWishlistsPage() {
+  const t = await getTranslations('mywishlists');
+  const locale = await getLocale();
+  const properties = await getFavoritesSSR();
+  const translationsData = await getServerTranslations(properties, locale);
+  const initialUserWishlist = properties.map(p => p.id);
 
   return (
     <main className="max-w-[1500px] mx-auto px-6 pb-6">
@@ -56,10 +19,13 @@ const MyWishlistsPage = () => {
           <p className="text-gray-500 mt-2">{t('propertiesWillAppearHere')}</p>
         </div>
       ) : (
-        <PropertyListContainer initialProperties={properties} isWishlist={true} />
+        <ListHybrid 
+          initialProperties={properties}
+          translationsData={translationsData}
+          locale={locale}
+          isWishlist
+          initialUserWishlist={initialUserWishlist}/>
       )}
     </main>
   );
-};
-
-export default MyWishlistsPage;
+}

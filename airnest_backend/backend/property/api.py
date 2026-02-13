@@ -5,12 +5,14 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .cache_utils import (
     property_list_cache, property_detail_cache, review_cache, 
-    user_private_data, static_data_cache, no_cache
+    user_private_data, static_data_cache, no_cache,
+    multilingual_cache, property_with_last_modified, review_with_last_modified,
+    check_conditional_request
 )
 
 from datetime import datetime, timedelta
 import pytz
-from .models import Property, PropertyImage, Reservation, Wishlist, PropertyReview, ReviewTag, ReviewTagAssignment
+from .models import Property, PropertyImage, Reservation, Wishlist, PropertyReview, ReviewTag, ReviewTagAssignment, ALLOWED_PROPERTY_TAG_IDS
 import json
 from .serializers import PropertySerializer, PropertyLandlordSerializer, PropertyImageSerializer, PropertyReviewSerializer, PropertyReviewListSerializer, ReviewTagSerializer, PropertyWithReviewStatsSerializer
 from .forms import PropertyForm
@@ -19,7 +21,7 @@ from django.db import models
 @api_view(['GET'])
 @authentication_classes([])
 @permission_classes([])
-@property_list_cache()  # 公开房源列表，5分钟缓存
+@multilingual_cache(max_age=300)  # 公开房源列表，5分钟缓存，支持多语言
 # 该api用来获取符合条件的房源，默认情况全部展示，可以按照地理位置、类别、入住/退房日期进行筛选
 def property_list(request):
     # 只显示已发布的房源
@@ -150,10 +152,24 @@ def property_detail(request,pk):
         
         # GET方法 - 返回房源详情
         if request.method == 'GET':
+            # 检查条件请求，如果内容未修改则返回304
+            conditional_response = check_conditional_request(request, property.updated_at)
+            if conditional_response:
+                conditional_response['Cache-Control'] = 'public, max-age=600'
+                conditional_response['Vary'] = 'Accept-Language'
+                return conditional_response
+            
             serializer = PropertyLandlordSerializer(property, many=False)
             response = JsonResponse(serializer.data, safe=False)
-            # 房源详情公开可缓存10分钟
+            
+            # 房源详情可以公开缓存10分钟，支持多语言
             response['Cache-Control'] = 'public, max-age=600'
+            response['Vary'] = 'Accept-Language'
+            
+            # 添加Last-Modified头 - 基于房源的更新时间
+            from django.utils.http import http_date
+            response['Last-Modified'] = http_date(property.updated_at.timestamp())
+            
             return response
         
         # PATCH方法 - 更新房源信息
@@ -634,7 +650,7 @@ def delete_property_image(request, property_id, image_id):
 @api_view(['GET'])
 @authentication_classes([])
 @permission_classes([])
-@static_data_cache()  # 静态数据，1小时缓存
+@multilingual_cache(max_age=3600)  # 静态数据，1小时缓存，支持多语言
 def get_review_tags(request):
     """获取所有可用的评论标签"""
     try:
@@ -679,8 +695,23 @@ def property_reviews(request, pk):
                 'page_size': page_size,
                 'has_next': end < total_count
             })
-            # 评论列表可以短期缓存10分钟
+            # 评论列表可以短期缓存10分钟，支持多语言
             response['Cache-Control'] = 'public, max-age=600'
+            response['Vary'] = 'Accept-Language'
+            
+            # 检查条件请求和添加Last-Modified头 - 基于最新评论的时间
+            latest_review = reviews.first()
+            if latest_review:
+                # 检查条件请求，如果内容未修改则返回304
+                conditional_response = check_conditional_request(request, latest_review.created_at)
+                if conditional_response:
+                    conditional_response['Cache-Control'] = 'public, max-age=600'
+                    conditional_response['Vary'] = 'Accept-Language'
+                    return conditional_response
+                    
+                from django.utils.http import http_date
+                response['Last-Modified'] = http_date(latest_review.created_at.timestamp())
+            
             return response
         
         elif request.method == 'POST':
@@ -697,11 +728,12 @@ def property_reviews(request, pk):
             if existing_review:
                 return JsonResponse({'error': '您已经评论过此房源'}, status=400)
             
+            from django.utils import timezone
             # 检查用户是否有权评论（需要有完成的预订）
             completed_reservations = Reservation.objects.filter(
                 property=property_obj,
                 user=request.user,
-                check_out__lt=datetime.now()  # 已退房的预订
+                check_out__lt=timezone.now()  # 已退房的预订
             )
             
             if not completed_reservations.exists():
@@ -710,19 +742,13 @@ def property_reviews(request, pk):
             # 创建评论
             serializer = PropertyReviewSerializer(data=request.data)
             if serializer.is_valid():
-                # 设置关联字段
-                serializer.validated_data['property_ref'] = property_obj
-                serializer.validated_data['user'] = request.user
-                
-                # 如果有预订关联，找到最近的完成预订
                 latest_reservation = completed_reservations.order_by('-check_out').first()
-                if latest_reservation:
-                    serializer.validated_data['reservation'] = latest_reservation
-                    serializer.validated_data['is_verified'] = True
-                
-                review = serializer.save()
-                
-                # 返回创建的评论
+                review = serializer.save(
+                    property_ref=property_obj,
+                    user=request.user,
+                    reservation=latest_reservation if latest_reservation else None,
+                    is_verified=bool(latest_reservation)
+                )
                 response_serializer = PropertyReviewListSerializer(review)
                 return JsonResponse(response_serializer.data, status=201)
             else:
@@ -737,7 +763,7 @@ def property_reviews(request, pk):
 @api_view(['GET'])
 @authentication_classes([])
 @permission_classes([])
-@review_cache()  # 评论统计数据，10分钟缓存
+@review_with_last_modified(max_age=600)  # 评论统计数据，10分钟缓存，支持多语言和Last-Modified
 def property_review_stats(request, pk):
     """获取房源评论统计信息"""
     try:
@@ -761,17 +787,11 @@ def property_review_stats(request, pk):
             average_rating = None
             total_reviews = 0
             positive_review_rate = None
-        
-        try:
-            most_popular_tags = property_obj.get_most_popular_tags(locale=locale, limit=2)
-        except Exception as e:
-            most_popular_tags = []
-        
+            
         stats = {
             'average_rating': average_rating,
             'total_reviews': total_reviews,
             'positive_review_rate': positive_review_rate,
-            'most_popular_tags': most_popular_tags
         }
         
         return JsonResponse(stats)
@@ -831,7 +851,7 @@ def manage_review(request, review_id):
 @api_view(['GET'])
 @authentication_classes([])
 @permission_classes([])
-@property_list_cache()  # 房源列表，5分钟缓存
+@multilingual_cache(max_age=300) 
 def properties_with_reviews(request):
     """获取带评论统计的房源列表（更新版的property_list）"""
     try:
@@ -868,8 +888,6 @@ def properties_with_reviews(request):
                 CHECK_IN_HOUR = 15
                 CHECK_OUT_HOUR = 11
                 
-                # 过滤逻辑保持不变...
-                # 这里简化处理，实际可以复制原有的日期过滤逻辑
                 
             except ValueError:
                 pass
@@ -885,9 +903,6 @@ def properties_with_reviews(request):
         # 分页逻辑 - 添加limit和offset参数支持
         limit = request.GET.get('limit', None)
         offset = request.GET.get('offset', None)
-        
-        # 确保稳定排序（模型中已设置默认排序）
-        # Property.Meta.ordering = ['-created_at', 'id'] 确保分页结果一致
         
         if limit is not None:
             try:
@@ -924,7 +939,7 @@ def properties_with_reviews(request):
 @api_view(['GET'])
 @authentication_classes([])
 @permission_classes([])
-@property_detail_cache()  # 房源详情，10分钟缓存
+@property_with_last_modified(max_age=600)  # 房源详情，10分钟缓存，支持多语言和Last-Modified
 def property_with_reviews(request, pk):
     """获取单个房源的详细信息，包含评论统计"""
     try:
@@ -986,6 +1001,20 @@ def create_draft_property(request):
         return JsonResponse({'error': str(e)}, status=400)
 
 
+def _clean_property_tags(v):
+    # 复用与 serializer 一致的规则（最小数量额外在这里卡）
+    if v is None:
+        v = []
+    if not isinstance(v, list):
+        raise ValueError("property_tags must be a list")
+    uniq = list(dict.fromkeys(v))
+    if any(x not in ALLOWED_PROPERTY_TAG_IDS for x in uniq):
+        raise ValueError("invalid property_tags")
+    if not (1 <= len(uniq) <= 5):
+        raise ValueError("property_tags must be between 1 and 5")
+    return uniq
+
+
 # R2直传相关API - 发布草稿房源
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
@@ -1020,7 +1049,14 @@ def publish_property(request, pk):
         property.postal_code = data.get('postal_code', property.postal_code)
         property.timezone = data.get('timezone', property.timezone)
         property.status = 'published'  # 更改状态为已发布
+
+        if 'property_tags' in data:
+            try:
+                property.property_tags = _clean_property_tags(data.get('property_tags'))
+            except ValueError as e:
+                return JsonResponse({'error': str(e)}, status=400)
         
+        property.status = 'published'
         property.save()
         
         # 处理R2图片信息

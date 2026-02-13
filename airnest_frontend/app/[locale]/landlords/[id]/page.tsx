@@ -1,9 +1,11 @@
 import Image from 'next/image';
-import ContactButton from '@/app/components/ContactButton';
-import PropertyListItem from '@/app/components/properties/PropertyListItem';
-import apiService from '@/app/services/apiService';
+import { notFound } from 'next/navigation';
+import ContactButton from '@properties/detail/ContactButton';
+import ListHybrid from '@properties/list/List.Hybrid';
+import { serverApiCall } from '@api/server/fetchServer';
 import { getTranslations } from 'next-intl/server';
-import { PropertyType } from '@/app/constants/propertyType';
+import type { PropertyType } from '@properties/types/Property';
+import type { TranslationData } from '@translation/server/serverTranslationService';
 
 interface Landlord {
   id: string;
@@ -14,12 +16,33 @@ interface Landlord {
   date_joined: string;
 }
 
-const LandlordDetailsPage = async ({ params }: { params: Promise<{ id: string; locale: string }> }) => {
-  const { id } = await params;
-  const landlord: Landlord = await apiService.get(`/api/auth/landlords/${id}/`);
+const LandlordDetailsPage = async ({
+  params,
+}: {
+  params: Promise<{ id: string; locale: string }>;
+}) => {
+  const { id, locale } = await params;
+  const landlord = await serverApiCall<Landlord | null>(`/api/auth/landlords/${id}/`);
+  if (!landlord) notFound();
   const t = await getTranslations('landlord');
-
   const hostingYears = new Date().getFullYear() - new Date(landlord.date_joined).getFullYear() + 1;
+  const translationsData: TranslationData = {
+    titles: Object.fromEntries(
+      (landlord.properties ?? [])
+        .filter(p => !!p.title)
+        .map(p => [p.title!, p.title!])
+    ),
+    cities: Object.fromEntries(
+      (landlord.properties ?? [])
+        .filter(p => !!p.city)
+        .map(p => [p.city!, p.city!])
+    ),
+    countries: Object.fromEntries(
+      (landlord.properties ?? [])
+        .filter(p => !!p.country)
+        .map(p => [p.country!, p.country!])
+    ),
+  };
 
   return (
     <main className="max-w-[1500px] mx-auto px-6 pb-6">
@@ -81,11 +104,11 @@ const LandlordDetailsPage = async ({ params }: { params: Promise<{ id: string; l
           </h2>
 
           {landlord.properties.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {landlord.properties.map(property => (
-                <PropertyListItem key={property.id} property={property} />
-              ))}
-            </div>
+            <ListHybrid 
+            initialProperties={landlord.properties}
+            translationsData={translationsData}
+            locale={locale}
+            initialUserWishlist={[]}/>
           ) : (
             <div className="bg-gray-50 rounded-xl p-8 text-center">
               <div className="text-gray-400 text-5xl mb-4">🏠</div>

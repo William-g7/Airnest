@@ -1,0 +1,24 @@
+{
+    "search": {
+    "where": "目的地",
+    "checkIn": "入住",
+    "checkOut": "退房",
+    "who": "人数",
+    "anywhere": "任何地方",
+    "addDate": "添加日期",
+    "search": "搜索",
+    "guest": "位客人",
+    "guests": "入住人数",
+    "whereTo": "准备去哪儿？",
+    "searchDestinations": "搜索目的地...",
+    "when": "何时入住？",
+    "whosComing": "有几位入住？",
+    "closeModal": "关闭搜索框",
+    "viewConversation": "查看对话",
+    "searching": "搜索中...",
+    "oneGuest": "1位客人",
+    "guestCount": "{count}位客人",
+    "agesInfo": "13岁或以上",
+    "searchDestination": "搜索目的地"
+  }
+}

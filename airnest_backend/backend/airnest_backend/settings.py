@@ -42,14 +42,15 @@ else:
 
 REST_AUTH = {
     'USE_JWT': True,
-    'JWT_AUTH_COOKIE': 'jwt-auth',
-    'JWT_AUTH_REFRESH_COOKIE': 'jwt-refresh-token',
-    'JWT_AUTH_REFRESH_COOKIE_PATH': '/',
-    'JWT_AUTH_HTTPONLY': False,
-    'JWT_AUTH_SAMESITE': 'Lax',
-    'JWT_AUTH_SECURE': False,
+    # 移除所有JWT Cookie相关配置，只返回JSON
+    # 'JWT_AUTH_COOKIE': 'jwt-auth',
+    # 'JWT_AUTH_REFRESH_COOKIE': 'jwt-refresh-token', 
+    # 'JWT_AUTH_REFRESH_COOKIE_PATH': '/',
+    # 'JWT_AUTH_HTTPONLY': False,
+    # 'JWT_AUTH_SAMESITE': 'Lax',
+    # 'JWT_AUTH_SECURE': False,
+    # 'JWT_AUTH_COOKIE_USE_CSRF': True,
     'JWT_AUTH_RETURN_EXPIRATION': True,
-    'JWT_AUTH_COOKIE_USE_CSRF': True,
     'USER_DETAILS_SERIALIZER': 'useraccount.serializers.UserSerializer',
     'LOGIN_SERIALIZER': 'useraccount.serializers.CustomLoginSerializer',
 }

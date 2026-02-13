@@ -1,25 +1,16 @@
-import { getUserId } from '@/app/auth/session';
-import apiService from '@/app/services/apiService';
-import React from 'react';
-import Conversation from '@/app/components/inbox/Conversation';
 import { getTranslations } from 'next-intl/server';
+import { checkBFFSession } from '@auth/server/session';
+import Conversation from '@chat/components/Conversation';
+import { listConversations } from '@chat/api/queries';
 
-export type UserType = {
-  id: string;
-  name: string;
-  avatar_url: string;
-};
+export type UserType = { id: string; name: string; avatar_url?: string | null };
+export type ConversationType = { id: string; users: UserType[] };
 
-export type ConversationType = {
-  id: string;
-  users: UserType[];
-};
-
-const InboxPage = async ({ params }: { params: Promise<{ locale: string }> }) => {
-  const userId = await getUserId();
+const InboxPage = async () => {
   const t = await getTranslations('inbox');
+  const session = await checkBFFSession();
 
-  if (!userId) {
+  if (!session.valid || !session.userId) {
     return (
       <main className="max-w-[1500px] max-auto px-6 py-12">
         <p>{t('authRequired')}</p>
@@ -27,20 +18,18 @@ const InboxPage = async ({ params }: { params: Promise<{ locale: string }> }) =>
     );
   }
 
-  const conversations = await apiService.getwithtoken('/api/chat/');
+  const list = await listConversations();
 
   return (
     <main className="max-w-[1500px] mx-auto px-6 pb-6 space-y-4">
       <h1 className="my-6 text-2xl">{t('title')}</h1>
 
-      {conversations.length > 0 ? (
+      {list.length > 0 ? (
         <div className="space-y-4">
           <p className="text-gray-500">{t('conversations')}</p>
-          {conversations.map((conversation: ConversationType) => {
-            return (
-              <Conversation userId={userId} key={conversation.id} conversation={conversation} />
-            );
-          })}
+          {list.map((conversation) => (
+            <Conversation userId={session.userId!} key={conversation.id} conversation={conversation as any} />
+          ))}
         </div>
       ) : (
         <div className="p-6 bg-gray-50 rounded-lg border border-gray-200">

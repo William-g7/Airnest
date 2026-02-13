@@ -1,0 +1,14 @@
+{
+    "mywishlists": {
+        "title": "My Wishlists",
+        "loading": "Loading...",
+        "loadError": "Failed to load wishlists",
+        "noSavedProperties": "No saved properties",
+        "propertiesWillAppearHere": "Properties you save will appear here"
+      },
+      "favorites": {
+        "added": "Added to your favorites",
+        "removed": "Removed from your favorites",
+        "error": "Failed to update favorites"
+    }
+}

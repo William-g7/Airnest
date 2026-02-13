@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import AuthProvider from './providers/AuthProvider';
-import ErrorBoundaryProvider from './providers/ErrorBoundaryProvider';
+import AuthProvider from '@auth/ui/AuthProvider';
+import ErrorBoundary from '@errors/ErrorBoundary';
 import { Toaster } from 'react-hot-toast';
-import AuthStatusDetector from './components/AuthStatusDetector';
+import AuthStatusDetector from '@auth/ui/AuthStatusDetector';
 import './globals.css';
 
+// 整个应用的root layout, 定义全站通用的框架，样式与长期存活的提供器
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
@@ -35,13 +36,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://media.airnest.me" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://media.airnest.me" />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
           <Toaster position="top-center" />
           <AuthProvider>
-            <ErrorBoundaryProvider>
+            <ErrorBoundary>
               <AuthStatusDetector />
               {children}
-            </ErrorBoundaryProvider>
+            </ErrorBoundary>
           </AuthProvider>
       </body>
     </html>

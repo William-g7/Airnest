@@ -1,0 +1,36 @@
+{
+    "navigation": {
+    "home": "首页",
+    "properties": "房源",
+    "wishlist": "心愿单",
+    "inbox": "收件箱",
+    "profile": "个人资料",
+    "login": "登录",
+    "register": "注册",
+    "logout": "退出登录",
+    "messages": "消息",
+    "notifications": "通知",
+    "trips": "行程",
+    "myAccount": "我的账户",
+    "myProperties": "我的房源",
+    "myReservations": "我的预订",
+    "myWishlists": "我的收藏"
+  },
+  "categories": {
+    "omg": "惊喜推荐",
+    "icons": "人气精选",
+    "beach": "海滨度假",
+    "castles": "城堡住宿",
+    "apartment": "城市公寓",
+    "beach house": "海滨别墅",
+    "bed and breakfast": "特色民宿",
+    "castle": "城堡",
+    "farm house": "乡村农舍",
+    "ferry": "渡轮住宿",
+    "hotel": "精品酒店",
+    "house": "独栋住宅",
+    "treehouse": "树屋",
+    "selectCategory": "选择类别",
+    "loading": "加载中..."
+  }
+}
