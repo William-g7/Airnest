@@ -526,3 +526,327 @@ Feel free to:
 ---
 
 **Made with ❤️ for learning modern web development**
+
+```
+Djangobnb
+├─ CLAUDE.md
+├─ README.md
+└─ airnest_frontend
+   ├─ .husky
+   │  └─ pre-commit
+   ├─ .prettierignore
+   ├─ .prettierrc
+   ├─ README.md
+   ├─ app
+   │  ├─ [locale]
+   │  │  ├─ inbox
+   │  │  │  ├─ [id]
+   │  │  │  │  └─ page.tsx
+   │  │  │  └─ page.tsx
+   │  │  ├─ landlords
+   │  │  │  └─ [id]
+   │  │  │     └─ page.tsx
+   │  │  ├─ layout.tsx
+   │  │  ├─ myprofile
+   │  │  │  └─ [id]
+   │  │  │     └─ page.tsx
+   │  │  ├─ myproperties
+   │  │  │  └─ page.tsx
+   │  │  ├─ myreservations
+   │  │  │  └─ page.tsx
+   │  │  ├─ mywishlists
+   │  │  │  └─ page.tsx
+   │  │  ├─ page.tsx
+   │  │  ├─ properties
+   │  │  │  └─ [id]
+   │  │  │     └─ page.tsx
+   │  │  ├─ resend-verification
+   │  │  │  └─ page.tsx
+   │  │  ├─ reset-password
+   │  │  │  └─ page.tsx
+   │  │  ├─ template.tsx
+   │  │  └─ verify-email
+   │  │     └─ page.tsx
+   │  ├─ api
+   │  │  ├─ auth
+   │  │  │  ├─ login
+   │  │  │  │  └─ route.ts
+   │  │  │  ├─ logout
+   │  │  │  │  └─ route.ts
+   │  │  │  ├─ refresh
+   │  │  │  │  └─ route.ts
+   │  │  │  └─ session
+   │  │  │     ├─ route.ts
+   │  │  │     └─ session-core.ts
+   │  │  ├─ backend
+   │  │  │  └─ [...path]
+   │  │  │     └─ route.ts
+   │  │  ├─ currency
+   │  │  │  └─ rates
+   │  │  │     └─ route.ts
+   │  │  └─ utils
+   │  │     └─ cookieSecurity.ts
+   │  ├─ global-error.tsx
+   │  ├─ globals.css
+   │  ├─ icon.svg
+   │  ├─ layout.tsx
+   │  ├─ robots.ts
+   │  └─ sitemap.ts
+   ├─ eslint.config.mjs
+   ├─ middleware.ts
+   ├─ next-env.d.ts
+   ├─ next.config.ts
+   ├─ package-lock.json
+   ├─ package.json
+   ├─ postcss.config.mjs
+   ├─ public
+   │  ├─ icons
+   │  │  ├─ apartment.svg
+   │  │  ├─ beach.svg
+   │  │  ├─ bed.svg
+   │  │  ├─ castle.svg
+   │  │  ├─ farm.svg
+   │  │  ├─ ferry.svg
+   │  │  ├─ hotel.svg
+   │  │  ├─ house.svg
+   │  │  └─ tree-house.svg
+   │  ├─ images
+   │  │  └─ default-avatar.png
+   │  ├─ logo.png
+   │  ├─ logo_icon.png
+   │  ├─ placeholder.jpg
+   │  └─ placetypes
+   │     ├─ door.svg
+   │     ├─ hostel.svg
+   │     └─ room.svg
+   ├─ src
+   │  ├─ entities
+   │  ├─ features
+   │  │  ├─ add-property
+   │  │  │  ├─ AddPropertyModal.tsx
+   │  │  │  ├─ components
+   │  │  │  │  ├─ ImageManager.tsx
+   │  │  │  │  ├─ TagSelector.tsx
+   │  │  │  │  └─ steps
+   │  │  │  │     ├─ StepBasicInfo.tsx
+   │  │  │  │     ├─ StepCatogories.tsx
+   │  │  │  │     ├─ StepDetails.tsx
+   │  │  │  │     ├─ StepLocation.tsx
+   │  │  │  │     ├─ StepPhotos.tsx
+   │  │  │  │     └─ StepPlaceTypes.tsx
+   │  │  │  ├─ hooks
+   │  │  │  │  └─ useAddPropertyModal.ts
+   │  │  │  ├─ i18n
+   │  │  │  │  ├─ en.json
+   │  │  │  │  ├─ fr.json
+   │  │  │  │  └─ zh.json
+   │  │  │  ├─ services
+   │  │  │  │  ├─ publishProperty.ts
+   │  │  │  │  └─ r2Upload.ts
+   │  │  │  └─ types
+   │  │  │     ├─ index.ts
+   │  │  │     ├─ property.ts
+   │  │  │     └─ upload.ts
+   │  │  ├─ auth
+   │  │  │  ├─ client
+   │  │  │  │  ├─ authChannel.ts
+   │  │  │  │  ├─ authStore.ts
+   │  │  │  │  ├─ clientApiService.ts
+   │  │  │  │  ├─ modalStore.ts
+   │  │  │  │  └─ tokenService.ts
+   │  │  │  ├─ hooks
+   │  │  │  │  └─ useAuth.ts
+   │  │  │  ├─ i18n
+   │  │  │  │  ├─ en.json
+   │  │  │  │  ├─ fr.json
+   │  │  │  │  └─ zh.json
+   │  │  │  ├─ security
+   │  │  │  │  └─ TurnstileWidget.tsx
+   │  │  │  ├─ server
+   │  │  │  │  └─ session.ts
+   │  │  │  ├─ ui
+   │  │  │  │  ├─ AuthProvider.tsx
+   │  │  │  │  ├─ AuthStatusDetector.tsx
+   │  │  │  │  └─ modals
+   │  │  │  │     ├─ ChangePasswordModal.tsx
+   │  │  │  │     ├─ ForgotPasswordModal.tsx
+   │  │  │  │     ├─ LoginModal.tsx
+   │  │  │  │     └─ SignupModal.tsx
+   │  │  │  └─ utils
+   │  │  │     ├─ cookieSecurity.ts
+   │  │  │     └─ jwt.ts
+   │  │  ├─ chat
+   │  │  │  ├─ api
+   │  │  │  │  └─ queries.ts
+   │  │  │  ├─ components
+   │  │  │  │  ├─ ChatWindow.tsx
+   │  │  │  │  └─ Conversation.tsx
+   │  │  │  ├─ types
+   │  │  │  │  └─ types.ts
+   │  │  │  ├─ utils
+   │  │  │  │  └─ message.ts
+   │  │  │  └─ ws
+   │  │  │     └─ useChatSocket.ts
+   │  │  ├─ currency
+   │  │  │  ├─ client
+   │  │  │  │  ├─ CurrencyProvider.tsx
+   │  │  │  │  └─ currencyService.ts
+   │  │  │  ├─ server
+   │  │  │  │  ├─ CurrencySSR.tsx
+   │  │  │  │  └─ rates.ts
+   │  │  │  ├─ ui
+   │  │  │  │  ├─ CurrencyDisplay.tsx
+   │  │  │  │  └─ CurrencyIsland.tsx
+   │  │  │  └─ utils
+   │  │  │     └─ shared.ts
+   │  │  ├─ day-picker
+   │  │  │  ├─ DayPicker.tsx
+   │  │  │  ├─ DayPickerDynamic.tsx
+   │  │  │  ├─ dateUtils.ts
+   │  │  │  ├─ daypicker.css
+   │  │  │  └─ i18n
+   │  │  │     ├─ en.json
+   │  │  │     ├─ fr.json
+   │  │  │     └─ zh.json
+   │  │  ├─ favorites
+   │  │  │  ├─ client
+   │  │  │  │  └─ favoritesStore.ts
+   │  │  │  ├─ i18n
+   │  │  │  │  ├─ en.json
+   │  │  │  │  ├─ fr.json
+   │  │  │  │  └─ zh.json
+   │  │  │  ├─ server
+   │  │  │  │  └─ queries.ts
+   │  │  │  ├─ services
+   │  │  │  │  └─ clientApi.ts
+   │  │  │  └─ ui
+   │  │  │     ├─ FavoriteButton.tsx
+   │  │  │     └─ WishlistIsland.tsx
+   │  │  ├─ properties
+   │  │  │  ├─ card
+   │  │  │  │  ├─ PriceBadge.tsx
+   │  │  │  │  ├─ PropertyCard.CSR.tsx
+   │  │  │  │  ├─ PropertyCard.SSR.tsx
+   │  │  │  │  └─ TagsLine.tsx
+   │  │  │  ├─ detail
+   │  │  │  │  ├─ ContactButton.tsx
+   │  │  │  │  ├─ Description.tsx
+   │  │  │  │  ├─ Detail.Container.tsx
+   │  │  │  │  ├─ Detail.View.tsx
+   │  │  │  │  ├─ Features.tsx
+   │  │  │  │  ├─ HostCard.tsx
+   │  │  │  │  └─ MetaSummary.tsx
+   │  │  │  ├─ i18n
+   │  │  │  │  ├─ en.json
+   │  │  │  │  ├─ fr.json
+   │  │  │  │  └─ zh.json
+   │  │  │  ├─ images
+   │  │  │  │  └─ ImageCarousel.tsx
+   │  │  │  ├─ list
+   │  │  │  │  ├─ List.Client.tsx
+   │  │  │  │  ├─ List.ErrorBoundary.tsx
+   │  │  │  │  ├─ List.Hybrid.tsx
+   │  │  │  │  ├─ List.Skeleton.tsx
+   │  │  │  │  └─ hooks
+   │  │  │  │     ├─ useIntersectionObserver.ts
+   │  │  │  │     └─ usePropertyList.ts
+   │  │  │  ├─ reservation
+   │  │  │  │  ├─ Reservation.Sidebar.tsx
+   │  │  │  │  ├─ useBookedDates.ts
+   │  │  │  │  └─ useReservation.ts
+   │  │  │  ├─ reviews
+   │  │  │  │  ├─ ReviewCard.tsx
+   │  │  │  │  ├─ Reviews.Container.tsx
+   │  │  │  │  ├─ Reviews.Form.tsx
+   │  │  │  │  ├─ Reviews.List.tsx
+   │  │  │  │  ├─ Reviews.Summary.tsx
+   │  │  │  │  └─ StarRating.tsx
+   │  │  │  ├─ server
+   │  │  │  │  └─ queries.ts
+   │  │  │  ├─ tags
+   │  │  │  │  └─ PropertyTag.tsx
+   │  │  │  ├─ types
+   │  │  │  │  ├─ EditableProperty.ts
+   │  │  │  │  ├─ Property.ts
+   │  │  │  │  └─ mappers.ts
+   │  │  │  └─ utils
+   │  │  │     └─ searchParams.ts
+   │  │  ├─ search
+   │  │  │  ├─ components
+   │  │  │  │  ├─ CategoryScroller.tsx
+   │  │  │  │  ├─ SearchBar.tsx
+   │  │  │  │  └─ SearchModal.tsx
+   │  │  │  ├─ hooks
+   │  │  │  │  ├─ useDebouncedCallback.ts
+   │  │  │  │  └─ useSearchQuery.ts
+   │  │  │  ├─ i18n
+   │  │  │  │  ├─ en.json
+   │  │  │  │  ├─ fr.json
+   │  │  │  │  └─ zh.json
+   │  │  │  └─ utils
+   │  │  │     └─ query.ts
+   │  │  └─ translation
+   │  │     ├─ cache
+   │  │     │  ├─ ClientCacheSeed.tsx
+   │  │     │  └─ memoryCache.ts
+   │  │     ├─ client
+   │  │     │  ├─ translationDatabase.ts
+   │  │     │  ├─ translationStore.ts
+   │  │     │  └─ useTranslate.ts
+   │  │     ├─ server
+   │  │     │  └─ serverTranslationService.ts
+   │  │     ├─ services
+   │  │     │  └─ apiTranslationService.ts
+   │  │     └─ ui
+   │  │        └─ LanguageSwitcher.tsx
+   │  ├─ shared
+   │  │  ├─ api
+   │  │  │  ├─ client
+   │  │  │  └─ server
+   │  │  │     └─ fetchServer.ts
+   │  │  ├─ errors
+   │  │  │  ├─ ErrorBoundary.tsx
+   │  │  │  ├─ error.ts
+   │  │  │  ├─ errorHandler.ts
+   │  │  │  └─ useErrorHandler.tsx
+   │  │  ├─ i18n
+   │  │  │  ├─ messages
+   │  │  │  │  ├─ en.json
+   │  │  │  │  ├─ fr.json
+   │  │  │  │  └─ zh.json
+   │  │  │  ├─ navigation.ts
+   │  │  │  ├─ request.ts
+   │  │  │  └─ routing.ts
+   │  │  └─ ui
+   │  │     ├─ AnimatedText.tsx
+   │  │     ├─ Button.tsx
+   │  │     ├─ Modal.tsx
+   │  │     ├─ ScrollToTop.tsx
+   │  │     ├─ Select.tsx
+   │  │     ├─ selects
+   │  │     │  ├─ CountrySelect.tsx
+   │  │     │  └─ TimezoneSelect.tsx
+   │  │     ├─ toast
+   │  │     │  ├─ ToasterProvider.tsx
+   │  │     │  ├─ toast.ts
+   │  │     │  └─ toastStyles.ts
+   │  │     └─ toast.ts
+   │  └─ widgets
+   │     └─ navigation
+   │        ├─ components
+   │        │  ├─ AddPropertyButton.tsx
+   │        │  ├─ LogoutButton.tsx
+   │        │  ├─ MenuLink.tsx
+   │        │  ├─ Navbar.tsx
+   │        │  ├─ NavbarWrapper.tsx
+   │        │  ├─ ResetLogo.tsx
+   │        │  ├─ SearchFilters.tsx
+   │        │  └─ UserNav.tsx
+   │        └─ i18n
+   │           ├─ en.json
+   │           ├─ fr.json
+   │           └─ zh.json
+   ├─ tailwind.config.ts
+   └─ tsconfig.json
+
+```
