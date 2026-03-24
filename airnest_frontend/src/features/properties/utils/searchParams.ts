@@ -12,6 +12,12 @@ export interface SearchParams {
   page?: number;
   limit?: number;
   offset?: number;
+  // AI 搜索扩展字段
+  bedrooms?: number;
+  bathrooms?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  placeType?: string;
 }
 
 /**
@@ -20,20 +26,35 @@ export interface SearchParams {
  * @returns 标准化的搜索参数对象
  */
 export function parseSearchParams(searchParams: URLSearchParams | Record<string, string | string[]>): SearchParams {
-  // 统一处理不同的输入格式
   const params = searchParams instanceof URLSearchParams 
     ? searchParams 
     : new URLSearchParams(Object.entries(searchParams).map(([key, value]) => [key, Array.isArray(value) ? value[0] : value]).filter(([_, value]) => value));
 
+  const optInt = (v: string | null) => {
+    if (!v) return undefined;
+    const n = parseInt(v, 10);
+    return Number.isFinite(n) && n > 0 ? n : undefined;
+  };
+  const optFloat = (v: string | null) => {
+    if (!v) return undefined;
+    const n = parseFloat(v);
+    return Number.isFinite(n) && n > 0 ? n : undefined;
+  };
+
   return {
     where: params.get('where') || params.get('location') || '',
-    checkIn: params.get('check-in') || '',
-    checkOut: params.get('check-out') || '',
+    checkIn: params.get('check-in') || params.get('check_in') || '',
+    checkOut: params.get('check-out') || params.get('check_out') || '',
     guests: Math.max(1, parseInt(params.get('guests') || '1')),
     category: params.get('category') || '',
     page: parseInt(params.get('page') || '1'),
     limit: parseInt(params.get('limit') || '20'),
-    offset: parseInt(params.get('offset') || '0')
+    offset: parseInt(params.get('offset') || '0'),
+    bedrooms: optInt(params.get('bedrooms')),
+    bathrooms: optInt(params.get('bathrooms')),
+    minPrice: optFloat(params.get('min_price')),
+    maxPrice: optFloat(params.get('max_price')),
+    placeType: params.get('place_type') || undefined,
   };
 }
 
@@ -85,16 +106,21 @@ export function buildSearchQuery(params: Partial<SearchParams>): URLSearchParams
  * URL参数变化时，组件会重新挂载
  */
 export function getSearchKey(params: SearchParams): string {
-  const keyParams = {
+  const keyParams: Record<string, unknown> = {
     where: params.where,
     checkIn: params.checkIn,
     checkOut: params.checkOut,
     guests: params.guests,
-    category: params.category
+    category: params.category,
+    bedrooms: params.bedrooms,
+    bathrooms: params.bathrooms,
+    minPrice: params.minPrice,
+    maxPrice: params.maxPrice,
+    placeType: params.placeType,
   };
   
   return Object.entries(keyParams)
-    .filter(([_, value]) => value && value !== '' && value !== 1)
+    .filter(([_, value]) => value != null && value !== '' && value !== 1)
     .map(([key, value]) => `${key}:${value}`)
     .join('|') || 'default';
 }
@@ -146,6 +172,11 @@ export function formatApiParams(params: SearchParams): Record<string, string> {
   if (params.category) apiParams.category = params.category;
   if (params.limit) apiParams.limit = params.limit.toString();
   if (params.offset) apiParams.offset = params.offset.toString();
+  if (params.bedrooms) apiParams.bedrooms = params.bedrooms.toString();
+  if (params.bathrooms) apiParams.bathrooms = params.bathrooms.toString();
+  if (params.minPrice) apiParams.min_price = params.minPrice.toString();
+  if (params.maxPrice) apiParams.max_price = params.maxPrice.toString();
+  if (params.placeType) apiParams.place_type = params.placeType;
   
   return apiParams;
 }

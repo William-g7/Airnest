@@ -19,6 +19,12 @@
     "searching": "Searching...",
     "oneGuest": "1 guest",
     "guestCount": "{count} guests",
-    "agesInfo": "Ages 13 or above"
+    "agesInfo": "Ages 13 or above",
+    "aiSearch": "AI Search",
+    "aiPlaceholder": "Describe what you're looking for...",
+    "aiParsing": "AI is understanding your request...",
+    "aiFallback": "Showing keyword results",
+    "aiToggle": "Smart Search",
+    "normalSearch": "Filters"
   }
 }

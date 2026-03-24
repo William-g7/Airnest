@@ -19,6 +19,12 @@
     "oneGuest": "1位客人",
     "guestCount": "{count}位客人",
     "agesInfo": "13岁或以上",
-    "searchDestination": "搜索目的地"
+    "searchDestination": "搜索目的地",
+    "aiSearch": "AI 搜索",
+    "aiPlaceholder": "描述你想要的房源，例如\"巴黎两卧室公寓，200美元以内\"...",
+    "aiParsing": "AI 正在理解你的需求...",
+    "aiFallback": "已切换为关键词搜索",
+    "aiToggle": "智能搜索",
+    "normalSearch": "筛选"
   }
 }
