@@ -899,7 +899,40 @@ def properties_with_reviews(request):
                 properties = properties.filter(guests__gte=guests_int)
             except ValueError:
                 pass
-        
+
+        # AI 搜索扩展筛选：bedrooms / bathrooms / price range / place_type
+        bedrooms = request.GET.get('bedrooms', None)
+        if bedrooms:
+            try:
+                properties = properties.filter(bedrooms__gte=int(bedrooms))
+            except ValueError:
+                pass
+
+        bathrooms = request.GET.get('bathrooms', None)
+        if bathrooms:
+            try:
+                properties = properties.filter(bathrooms__gte=int(bathrooms))
+            except ValueError:
+                pass
+
+        max_price = request.GET.get('max_price', None)
+        if max_price:
+            try:
+                properties = properties.filter(price_per_night__lte=float(max_price))
+            except ValueError:
+                pass
+
+        min_price = request.GET.get('min_price', None)
+        if min_price:
+            try:
+                properties = properties.filter(price_per_night__gte=float(min_price))
+            except ValueError:
+                pass
+
+        place_type = request.GET.get('place_type', None)
+        if place_type:
+            properties = properties.filter(place_type__iexact=place_type)
+
         # 分页逻辑 - 添加limit和offset参数支持
         limit = request.GET.get('limit', None)
         offset = request.GET.get('offset', None)

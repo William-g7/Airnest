@@ -4,15 +4,20 @@ import {useEffect, useRef, useState, useCallback, startTransition} from 'react';
 import {AnimatePresence, motion} from 'framer-motion';
 import {useTranslations} from 'next-intl';
 import {useSearchQuery} from '@search/hooks/useSearchQuery';
+import {useAISearch} from '@search/hooks/useAISearch';
 import DatePickerDynamic from '@daysPicker/DayPickerDynamic';
 import {formatDateYYYYMMDD, parseLocalISODate} from '@daysPicker/dateUtils';
 
 export default function SearchBar() {
   const t = useTranslations('search');
   const {state, replaceUrl, isPending} = useSearchQuery();
+  const {search: aiSearch, isLoading: isAILoading, isFallback} = useAISearch();
   const formRef = useRef<HTMLFormElement>(null);
   const locationInputRef = useRef<HTMLInputElement>(null);
+  const aiInputRef = useRef<HTMLInputElement>(null);
 
+  const [isAIMode, setIsAIMode] = useState(false);
+  const [aiQuery, setAIQuery] = useState('');
   const [activeField, setActiveField] = useState<string | null>(null);
   const [locationInput, setLocationInput] = useState(state.location);
   const [isLocationDebouncing, setIsLocationDebouncing] = useState(false);
@@ -90,8 +95,117 @@ export default function SearchBar() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  const handleAISubmit = () => {
+    if (!aiQuery.trim() || isAILoading) return;
+    aiSearch(aiQuery);
+    setActiveField(null);
+  };
+
+  const handleAIKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAISubmit();
+    }
+    if (e.key === 'Escape') setActiveField(null);
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto">
+      {/* AI / 普通搜索模式切换 */}
+      <div className="flex justify-center mb-3 gap-1">
+        <button
+          type="button"
+          onClick={() => setIsAIMode(false)}
+          className={`px-4 py-1.5 text-xs font-medium rounded-full transition-all duration-200 ${
+            !isAIMode
+              ? 'bg-gray-900 text-white shadow-sm'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          }`}
+        >
+          {t('normalSearch')}
+        </button>
+        <button
+          type="button"
+          onClick={() => { setIsAIMode(true); setTimeout(() => aiInputRef.current?.focus(), 100); }}
+          className={`px-4 py-1.5 text-xs font-medium rounded-full transition-all duration-200 flex items-center gap-1.5 ${
+            isAIMode
+              ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-sm shadow-violet-200'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          }`}
+        >
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+          </svg>
+          {t('aiToggle')}
+        </button>
+      </div>
+
+      <AnimatePresence mode="wait">
+        {isAIMode ? (
+          /* ─── AI 搜索模式 ─── */
+          <motion.div
+            key="ai-mode"
+            initial={{opacity: 0, y: -4}}
+            animate={{opacity: 1, y: 0}}
+            exit={{opacity: 0, y: -4}}
+            transition={{duration: 0.15}}
+          >
+            <form
+              ref={formRef}
+              onSubmit={(e) => { e.preventDefault(); handleAISubmit(); }}
+              className="relative bg-white rounded-full shadow-lg border border-gray-200 overflow-hidden"
+            >
+              <div className="flex items-center">
+                <div className="flex-1 p-4">
+                  <div className="text-xs font-semibold text-gray-900 mb-1">{t('aiSearch')}</div>
+                  <input
+                    ref={aiInputRef}
+                    type="text"
+                    value={aiQuery}
+                    onChange={(e) => setAIQuery(e.target.value)}
+                    onKeyDown={handleAIKeyDown}
+                    placeholder={t('aiPlaceholder')}
+                    className="w-full text-sm text-gray-700 placeholder:text-gray-400 outline-none bg-transparent"
+                    disabled={isAILoading}
+                  />
+                  {isAILoading && (
+                    <div className="mt-1 text-xs text-violet-600 flex items-center gap-1.5">
+                      <div className="animate-spin w-3 h-3 border-2 border-violet-200 border-t-violet-600 rounded-full" />
+                      {t('aiParsing')}
+                    </div>
+                  )}
+                  {isFallback && !isAILoading && (
+                    <div className="mt-1 text-xs text-amber-600">{t('aiFallback')}</div>
+                  )}
+                </div>
+                <div className="pr-2">
+                  <button
+                    type="submit"
+                    disabled={isAILoading || !aiQuery.trim()}
+                    className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white p-4 rounded-full transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center"
+                    aria-label={t('aiSearch')}
+                  >
+                    {isAILoading ? (
+                      <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                    ) : (
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </motion.div>
+        ) : (
+          /* ─── 普通搜索模式 ─── */
+          <motion.div
+            key="normal-mode"
+            initial={{opacity: 0, y: -4}}
+            animate={{opacity: 1, y: 0}}
+            exit={{opacity: 0, y: -4}}
+            transition={{duration: 0.15}}
+          >
       <form ref={formRef} className="relative bg-white rounded-full shadow-lg border border-gray-200 overflow-hidden">
         <div className="flex items-center divide-x divide-gray-200">
           {/* 地点 */}
@@ -262,6 +376,9 @@ export default function SearchBar() {
           )}
         </AnimatePresence>
       </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

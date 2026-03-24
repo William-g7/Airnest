@@ -19,6 +19,12 @@
     "oneGuest": "1 voyageur",
     "guestCount": "{count} voyageurs",
     "agesInfo": "13 ans ou plus",
-    "searchDestination": "Rechercher une destination"
+    "searchDestination": "Rechercher une destination",
+    "aiSearch": "Recherche IA",
+    "aiPlaceholder": "Décrivez ce que vous cherchez...",
+    "aiParsing": "L'IA analyse votre demande...",
+    "aiFallback": "Résultats par mots-clés",
+    "aiToggle": "Recherche intelligente",
+    "normalSearch": "Filtres"
   }
 }
