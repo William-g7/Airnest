@@ -1,12 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 
 const ScrollToTop = () => {
   const t = useTranslations('common');
+  const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(false);
+
+  // Hide on property detail pages (concierge button occupies this position)
+  const isPropertyDetail = /\/properties\/[^/]+$/.test(pathname);
   const [showTooltip, setShowTooltip] = useState(false);
 
   useEffect(() => {
@@ -68,7 +73,7 @@ const ScrollToTop = () => {
 
   return (
     <AnimatePresence>
-      {isVisible && (
+      {isVisible && !isPropertyDetail && (
         <div className="fixed bottom-8 right-8 z-50">
           <motion.button
             onClick={scrollToTop}

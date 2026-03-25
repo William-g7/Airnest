@@ -235,6 +235,20 @@
     "checkInInstructions": "请在入住当天的15:00之后办理入住",
     "checkOutInstructions": "请在离店当天的11:00之前办理退房"
   },
+  "concierge": {
+    "tooltip": "AI 助手",
+    "title": "AI 房源助手",
+    "emptyState": "来试试问我问题吧，比如：周边有什么设施？",
+    "inputPlaceholder": "问问关于这个房源的问题...",
+    "send": "发送",
+    "stop": "停止生成",
+    "error": "出了点问题，请重试。",
+    "retry": "重试",
+    "limitReached": "对话已达上限，如需更多信息，建议直接联系房东。",
+    "contactHost": "联系房东",
+    "interrupted": "回复已中断",
+    "rateLimit": "消息发送过于频繁，请稍后再试。"
+  },
   "errors": {
     "AUTH_INVALID_CREDENTIALS": "无效的凭据，请检查您的用户名和密码",
     "NETWORK_ERROR": "网络错误，请检查您的网络连接",

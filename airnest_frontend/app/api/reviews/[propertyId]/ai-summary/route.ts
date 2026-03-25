@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { callWithTools, type ToolCallResult } from '@/src/shared/ai/llm-client';
+import {
+  callWithTools,
+  getLlmApiKey,
+  type ToolCallResult,
+} from '@/src/shared/ai/llm-client';
 import type OpenAI from 'openai';
 
 const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -113,7 +117,7 @@ export async function GET(
     }
 
     // 2. Check if we have an API key
-    if (!process.env.OPENROUTER_API_KEY) {
+    if (!getLlmApiKey()) {
       return NextResponse.json(
         { error: 'AI service not configured' },
         { status: 503 },

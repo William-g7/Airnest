@@ -236,6 +236,20 @@
   },
   
   
+  "concierge": {
+    "tooltip": "AI Assistant",
+    "title": "AI Property Assistant",
+    "emptyState": "Try asking me a question, like: What amenities are nearby?",
+    "inputPlaceholder": "Ask about this property...",
+    "send": "Send",
+    "stop": "Stop generating",
+    "error": "Something went wrong. Please try again.",
+    "retry": "Retry",
+    "limitReached": "Conversation limit reached. For more info, contact the host directly.",
+    "contactHost": "Contact Host",
+    "interrupted": "Response interrupted",
+    "rateLimit": "Too many messages. Please wait a moment."
+  },
   "errors": {
     "AUTH_INVALID_CREDENTIALS": "Invalid credentials. Please check your username and password.",
     "NETWORK_ERROR": "Network error. Please check your connection.",
