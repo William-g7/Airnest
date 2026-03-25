@@ -2,14 +2,33 @@ import 'server-only';
 import OpenAI from 'openai';
 
 /**
+ * OpenRouter uses the OpenAI-compatible API. Accept either env name so Vercel
+ * configs that still use OPENAI_API_KEY (common mistake) keep working.
+ * Priority: OPENROUTER_API_KEY → OPENAI_API_KEY.
+ */
+export function getLlmApiKey(): string | undefined {
+  const fromOpenRouter = process.env.OPENROUTER_API_KEY?.trim();
+  const fromOpenAI = process.env.OPENAI_API_KEY?.trim();
+  return fromOpenRouter || fromOpenAI || undefined;
+}
+
+/**
  * Do not instantiate OpenAI at module load. During `next build` (e.g. Vercel),
- * OPENROUTER_API_KEY may be unset; the SDK throws if apiKey is missing.
+ * API keys may be unset; the SDK throws if apiKey is missing.
  * Lazy-init only when a key exists so route modules can import this file safely.
  */
 let openaiClient: OpenAI | null = null;
 
+/**
+ * Expose the lazy-initialized client for callers that need streaming or
+ * other SDK features beyond `callWithTools`.
+ */
+export function getOpenAIClient(): OpenAI | null {
+  return getOpenAI();
+}
+
 function getOpenAI(): OpenAI | null {
-  const key = process.env.OPENROUTER_API_KEY;
+  const key = getLlmApiKey();
   if (!key) return null;
   if (!openaiClient) {
     openaiClient = new OpenAI({
@@ -49,7 +68,7 @@ export async function callWithTools<T>(options: {
       success: false,
       data: null,
       fallback: true,
-      error: 'AI service not configured (OPENROUTER_API_KEY)',
+      error: 'AI service not configured (set OPENROUTER_API_KEY or OPENAI_API_KEY)',
     };
   }
 

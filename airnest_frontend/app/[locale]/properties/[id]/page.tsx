@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import PropertyContainer from '@properties/detail/Detail.Container';
 import { getPropertyByIdWithReviews } from '@properties/server/queries';
+import ConciergeButton from '@/src/features/ai-concierge/components/ConciergeButton';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
@@ -20,6 +21,7 @@ const PropertyDetailPage = async (props: Props) => {
   return (
     <main className="max-w-[1500px] mx-auto px-6 pb-6">
       <PropertyContainer property={property} />
+      <ConciergeButton propertyId={id} />
     </main>
   );
 };

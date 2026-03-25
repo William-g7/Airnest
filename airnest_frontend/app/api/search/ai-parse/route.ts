@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { callWithTools, type ToolCallResult } from '@/src/shared/ai/llm-client';
+import {
+  callWithTools,
+  getLlmApiKey,
+  type ToolCallResult,
+} from '@/src/shared/ai/llm-client';
 import type OpenAI from 'openai';
 
 /**
@@ -120,8 +124,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing query' }, { status: 400 });
     }
 
-    const hasKey = !!process.env.OPENROUTER_API_KEY;
-    console.log('[AI Parse] OPENROUTER_API_KEY present:', hasKey);
+    const hasKey = !!getLlmApiKey();
+    console.log('[AI Parse] LLM API key present:', hasKey);
     if (!hasKey) {
       console.log('[AI Parse] No API key, returning fallback');
       return NextResponse.json(buildFallback(query, 'AI service not configured'));

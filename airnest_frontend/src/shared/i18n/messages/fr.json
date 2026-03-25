@@ -235,6 +235,20 @@
     "aiHoursAgo": "Il y a {count}h",
     "aiDaysAgo": "Il y a {count}j"
   },
+  "concierge": {
+    "tooltip": "Assistant IA",
+    "title": "Assistant IA de la propriété",
+    "emptyState": "Essayez de me poser une question, par exemple : Quels sont les équipements à proximité ?",
+    "inputPlaceholder": "Posez une question sur cette propriété...",
+    "send": "Envoyer",
+    "stop": "Arrêter la génération",
+    "error": "Un problème est survenu. Veuillez réessayer.",
+    "retry": "Réessayer",
+    "limitReached": "Limite de conversation atteinte. Pour plus d'informations, contactez directement l'hôte.",
+    "contactHost": "Contacter l'hôte",
+    "interrupted": "Réponse interrompue",
+    "rateLimit": "Trop de messages. Veuillez patienter un instant."
+  },
   "errors": {
     "NETWORK_ERROR": "Erreur de réseau. Veuillez vérifier votre connexion Internet.",
     "SERVER_ERROR": "Erreur du serveur. Veuillez réessayer plus tard.",
