@@ -117,21 +117,15 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const query = body.query?.trim();
-    console.log('[AI Parse] Received query:', query);
 
     if (!query) {
-      console.log('[AI Parse] Empty query, returning 400');
       return NextResponse.json({ error: 'Missing query' }, { status: 400 });
     }
 
-    const hasKey = !!getLlmApiKey();
-    console.log('[AI Parse] LLM API key present:', hasKey);
-    if (!hasKey) {
-      console.log('[AI Parse] No API key, returning fallback');
+    if (!getLlmApiKey()) {
       return NextResponse.json(buildFallback(query, 'AI service not configured'));
     }
 
-    console.log('[AI Parse] Calling LLM with model:', process.env.AI_MODEL || 'google/gemini-2.0-flash-001');
     const result: ToolCallResult<AISearchParams> = await callWithTools<AISearchParams>({
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
@@ -141,27 +135,19 @@ export async function POST(request: NextRequest) {
       toolChoice: { type: 'function', function: { name: 'search_properties' } },
     });
 
-    console.log('[AI Parse] LLM result:', JSON.stringify(result));
-
     if (!result.success || !result.data) {
-      console.log('[AI Parse] LLM failed, returning fallback. Error:', result.error);
       return NextResponse.json(buildFallback(query, result.error));
     }
 
-    const params = sanitize(result.data);
-    console.log('[AI Parse] Sanitized params:', JSON.stringify(params));
-
-    const response = {
+    return NextResponse.json({
       success: true,
-      params,
+      params: sanitize(result.data),
       fallback: false,
       raw_query: query,
-    };
-    console.log('[AI Parse] Returning success response');
-    return NextResponse.json(response);
+    });
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Unknown error';
-    console.error('[AI Parse] Uncaught error:', msg);
+    console.error('[AI Parse] Error:', msg);
 
     const query = (await request.json().catch(() => ({}))).query || '';
     return NextResponse.json(buildFallback(query, msg));
