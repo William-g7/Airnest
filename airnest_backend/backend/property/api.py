@@ -12,7 +12,7 @@ from .cache_utils import (
 
 from datetime import datetime, timedelta
 import pytz
-from .models import Property, PropertyImage, Reservation, Wishlist, PropertyReview, ReviewTag, ReviewTagAssignment, ALLOWED_PROPERTY_TAG_IDS
+from .models import Property, PropertyImage, Reservation, Wishlist, PropertyReview, ReviewTag, ReviewTagAssignment, PropertyReviewSummary, ALLOWED_PROPERTY_TAG_IDS
 import json
 from .serializers import PropertySerializer, PropertyLandlordSerializer, PropertyImageSerializer, PropertyReviewSerializer, PropertyReviewListSerializer, ReviewTagSerializer, PropertyWithReviewStatsSerializer
 from .forms import PropertyForm
@@ -749,6 +749,11 @@ def property_reviews(request, pk):
                     reservation=latest_reservation if latest_reservation else None,
                     is_verified=bool(latest_reservation)
                 )
+                # Mark all AI review summaries for this property as stale
+                PropertyReviewSummary.objects.filter(
+                    property_ref=property_obj
+                ).update(is_stale=True)
+
                 response_serializer = PropertyReviewListSerializer(review)
                 return JsonResponse(response_serializer.data, status=201)
             else:
@@ -1129,3 +1134,52 @@ def publish_property(request, pk):
     except Exception as e:
         print(f"Error publishing property: {e}")
         return JsonResponse({'error': str(e)}, status=400)
+
+
+@api_view(['GET', 'PUT'])
+@authentication_classes([])
+@permission_classes([])
+def ai_review_summary(request, pk):
+    """
+    GET: Return cached AI review summary for property+locale (or 404).
+    PUT: Upsert an AI-generated review summary (called by BFF after LLM generation).
+    """
+    locale = request.GET.get('locale', 'en')
+
+    if request.method == 'GET':
+        try:
+            summary = PropertyReviewSummary.objects.get(
+                property_ref_id=pk, locale=locale
+            )
+            return JsonResponse({
+                'highlights': summary.highlights,
+                'concerns': summary.concerns,
+                'best_for': summary.best_for,
+                'summary_text': summary.summary_text,
+                'reviews_count_at_generation': summary.reviews_count_at_generation,
+                'is_stale': summary.is_stale,
+                'generated_at': summary.generated_at.isoformat(),
+                'model_version': summary.model_version,
+            })
+        except PropertyReviewSummary.DoesNotExist:
+            return JsonResponse({'error': 'No summary found'}, status=404)
+
+    elif request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            summary, _ = PropertyReviewSummary.objects.update_or_create(
+                property_ref_id=pk,
+                locale=locale,
+                defaults={
+                    'highlights': data.get('highlights', []),
+                    'concerns': data.get('concerns', []),
+                    'best_for': data.get('best_for', []),
+                    'summary_text': data.get('summary_text', ''),
+                    'reviews_count_at_generation': data.get('reviews_count_at_generation', 0),
+                    'is_stale': False,
+                    'model_version': data.get('model_version', ''),
+                },
+            )
+            return JsonResponse({'status': 'ok', 'id': str(summary.id)})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)

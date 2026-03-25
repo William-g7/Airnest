@@ -200,7 +200,15 @@
     "titlePlaceholder": "Give your review a title...",
     "contentPlaceholder": "Share your experience with this property...",
     "showAllReviews": "Show all {count} more reviews",
-    "showLess": "Show less reviews"
+    "showLess": "Show less reviews",
+    "aiInsightsTitle": "AI Review Insights",
+    "aiBasedOn": "Based on {count} reviews",
+    "aiHighlights": "Guest favorites",
+    "aiConcerns": "Good to know",
+    "aiBestFor": "Best for",
+    "aiJustNow": "Just updated",
+    "aiHoursAgo": "{count}h ago",
+    "aiDaysAgo": "{count}d ago"
   },
   
   "myproperties": {

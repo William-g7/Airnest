@@ -7,6 +7,7 @@ import { useLoginModal } from '@auth/client/modalStore';
 import apiService from '@auth/client/clientApiService';
 import toast from 'react-hot-toast';
 import ReviewsSummary from './Reviews.Summary';
+import ReviewsAIInsights from './Reviews.AIInsights';
 import ReviewsList from './Reviews.List';
 import ReviewsForm from './Reviews.Form';
 import Button from '@sharedUI/Button';
@@ -157,6 +158,11 @@ export default function Reviews({ propertyId, propertyStatus }: ReviewsProps) {
       {/* summary */}
       {stats && stats.total_reviews > 0 && (
         <ReviewsSummary stats={stats} />
+      )}
+
+      {/* AI insights */}
+      {stats && (
+        <ReviewsAIInsights propertyId={propertyId} totalReviews={stats.total_reviews} />
       )}
 
       {/* form */}

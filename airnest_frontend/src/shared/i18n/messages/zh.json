@@ -201,7 +201,15 @@
     "titlePlaceholder": "为您的评论起个标题...",
     "contentPlaceholder": "分享您对这处房源的体验...",
     "showAllReviews": "显示全部 {count} 条评论",
-    "showLess": "收起评论"
+    "showLess": "收起评论",
+    "aiInsightsTitle": "AI 评论洞察",
+    "aiBasedOn": "基于 {count} 条评论",
+    "aiHighlights": "住客最爱",
+    "aiConcerns": "值得注意",
+    "aiBestFor": "最适合",
+    "aiJustNow": "刚刚更新",
+    "aiHoursAgo": "{count}小时前",
+    "aiDaysAgo": "{count}天前"
   },
 
   "myproperties": {

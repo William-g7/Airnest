@@ -225,7 +225,15 @@
     "titlePlaceholder": "Donnez un titre à votre avis...",
     "contentPlaceholder": "Partagez votre expérience avec cette propriété...",
     "showAllReviews": "Afficher les {count} autres avis",
-    "showLess": "Afficher moins d'avis"
+    "showLess": "Afficher moins d'avis",
+    "aiInsightsTitle": "Avis IA en un coup d'œil",
+    "aiBasedOn": "Basé sur {count} avis",
+    "aiHighlights": "Ce que les voyageurs adorent",
+    "aiConcerns": "Bon à savoir",
+    "aiBestFor": "Idéal pour",
+    "aiJustNow": "Mis à jour à l'instant",
+    "aiHoursAgo": "Il y a {count}h",
+    "aiDaysAgo": "Il y a {count}j"
   },
   "errors": {
     "NETWORK_ERROR": "Erreur de réseau. Veuillez vérifier votre connexion Internet.",
