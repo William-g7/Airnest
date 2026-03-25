@@ -258,3 +258,28 @@ class ReviewTagAssignment(models.Model):
     
     def __str__(self):
         return f"{self.review.id} - {self.tag.tag_key}"
+
+
+class PropertyReviewSummary(models.Model):
+    """AI-generated review insights, cached per property per locale."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    property_ref = models.ForeignKey(
+        Property, related_name='ai_review_summaries', on_delete=models.CASCADE
+    )
+    locale = models.CharField(max_length=10, default='en')
+
+    highlights = models.JSONField(default=list)
+    concerns = models.JSONField(default=list)
+    best_for = models.JSONField(default=list)
+    summary_text = models.TextField(blank=True)
+
+    reviews_count_at_generation = models.IntegerField(default=0)
+    is_stale = models.BooleanField(default=False)
+    generated_at = models.DateTimeField(auto_now=True)
+    model_version = models.CharField(max_length=50, default='')
+
+    class Meta:
+        unique_together = ['property_ref', 'locale']
+
+    def __str__(self):
+        return f"AI Summary for {self.property_ref.title} ({self.locale})"

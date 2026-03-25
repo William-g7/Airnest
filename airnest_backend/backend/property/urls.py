@@ -25,4 +25,5 @@ urlpatterns = [
     path('<uuid:pk>/reviews/', api.property_reviews, name='api_property_reviews'),
     path('<uuid:pk>/review-stats/', api.property_review_stats, name='api_property_review_stats'),
     path('reviews/<uuid:review_id>/', api.manage_review, name='api_manage_review'),
+    path('<uuid:pk>/ai-review-summary/', api.ai_review_summary, name='api_ai_review_summary'),
 ]

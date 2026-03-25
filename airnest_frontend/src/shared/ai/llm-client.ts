@@ -1,10 +1,24 @@
 import 'server-only';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  baseURL: 'https://openrouter.ai/api/v1',
-  apiKey: process.env.OPENROUTER_API_KEY,
-});
+/**
+ * Do not instantiate OpenAI at module load. During `next build` (e.g. Vercel),
+ * OPENROUTER_API_KEY may be unset; the SDK throws if apiKey is missing.
+ * Lazy-init only when a key exists so route modules can import this file safely.
+ */
+let openaiClient: OpenAI | null = null;
+
+function getOpenAI(): OpenAI | null {
+  const key = process.env.OPENROUTER_API_KEY;
+  if (!key) return null;
+  if (!openaiClient) {
+    openaiClient = new OpenAI({
+      baseURL: 'https://openrouter.ai/api/v1',
+      apiKey: key,
+    });
+  }
+  return openaiClient;
+}
 
 const DEFAULT_MODEL = process.env.AI_MODEL || 'google/gemini-2.0-flash-001';
 const DEFAULT_TIMEOUT = Number(process.env.AI_TIMEOUT_MS) || 8000;
@@ -28,6 +42,16 @@ export async function callWithTools<T>(options: {
   timeoutMs?: number;
 }): Promise<ToolCallResult<T>> {
   const { messages, tools, toolChoice, model = DEFAULT_MODEL, timeoutMs = DEFAULT_TIMEOUT } = options;
+
+  const openai = getOpenAI();
+  if (!openai) {
+    return {
+      success: false,
+      data: null,
+      fallback: true,
+      error: 'AI service not configured (OPENROUTER_API_KEY)',
+    };
+  }
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
